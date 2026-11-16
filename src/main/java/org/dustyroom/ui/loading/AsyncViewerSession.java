@@ -221,7 +221,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             }
             List<RecentBook> books;
             try {
-                books = RecentGroups.select(store.recentBooks(1000), groupRecentByFolder, 12)
+                books = RecentGroups.select(store.recentBooks(1000), groupRecentByFolder)
                         .stream()
                         .map(RecentBookLoader::inspectGroup)
                         .toList();

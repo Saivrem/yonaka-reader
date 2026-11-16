@@ -69,7 +69,7 @@ The explicit `yonaka.dataDir` launch option takes precedence and disables the fo
 
 ## Recently read
 
-The home screen shows up to 12 recently read books/series with a first-page cover and saved
+The home screen shows up to 6 recently read books/series with a first-page cover and saved
 page progress. ZIP cards show the parent folder as the series title and the last opened
 filename below it, including when only one volume has been read. The same list is available under **File → Open Recent**. Use
 **File → Home** (Command+Shift+H on macOS, Ctrl+Shift+H elsewhere) to return to the shelf while a book is open.
@@ -78,7 +78,7 @@ filename below it, including when only one volume has been read. The same list i
 Archives in the same parent folder share a card; Continue resumes the most recently
 read chapter. **Chapters** shows the chapters on the card with individual open and
 delete controls. The card's trash button clears the reading history of every chapter
-on that card. Grouping examines up to 1,000 recent book states and loads up to 12 covers.
+on that card. Grouping examines up to 1,000 recent book states and loads up to 6 covers.
 Grouping is by folder, not by filename guesses; keep different series in separate
 folders or switch grouping off. This preference survives restarts.
 

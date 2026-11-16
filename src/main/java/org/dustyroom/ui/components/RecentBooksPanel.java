@@ -15,7 +15,9 @@ import java.util.function.Consumer;
  */
 public final class RecentBooksPanel extends JPanel {
     private final JCheckBox groupByFolder = new JCheckBox("Group ZIPs by folder", true);
-    private final JPanel cards = new JPanel(new GridLayout(0, 2, 16, 16));
+    private final GridLayout grid = new GridLayout(0, 2, 16, 16);
+    private final JPanel cards = new JPanel(grid);
+    private Dimension coverSize = new Dimension(72, 104);
     private final JLabel empty = new JLabel("Your recently read books will appear here.");
     private final Map<String, RecentBookCard> entries = new LinkedHashMap<>();
     private Consumer<String> open = _ -> {
@@ -33,6 +35,27 @@ public final class RecentBooksPanel extends JPanel {
         add(header, BorderLayout.NORTH);
         add(empty, BorderLayout.CENTER);
         setMaximumSize(new Dimension(760, Integer.MAX_VALUE));
+    }
+
+    void fitShelf(int width, int height) {
+        int columns = width >= 1200 ? 3 : 2;
+        int rows = 6 / columns;
+        int cardWidth = (width - (columns - 1) * grid.getHgap()) / columns;
+        // Reserve room for the welcome header, card titles, progress and actions.
+        int coverHeight = Math.clamp((height - 288) / rows - 112, 104, 384);
+        int coverWidth = Math.clamp(cardWidth / 2, 72, 320);
+        Dimension size = new Dimension(coverWidth, coverHeight);
+        if (width == getMaximumSize().width && columns == grid.getColumns() && size.equals(coverSize)) {
+            return;
+        }
+
+        grid.setColumns(columns);
+        coverSize = size;
+        setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
+        for (RecentBookCard card : entries.values()) {
+            card.setCoverSize(size);
+        }
+        revalidate();
     }
 
     public void setGrouping(boolean grouped, Consumer<Boolean> change) {
@@ -56,6 +79,7 @@ public final class RecentBooksPanel extends JPanel {
             cards.removeAll();
             for (RecentBook book : books) {
                 RecentBookCard card = new RecentBookCard(book.getState().getSourceId(), id -> open.accept(id), id -> remove.accept(id));
+                card.setCoverSize(coverSize);
                 entries.put(book.getState().getSourceId(), card);
                 cards.add(card);
             }

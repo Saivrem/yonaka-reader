@@ -27,8 +27,7 @@ final class RecentBookCard extends JPanel {
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")),
                 BorderFactory.createEmptyBorder(12, 12, 12, 12)));
-        setPreferredSize(new Dimension(350, 212));
-        cover.setPreferredSize(new Dimension(72, 104));
+        setCoverSize(new Dimension(72, 104));
         cover.setHorizontalAlignment(SwingConstants.CENTER);
         JPanel heading = new JPanel(new BorderLayout());
         heading.add(title, BorderLayout.NORTH);
@@ -116,6 +115,14 @@ final class RecentBookCard extends JPanel {
         dialog.setVisible(true);
     }
 
+    void setCoverSize(Dimension size) {
+        cover.setPreferredSize(size);
+        setPreferredSize(new Dimension(350, size.height + 108));
+        if (current != null && current.getCover() != null) {
+            cover.setIcon(new RecentCoverIcon(current.getCover(), size));
+        }
+    }
+
     void update(RecentBook book) {
         current = book;
         boolean grouped = book.getChapters().size() > 1;
@@ -147,7 +154,7 @@ final class RecentBookCard extends JPanel {
         availability.setVisible(!book.isAvailable());
         availability.setToolTipText(book.getState().getSourceId());
         if (book.getCover() != null) {
-            cover.setIcon(new RecentCoverIcon(book.getCover()));
+            cover.setIcon(new RecentCoverIcon(book.getCover(), cover.getPreferredSize()));
         } else {
             cover.setIcon(new ReaderIcon(ReaderIconKind.OPEN));
         }

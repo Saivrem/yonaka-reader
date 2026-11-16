@@ -43,7 +43,7 @@ public class RecentBookLoader {
             List<PageRef> pages = source.pages();
             if (!pages.isEmpty()) {
                 BufferedImage image = source.load(pages.getFirst()).getImage();
-                return new RecentBook(book.getState(), true, ThumbnailRenderer.render(image), book.getChapters());
+                return new RecentBook(book.getState(), true, ThumbnailRenderer.renderCover(image), book.getChapters());
             }
         } catch (RuntimeException ignored) {
             // A missing or corrupt preview must not hide the saved reading position.

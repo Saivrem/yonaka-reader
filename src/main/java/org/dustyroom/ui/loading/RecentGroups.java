@@ -12,7 +12,9 @@ import java.util.*;
 @UtilityClass
 public class RecentGroups {
 
-    public static List<List<BookState>> select(List<BookState> history, boolean grouped, int limit) {
+    private static final int MAX_CARDS = 6;
+
+    public static List<List<BookState>> select(List<BookState> history, boolean grouped) {
         Map<String, List<BookState>> groups = new LinkedHashMap<>();
         for (BookState book : history) {
             String key = "book:" + book.getSourceId();
@@ -24,7 +26,7 @@ public class RecentGroups {
             }
             if (groups.containsKey(key)) {
                 groups.get(key).add(book);
-            } else if (groups.size() < limit) {
+            } else if (groups.size() < MAX_CARDS) {
                 List<BookState> books = new ArrayList<>();
                 books.add(book);
                 groups.put(key, books);
