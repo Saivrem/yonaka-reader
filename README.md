@@ -19,7 +19,7 @@ Run the full verification and build an executable fat JAR:
 The resulting application is written to:
 
 ```text
-build/libs/yonaka-reader-0.10.1.jar
+build/libs/yonaka-reader-0.11.0.jar
 ```
 
 ## Run
@@ -27,7 +27,7 @@ build/libs/yonaka-reader-0.10.1.jar
 Open the application without an initial file:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.10.1.jar
+java -jar build/libs/yonaka-reader-0.11.0.jar
 ```
 
 For development, use `./gradlew run` or the shared **Yonaka Reader** run configuration
@@ -39,9 +39,9 @@ in its VM options; executable JAR and native-package launches already enable it.
 Open an image, a directory of images, or a ZIP archive immediately:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.10.1.jar /path/to/page.jpg
-java -jar build/libs/yonaka-reader-0.10.1.jar /path/to/chapter
-java -jar build/libs/yonaka-reader-0.10.1.jar /path/to/volume.zip
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/page.jpg
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/chapter
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/volume.zip
 ```
 
 ## Settings
@@ -51,7 +51,7 @@ Open **Options → Settings…** (Command+, on macOS, Ctrl+, elsewhere).
 
 - **Appearance:** Ayu Light, Ayu Dark, or System. System appearance is checked in the
   background every five seconds on macOS, Windows and GNOME/Ubuntu. If detection is
-  unavailable, the last resolved theme is retained. The Theme menu selects a fixed theme.
+  unavailable, the last resolved theme is retained. The Theme menu also supports following the system appearance.
 - **Reading:** default direction, single/two-page mode and scale for newly opened books,
   plus thumbnail visibility. Existing books retain saved direction and spread mode;
   these defaults do not overwrite their progress. Original size starts at 100%.
@@ -166,13 +166,14 @@ Ctrl/Command+wheel works without it.
 - A welcome screen provides a single Open action and a supported-format hint.
 - The toolbar shows the displayed page or spread range and total page count. Click it or press G to jump to a page.
 - Vector navigation icons replace font-dependent symbols and emoji.
+- The toolbar has dedicated buttons for fit, zoom and reading direction. Hover over a button for its action and shortcut.
 - Scale, two-page spread, reading direction and fullscreen states stay synchronized between toolbar, menus and shortcuts.
 - Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous retain wrap-around navigation.
 - Escape leaves fullscreen without closing the application; Q and Cmd/Ctrl+Q still quit.
 
 ## Appearance and platform behavior
 
-- Options → Theme selects Yonaka Reader Ayu Dark (default) or Ayu Light.
+- Options → Theme offers System, Ayu Dark and Ayu Light.
 - Both application themes use the [Ayu palette](https://github.com/ayu-theme/ayu-colors), implemented with FlatLaf.
 - macOS uses the global screen menu and Command shortcuts.
 - Windows and Linux use a menu inside the window, Control shortcuts, and native window decorations. Windows retains its system window controls and Alt+F4 behavior.
@@ -206,7 +207,7 @@ Storage locations:
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.10.1.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.11.0.jar
 ```
 
 ### Reset and compatibility

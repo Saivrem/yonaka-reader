@@ -26,6 +26,7 @@ import org.dustyroom.ui.settings.SettingsHost;
 import org.dustyroom.ui.settings.SystemThemeMonitor;
 import org.dustyroom.ui.utils.DialogUtils;
 import org.dustyroom.ui.utils.UiUtils;
+import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -328,32 +329,44 @@ public class ViewerController implements SettingsHost, ViewerView {
         session.setMangaReadingMode();
     }
 
-    public boolean setTheme(ViewerTheme theme) {
-        if (!applyTheme(theme)) {
+    public boolean setTheme(ThemeMode mode) {
+        if (!applyTheme(mode.resolve(UiUtils.currentTheme()))) {
             return false;
         }
-        preferences.setThemeMode(theme == ViewerTheme.LIGHT ? ThemeMode.LIGHT : ThemeMode.DARK);
-        themeMonitor.setMode(preferences.getThemeMode());
+        preferences.setThemeMode(mode);
+        themeMonitor.setMode(mode);
         saveSettings();
         return true;
     }
 
     private boolean applyTheme(ViewerTheme theme) {
+        if (theme == UiUtils.currentTheme()) {
+            return true;
+        }
+        MenuSelectionManager.defaultManager().clearSelectedPath();
         if (!UiUtils.installTheme(theme)) {
             DialogUtils.showError(frame, "Unable to apply the selected theme.");
             return false;
         }
-        SwingUtilities.updateComponentTreeUI(frame);
-        for (Window window : frame.getOwnedWindows()) {
-            SwingUtilities.updateComponentTreeUI(window);
+        JMenuBar nativeMenu = PlatformUi.usesScreenMenuBar() ? frame.getJMenuBar() : null;
+        if (nativeMenu != null) {
+            frame.setJMenuBar(null);
+        }
+        try {
+            SwingUtilities.updateComponentTreeUI(frame);
+            for (Window window : frame.getOwnedWindows()) {
+                if (window.isDisplayable()) {
+                    SwingUtilities.updateComponentTreeUI(window);
+                }
+            }
+        } finally {
+            if (nativeMenu != null) {
+                SwingUtilities.updateComponentTreeUI(nativeMenu);
+                frame.setJMenuBar(nativeMenu);
+            }
         }
         configureViewerSurfaces();
-        frame.revalidate();
-        frame.repaint();
         preferences.setTheme(theme);
-        if (menuBar instanceof MenuBar menu) {
-            menu.showTheme(theme);
-        }
         return true;
     }
 
@@ -498,11 +511,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             failure.accept("Persistent storage is unavailable. Settings have not been saved.");
             return;
         }
-        ViewerTheme theme = switch (selected.getThemeMode()) {
-            case DARK -> ViewerTheme.DARK;
-            case LIGHT -> ViewerTheme.LIGHT;
-            case SYSTEM -> UiUtils.currentTheme();
-        };
+        ViewerTheme theme = selected.getThemeMode().resolve(UiUtils.currentTheme());
         ReaderSettings saved = selected.toBuilder().theme(theme).build();
         applyingSettings = true;
         session.saveSettings(saved, () -> {
@@ -514,6 +523,9 @@ public class ViewerController implements SettingsHost, ViewerView {
             session.configureDefaults(saved);
             themeMonitor.setMode(saved.getThemeMode());
             applyTheme(theme);
+            if (menuBar instanceof MenuBar menu) {
+                menu.showTheme(saved.getThemeMode());
+            }
             success.run();
         }, message -> {
             applyingSettings = false;
@@ -576,7 +588,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         }
         ViewerActionState.apply(actions, displayedFrame, imageComponent.getFitMode(), fullscreen);
         actions.openPageGrid().setEnabled(displayedFrame != null && thumbnailPanel != null && thumbnailPanel.isVisible());
-        navigationPanel.updateState(displayedFrame, imageComponent.getFitMode());
+        navigationPanel.updateState(displayedFrame);
     }
 
     private void applyFrame(ViewerFrame viewerFrame) {

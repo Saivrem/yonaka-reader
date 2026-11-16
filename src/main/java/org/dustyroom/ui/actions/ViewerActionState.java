@@ -26,11 +26,11 @@ public class ViewerActionState {
         actions.firstImage().setEnabled(loaded && frame.getFirstPage() > 1);
         actions.lastImage().setEnabled(loaded && frame.getLastPage() < frame.getPageCount());
         actions.exitFullscreen().setEnabled(fullscreen);
-        selected(actions.fitHeight(), fit == FitMode.FIT_HEIGHT);
-        selected(actions.fitWidth(), fit == FitMode.FIT_WIDTH);
-        selected(actions.fitScreen(), fit == FitMode.FIT_SCREEN);
+        selected(actions.fitHeight(), loaded && fit == FitMode.FIT_HEIGHT);
+        selected(actions.fitWidth(), loaded && fit == FitMode.FIT_WIDTH);
+        selected(actions.fitScreen(), loaded && fit == FitMode.FIT_SCREEN);
         selected(actions.toggleTwoPageMode(), loaded && frame.isTwoPageMode());
-        selected(actions.setMangaReadingMode(), !loaded || frame.getReadingMode() == ReadingMode.MANGA);
+        selected(actions.setMangaReadingMode(), loaded && frame.getReadingMode() == ReadingMode.MANGA);
         selected(actions.setComicsReadingMode(), loaded && frame.getReadingMode() == ReadingMode.COMICS);
         selected(actions.toggleFullscreen(), fullscreen);
     }

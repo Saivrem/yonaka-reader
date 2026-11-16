@@ -7,6 +7,7 @@ import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ViewerTheme;
+import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.be.utils.Constants;
@@ -57,7 +58,7 @@ public final class ReaderUiPreview {
     }
 
     private static void renderAbout(File output, ViewerTheme theme) {
-        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.10.1"),
+        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.11.0"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 BrandAssets.aboutIcon());
         pane.setSize(520, 240);
@@ -98,7 +99,7 @@ public final class ReaderUiPreview {
         }
 
         NavigationPanel navigation = new NavigationPanel(actions);
-        navigation.updateState(frame, FitMode.FIT_SCREEN);
+        navigation.updateState(frame);
         ThumbnailPanel thumbnails = new ThumbnailPanel((_, _, result) ->
                 result.accept(ThumbnailRenderer.render(samplePage())), _ -> {
         }, () -> {
@@ -107,7 +108,7 @@ public final class ReaderUiPreview {
         });
         thumbnails.setVisible(loaded);
         JRootPane root = new JRootPane();
-        root.setJMenuBar(new MenuBar(actions, UiUtils::installTheme));
+        root.setJMenuBar(new MenuBar(actions, theme == ViewerTheme.LIGHT ? ThemeMode.LIGHT : ThemeMode.DARK, _ -> true));
         root.setContentPane(content);
         JPanel host = new JPanel(new BorderLayout());
         host.add(root);

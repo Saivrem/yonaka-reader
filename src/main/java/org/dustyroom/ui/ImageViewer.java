@@ -44,7 +44,7 @@ public class ImageViewer extends JFrame {
         resizeRenderTimer = new Timer(RESIZE_RENDER_DELAY_MS, _ -> applyResizeRender());
         resizeRenderTimer.setRepeats(false);
 
-        menuBar = new MenuBar(viewerActions, viewerController::setTheme);
+        menuBar = new MenuBar(viewerActions, settings.getThemeMode(), viewerController::setTheme);
         navigationPanel = new NavigationPanel(viewerActions);
         readerSurface = new ReaderSurface(scrollPane, viewerActions.openFile());
         viewerController.attachPanels(menuBar, navigationPanel, readerSurface, viewerActions);

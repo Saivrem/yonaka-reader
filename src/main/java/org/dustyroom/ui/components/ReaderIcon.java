@@ -106,6 +106,38 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
                         line(g, 15, 10, 18, 9);
                     }
                 }
+                case FIT_SCREEN -> {
+                    g.drawRoundRect(2, 4, 20, 16, 2, 2);
+                    g.drawRect(8, 6, 8, 12);
+                }
+                case FIT_WIDTH, FIT_HEIGHT -> {
+                    if (kind == ReaderIconKind.FIT_HEIGHT) {
+                        g.rotate(Math.PI / 2, 12, 12);
+                    }
+                    line(g, 3, 5, 3, 19);
+                    line(g, 21, 5, 21, 19);
+                    line(g, 6, 12, 18, 12);
+                    line(g, 9, 9, 6, 12, 9, 15);
+                    line(g, 15, 9, 18, 12, 15, 15);
+                }
+                case ZOOM_IN, ZOOM_OUT -> {
+                    g.drawOval(3, 3, 13, 13);
+                    line(g, 15, 15, 21, 21);
+                    line(g, 6, 9.5, 13, 9.5);
+                    if (kind == ReaderIconKind.ZOOM_IN) {
+                        line(g, 9.5, 6, 9.5, 13);
+                    }
+                }
+                case READ_RIGHT_TO_LEFT, READ_LEFT_TO_RIGHT -> {
+                    if (kind == ReaderIconKind.READ_RIGHT_TO_LEFT) {
+                        g.translate(24, 0);
+                        g.scale(-1, 1);
+                    }
+                    line(g, 4, 5, 20, 5);
+                    line(g, 4, 9, 14, 9);
+                    line(g, 4, 16, 20, 16);
+                    line(g, 16, 12, 20, 16, 16, 20);
+                }
                 case MENU -> {
                     line(g, 3, 6, 21, 6);
                     line(g, 3, 12, 21, 12);

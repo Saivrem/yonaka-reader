@@ -52,12 +52,14 @@ class ReaderUiTest {
                     .anyMatch(button -> button.getAction() == actions.firstImage()));
             assertTrue(children(panel).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast)
                     .anyMatch(button -> button.getAction() == actions.lastImage()));
+            assertFalse(children(panel).filter(JToggleButton.class::isInstance)
+                    .map(JToggleButton.class::cast).anyMatch(AbstractButton::isSelected));
             assertFalse(actions.nextImage().isEnabled());
             assertFalse(actions.goToPage().isEnabled());
             assertTrue(actions.openFile().isEnabled());
             ViewerFrame frame = new ViewerFrame(null, "Book", null, 2, 3, 10, true, ReadingMode.COMICS, null);
             ViewerActionState.apply(actions, frame, FitMode.FIT_WIDTH, true);
-            panel.updateState(frame, FitMode.FIT_WIDTH);
+            panel.updateState(frame);
             assertEquals(Boolean.TRUE, actions.fitWidth().getValue(Action.SELECTED_KEY));
             assertEquals(Boolean.FALSE, actions.fitScreen().getValue(Action.SELECTED_KEY));
             assertEquals(Boolean.TRUE, actions.toggleTwoPageMode().getValue(Action.SELECTED_KEY));
@@ -67,7 +69,15 @@ class ReaderUiTest {
             assertTrue(children(panel).filter(JButton.class::isInstance).map(JButton.class::cast)
                     .anyMatch(button -> "2–3 / 10".equals(button.getText())));
             children(panel).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast)
-                    .forEach(button -> assertEquals(0, button.getMnemonic()));
+                    .forEach(button -> {
+                        assertEquals(0, button.getMnemonic());
+                        assertFalse(button.isRequestFocusEnabled());
+                        assertNotNull(button.getToolTipText());
+                        if (button.getAction() != actions.goToPage()) {
+                            assertNotNull(button.getIcon());
+                            assertTrue(button.getText() == null || button.getText().isEmpty());
+                        }
+                    });
             ViewerActionState.apply(actions, new ViewerFrame(null, "Book", null, 10, 10, 10, false,
                     ReadingMode.MANGA, null), FitMode.ORIGINAL, false);
             assertFalse(actions.lastImage().isEnabled());
