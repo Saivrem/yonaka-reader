@@ -387,20 +387,21 @@ public class ViewerController implements SettingsHost, ViewerView {
         showAbout(frame);
     }
 
-    public void resetApplication() {
+    public void resetComicDatabase() {
         if (resetting || profileSwitchPending) {
             return;
         }
         Object[] options = {"Reset and quit", "Cancel"};
         int choice = JOptionPane.showOptionDialog(frame,
                 """
-                        Reset all settings, library and reading history?
+                        Clear all data in the current comic database?
 
-                        Saved page positions and reading modes will be removed.
+                        This removes settings, library entries, completion marks, reading history,
+                        saved page positions and reading modes.
                         Your image files, folders and ZIP archives will not be deleted.
 
                         Yonaka Reader will close. The next launch will start with default settings.""",
-                "Reset Yonaka Reader", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                "Reset comic database", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
                 null, options, options[1]);
         if (choice != 0) {
             return;

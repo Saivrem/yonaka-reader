@@ -210,7 +210,7 @@ class MenuBarTest {
             return action;
         }
 
-        public Action resetApplication() {
+        public Action resetComicDatabase() {
             return action;
         }
 

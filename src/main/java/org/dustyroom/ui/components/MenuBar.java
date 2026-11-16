@@ -61,12 +61,13 @@ public class MenuBar extends JMenuBar {
         addActions(optionsMenu, actions.settings());
         optionsMenu.addSeparator();
         optionsMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
-        addActions(helpMenu, actions.showAbout());
 
         optionsMenu.add(readingModeMenu);
         optionsMenu.add(themeMenu(selectTheme));
-        optionsMenu.addSeparator();
-        addActions(optionsMenu, actions.resetApplication());
+
+        addActions(helpMenu, actions.showAbout());
+        helpMenu.addSeparator();
+        addActions(helpMenu, actions.resetComicDatabase());
 
         add(fileMenu);
         add(viewMenu);
@@ -110,6 +111,7 @@ public class MenuBar extends JMenuBar {
                 case "comicsReadingMode" -> KeyEvent.VK_C;
                 case "mangaReadingMode" -> KeyEvent.VK_M;
                 case "goToPage", "openPageGrid" -> KeyEvent.VK_G;
+                case "resetComicDatabase" -> KeyEvent.VK_R;
                 case "showAbout" -> KeyEvent.VK_A;
                 default -> 0;
             };

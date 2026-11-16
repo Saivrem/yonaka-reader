@@ -215,7 +215,7 @@ java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.11.0.jar
 
 ### Reset and compatibility
 
-Use **Options → Reset Application…** to clear settings, library membership, completion marks and reading history. The
+Use **Help → Reset comic database…** to clear settings, library membership, completion marks and reading history. The
 confirmation defaults to Cancel. After a successful reset the app closes; the next
 launch uses defaults. Image files, folders and ZIP archives are never deleted.
 Reset is transactional: if clearing any table fails, all retain their data.
@@ -228,7 +228,7 @@ schema version is independent: an unchanged schema is opened without running DDL
 Schema upgrades use ordered transactional migrations without automatic backups.
 Failures roll back; migrations never trigger an automatic wipe or database recreation.
 A newer, unsupported schema is rejected without changing its contents; the app can
-still read books without saving progress. **Options → Reset Application…** remains
+still read books without saving progress. **Help → Reset comic database…** remains
 available when initialization fails: after explicit confirmation it clears application
 data transactionally, allowing a fresh startup. If SQLite cannot read a corrupt database,
 reset is refused rather than deleting an unreadable file blindly.
@@ -279,7 +279,7 @@ is saved between launches. Click a thumbnail to open that page, or focus the lis
 select a page with the arrow keys and press Enter. The current page or spread is
 highlighted and follows reading progress. The panel is shown once a book is open.
 
-Use **View → Grid** or the **Grid** item in the reader menu next to Home (the grid button is at the foot of the sidebar in Fullscreen) to fill the reading area with a responsive
+Use **View → Grid** or the **Grid** button on the bottom toolbar (the grid button is at the foot of the sidebar in Fullscreen) to fill the reading area with a responsive
 thumbnail grid, including while in Fullscreen. Click a page or select it with the
 arrow keys and press Enter: the grid returns to the vertical sidebar and opens that
 page. **Back to reader** or **Esc** returns without changing the page. Keyboard
@@ -332,7 +332,7 @@ Command-line paths containing spaces must be quoted.
 To uninstall, quit Yonaka Reader and move the app from Applications to Trash.
 The bundled Java is removed with it. Reading history and settings remain in
 `~/Library/Application Support/YonakaReader` for future reinstalls. To clear them
-as well, use **Options → Reset Application…** before deleting the app. Books are
+as well, use **Help → Reset comic database…** before deleting the app. Books are
 never deleted by reset or uninstall.
 
 These development packages are ad-hoc signed, not Developer ID signed or notarized;
@@ -368,7 +368,7 @@ Windows Settings → Apps. A stable upgrade UUID identifies future MSI upgrades.
 The portable ZIP contains `Yonaka Reader.exe` and its Java runtime; extract the
 whole directory before launching. Portable builds do not register file associations.
 Deleting a portable directory removes the app. Both forms preserve user settings
-and reading history; use Reset Application to clear them explicitly.
+and reading history; use **Help → Reset comic database…** to clear them explicitly.
 
 The binaries are currently unsigned. SmartScreen may warn about an unknown publisher;
 Smart App Control or managed-device policies can block unsigned software. There is

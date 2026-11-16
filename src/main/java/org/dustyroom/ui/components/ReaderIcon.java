@@ -145,11 +145,6 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
                     line(g, 4, 16, 20, 16);
                     line(g, 16, 12, 20, 16, 16, 20);
                 }
-                case MENU -> {
-                    line(g, 3, 6, 21, 6);
-                    line(g, 3, 12, 21, 12);
-                    line(g, 3, 18, 21, 18);
-                }
                 case PAGE_GRID -> {
                     for (int row = 0; row < 3; row++) {
                         for (int column = 0; column < 3; column++) {

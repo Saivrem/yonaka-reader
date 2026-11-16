@@ -64,6 +64,9 @@ class LibraryStoreTest extends BasePersistenceTest {
         try (ReaderStore store = openStore()) {
             assertEquals(workId, store.libraryWorks().getFirst().getId());
             store.reset();
+        }
+        try (ReaderStore store = openStore()) {
+            assertTrue(store.recentBooks(12).isEmpty());
             assertTrue(store.libraryWorks().isEmpty());
             assertTrue(store.book(source).isEmpty());
         }

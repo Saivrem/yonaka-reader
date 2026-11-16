@@ -3,7 +3,6 @@ package org.dustyroom.ui.components;
 public enum ReaderIconKind {
     TRASH,
     HOME,
-    MENU,
     OPEN,
     FIRST,
     LAST,

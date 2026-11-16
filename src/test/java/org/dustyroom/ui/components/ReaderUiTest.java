@@ -41,6 +41,37 @@ class ReaderUiTest {
     }
 
     @Test
+    void toolbarFitsOneRowAtTheMinimumWindowWidth() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ViewerActions actions = actions();
+            NavigationPanel panel = new NavigationPanel(actions);
+            // Allow for native window borders inside the 940-pixel minimum frame width.
+            panel.setSize(920, panel.getPreferredSize().height);
+            panel.doLayout();
+            for (Component component : panel.getComponents()) {
+                JPanel group = (JPanel) component;
+                group.doLayout();
+                for (Component button : group.getComponents()) {
+                    assertTrue(group.getVisibleRect().contains(button.getBounds()));
+                }
+            }
+
+            Map<Action, ReaderIconKind> shortcuts = Map.of(
+                    actions.openFile(), ReaderIconKind.OPEN,
+                    actions.openPageGrid(), ReaderIconKind.PAGE_GRID,
+                    actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN);
+            shortcuts.forEach((action, icon) -> {
+                AbstractButton button = children(panel)
+                        .filter(AbstractButton.class::isInstance)
+                        .map(AbstractButton.class::cast)
+                        .filter(item -> item.getAction() == action)
+                        .findFirst().orElseThrow();
+                assertEquals(icon, assertInstanceOf(ReaderIcon.class, button.getIcon()).kind());
+            });
+        });
+    }
+
+    @Test
     void toolbarTracksDisplayedPagesModesAndAvailability() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ViewerActions actions = actions();

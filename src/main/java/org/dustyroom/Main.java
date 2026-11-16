@@ -38,7 +38,7 @@ public class Main {
             candidate = database == null ? ReaderStore.disabled() : new RecoverableReaderStore(database);
             String recovery = database == null
                     ? "The selected data folder is unavailable. Reconnect it and restart the reader."
-                    : "To start fresh, use Options → Reset Application. Reset requires confirmation.";
+                    : "To start fresh, use Help → Reset comic database. Reset requires confirmation.";
             error = """
                     %s
 

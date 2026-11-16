@@ -17,7 +17,9 @@ public class NavigationPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
         JPanel files = group();
         files.add(button(actions.home(), ReaderIconKind.HOME));
-        files.add(readerMenu(actions));
+        files.add(button(actions.openFile(), ReaderIconKind.OPEN));
+        files.add(button(actions.openPageGrid(), ReaderIconKind.PAGE_GRID));
+        files.add(toggle(actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN));
         files.add(button(actions.prevVolume(), ReaderIconKind.PREVIOUS_VOLUME));
         files.add(button(actions.nextVolume(), ReaderIconKind.NEXT_VOLUME));
         add(files, BorderLayout.WEST);
@@ -48,25 +50,8 @@ public class NavigationPanel extends JPanel {
         add(settings, BorderLayout.EAST);
     }
 
-    private static JButton readerMenu(ViewerActions actions) {
-        JButton button = new JButton(new ReaderIcon(ReaderIconKind.MENU));
-        button.setPreferredSize(new Dimension(36, 36));
-        button.putClientProperty("JButton.buttonType", "toolBarButton");
-        button.setRequestFocusEnabled(false);
-        button.setToolTipText("Reader menu");
-        button.getAccessibleContext().setAccessibleName("Reader menu");
-        button.addActionListener(_ -> {
-            JPopupMenu menu = new JPopupMenu();
-            menu.add(actions.openFile()).setIcon(new ReaderIcon(ReaderIconKind.OPEN, 16));
-            menu.add(actions.openPageGrid()).setIcon(new ReaderIcon(ReaderIconKind.PAGE_GRID, 16));
-            menu.add(new JCheckBoxMenuItem(actions.toggleFullscreen()));
-            menu.show(button, 0, -menu.getPreferredSize().height);
-        });
-        return button;
-    }
-
     private static JPanel group() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
         panel.setOpaque(false);
         return panel;
     }
