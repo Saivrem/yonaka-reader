@@ -2,12 +2,13 @@ package org.dustyroom.ui.components;
 
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.view.RecentBook;
+import org.dustyroom.ui.listeners.MouseClickListener;
+import org.dustyroom.be.utils.FileUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
-import org.dustyroom.ui.listeners.MouseClickListener;
 import java.util.function.Consumer;
 
 final class RecentBookCard extends JPanel {
@@ -15,7 +16,7 @@ final class RecentBookCard extends JPanel {
     private final JButton title = new JButton();
     private final JLabel progress = new JLabel();
     private final JLabel availability = new JLabel();
-    private final JLabel folder = new JLabel();
+    private final JLabel subtitle = new JLabel("", SwingConstants.CENTER);
     private final JButton trash;
     private final JButton chapters = new JButton();
     private final JProgressBar bar = new JProgressBar(0, 100);
@@ -26,13 +27,22 @@ final class RecentBookCard extends JPanel {
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")),
                 BorderFactory.createEmptyBorder(12, 12, 12, 12)));
-        setPreferredSize(new Dimension(350, 176));
+        setPreferredSize(new Dimension(350, 212));
         cover.setPreferredSize(new Dimension(72, 104));
         cover.setHorizontalAlignment(SwingConstants.CENTER);
-        add(cover, BorderLayout.WEST);
+        JPanel heading = new JPanel(new BorderLayout());
+        heading.add(title, BorderLayout.NORTH);
+        heading.add(subtitle, BorderLayout.CENTER);
+        add(heading, BorderLayout.NORTH);
+        JPanel body = new JPanel(new BorderLayout(12, 0));
+        body.add(cover, BorderLayout.WEST);
+        add(body, BorderLayout.CENTER);
+        JPanel footer = new JPanel(new BorderLayout());
+        add(footer, BorderLayout.SOUTH);
         JPanel details = new JPanel();
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
-        title.setHorizontalAlignment(SwingConstants.LEFT);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.putClientProperty("JButton.buttonType", "borderless");
         title.addActionListener(_ -> open.accept(id));
         title.setToolTipText(id);
@@ -43,20 +53,24 @@ final class RecentBookCard extends JPanel {
                 .toList()));
         chapters.putClientProperty("JButton.buttonType", "borderless");
         chapters.addActionListener(_ -> showChapters(open, remove));
-        folder.putClientProperty("html.disable", true);
+        footer.add(chapters, BorderLayout.WEST);
+        footer.add(trash, BorderLayout.EAST);
+        subtitle.putClientProperty("html.disable", true);
         MouseClickListener continueReading = new MouseClickListener(event -> {
             if (SwingUtilities.isLeftMouseButton(event) && title.isEnabled()) {
                 title.doClick(0);
             }
         });
-        for (JComponent surface : List.of(this, details, cover, progress, folder, availability, bar)) {
+        for (JComponent surface : List.of(this, heading, body, footer, details, cover, progress, subtitle, availability, bar)) {
             surface.addMouseListener(continueReading);
         }
-        for (JComponent item : List.of(title, folder, progress, bar, chapters, availability, trash)) {
+        details.add(Box.createVerticalGlue());
+        for (JComponent item : List.of(progress, bar, availability)) {
             item.setAlignmentX(LEFT_ALIGNMENT);
             details.add(item);
         }
-        add(details, BorderLayout.CENTER);
+        details.add(Box.createVerticalGlue());
+        body.add(details, BorderLayout.CENTER);
     }
 
     private static JButton trashButton(String label, Runnable remove) {
@@ -107,22 +121,30 @@ final class RecentBookCard extends JPanel {
         boolean grouped = book.getChapters().size() > 1;
         File file = new File(book.getState().getSourceId());
         File parent = file.getParentFile();
-        folder.setText(grouped ? file.getName() : parent == null ? "" : parent.getName());
+        String heading = book.getTitle();
+        String detail = parent == null ? "" : parent.getName();
+        if (parent != null && !detail.isBlank() && FileUtils.isSupportedArchive(file.getName())) {
+            heading = detail;
+            detail = file.getName();
+        }
+        subtitle.setText(detail);
+        subtitle.setVisible(!detail.isBlank());
         String scope = grouped ? "all " + book.getChapters().size() + " chapters" : book.getTitle();
         String label = "Clear reading history for " + scope;
         trash.setToolTipText(label);
         trash.getAccessibleContext().setAccessibleName(label);
         chapters.setVisible(grouped);
         chapters.setText("Chapters (" + book.getChapters().size() + ") ▾");
-        chapters.setToolTipText("Show recently read chapters. Continue: " + new File(book.getState().getSourceId()).getName());
+        chapters.setToolTipText("Show recently read chapters. Continue: " + file.getName());
         // Treat filenames as plain text, never as Swing HTML markup.
         title.putClientProperty("html.disable", true);
-        title.setText(book.getTitle());
+        title.setText(heading);
         title.setEnabled(book.isAvailable());
-        title.getAccessibleContext().setAccessibleName("Continue " + book.getTitle() + ", " + book.getProgress());
+        title.getAccessibleContext().setAccessibleName("Continue " + heading + ", " + detail + ", " + book.getProgress());
         progress.setText(book.getProgress());
         bar.setValue((int) (100L * book.getState().getPageNumber() / Math.max(1, book.getState().getPageCount())));
-        availability.setText(book.isAvailable() ? " " : "Moved, missing or unavailable");
+        availability.setText("Moved, missing or unavailable");
+        availability.setVisible(!book.isAvailable());
         availability.setToolTipText(book.getState().getSourceId());
         if (book.getCover() != null) {
             cover.setIcon(new RecentCoverIcon(book.getCover()));

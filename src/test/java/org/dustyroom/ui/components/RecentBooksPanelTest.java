@@ -24,7 +24,7 @@ class RecentBooksPanelTest {
             panel.showBooks(List.of(new RecentBook(state, false, null)));
             JButton title = buttons(panel)
                     .stream()
-                    .filter(b -> "volume.zip".equals(b.getText()))
+                    .filter(b -> "books".equals(b.getText()))
                     .findFirst()
                     .orElseThrow();
             JButton remove = buttons(panel)
@@ -44,6 +44,24 @@ class RecentBooksPanelTest {
             assertEquals(List.of(state.getSourceId()), opened);
             panel.showBooks(List.of());
             assertTrue(buttons(panel).isEmpty());
+        });
+    }
+
+    @Test
+    void groupTrashClearsEveryChapterOnTheCard() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            RecentBooksPanel panel = new RecentBooksPanel();
+            List<String> removed = new ArrayList<>();
+            panel.setHandlers(id -> fail("Trash must not open " + id), removed::addAll);
+            BookState first = new BookState("/books/1.zip", "a", 1, 2, false, ReadingMode.MANGA);
+            BookState second = new BookState("/books/2.zip", "b", 2, 2, false, ReadingMode.MANGA);
+            panel.showBooks(List.of(new RecentBook(first, true, null, List.of(first, second))));
+            buttons(panel).stream()
+                          .filter(button -> "Clear reading history for all 2 chapters".equals(button.getToolTipText()))
+                          .findFirst()
+                          .orElseThrow()
+                          .doClick(0);
+            assertEquals(List.of(first.getSourceId(), second.getSourceId()), removed);
         });
     }
 
