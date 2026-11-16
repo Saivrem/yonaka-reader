@@ -576,7 +576,7 @@ public final class AsyncViewerSession implements AutoCloseable {
 
             persist(() -> store.showRecent(initialPage.getKey().sourceId()));
             lastRememberedSource = null;
-            renderAndPublish(targetGeneration, requestId);
+            renderAndPublish(targetGeneration, requestId, initialImage);
         } catch (RuntimeException e) {
             closeCandidate(candidate);
             lastSourceError = errorMessage(e);
@@ -679,11 +679,15 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private void renderAndPublish(long targetGeneration, long requestId) {
+        renderAndPublish(targetGeneration, requestId, null);
+    }
+
+    private void renderAndPublish(long targetGeneration, long requestId, BufferedImage initialImage) {
         if (!isLatest(targetGeneration, requestId)) {
             return;
         }
         PageRef current = pages.get(pageIndex);
-        BufferedImage currentImage = loadImage(current);
+        BufferedImage currentImage = initialImage != null ? initialImage : loadImage(current);
         if (!isLatest(targetGeneration, requestId)) {
             return;
         }
@@ -769,9 +773,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         }
         PageRef current = pages.get(anchorIndex);
         PageRef next = pages.get(anchorIndex + 1);
-        PageShape currentShape = shapeOf(current);
-        PageShape nextShape = shapeOf(next);
-        return spreadPlanner.shouldPair(currentShape, nextShape, true) ? next : null;
+        return spreadPlanner.shouldPair(shapeOf(current), () -> shapeOf(next)) ? next : null;
     }
 
     private PageShape shapeOf(PageRef page) {

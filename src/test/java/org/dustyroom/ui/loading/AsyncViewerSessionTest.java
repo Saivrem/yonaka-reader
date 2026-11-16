@@ -624,6 +624,22 @@ class AsyncViewerSessionTest {
     }
 
     @Test
+    void openingPageLargerThanCacheDecodesItOnce() {
+        FakeImageIterator source = FakeImageIterator.portraits("source", "one");
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        AsyncViewerSession session = session(source, tasks, Runnable::run, view, new BoundedImageCache(1, 1));
+
+        session.open(new File("source"));
+        tasks.runNext();
+
+        assertEquals(1, source.loads("one"));
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.close();
+        tasks.runAll();
+    }
+
+    @Test
     void landscapePageRemainsSingleInTwoPageMode() {
         FakeImageIterator source = new FakeImageIterator(
                 "source",
@@ -641,6 +657,7 @@ class AsyncViewerSessionTest {
         tasks.runNext();
         session.toggleTwoPageMode();
         tasks.runNext();
+        assertEquals(0, source.loads("portrait"));
         assertFalse(lastFrame(view).getTitle().contains("+"));
 
         session.next();
