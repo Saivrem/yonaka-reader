@@ -5,6 +5,7 @@ import org.dustyroom.be.animation.gif.GifDecoder;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
@@ -24,31 +25,39 @@ final class ImageDecoder {
     private static final int JPEG_APP0 = 0xe0;
     private static final byte[] JFIF_SIGNATURE = {'J', 'F', 'I', 'F', 0};
 
-    static BufferedImage read(InputStream input) throws IOException {
-        try (ImageInputStream imageInput = ImageIO.createImageInputStream(input)) {
-            if (imageInput == null) {
-                return null;
-            }
+    // Keep small archive entries seekable in memory while leaving large streams to ImageIO.
+    private static final long MEMORY_STREAM_LIMIT = 4L * 1024 * 1024;
 
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
-            if (!readers.hasNext()) {
-                return null;
-            }
+    static ImageInputStream openStream(InputStream input, long size) throws IOException {
+        if (size >= 0 && size <= MEMORY_STREAM_LIMIT) {
+            return new MemoryCacheImageInputStream(input);
+        }
+        return ImageIO.createImageInputStream(input);
+    }
 
-            ImageReader reader = readers.next();
-            try {
-                boolean jfif = isJpeg(reader) && hasJfifMarker(imageInput);
-                reader.setInput(imageInput, false, false);
-                if ("gif".equalsIgnoreCase(reader.getFormatName())) {
-                    return GifDecoder.firstFrame(reader);
-                }
-                if (jfif && !reader.getImageTypes(0).hasNext()) {
-                    return readUnsupportedJfif(reader);
-                }
-                return reader.read(0);
-            } finally {
-                reader.dispose();
+    static BufferedImage read(ImageInputStream imageInput) throws IOException {
+        if (imageInput == null) {
+            return null;
+        }
+
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
+        if (!readers.hasNext()) {
+            return null;
+        }
+
+        ImageReader reader = readers.next();
+        try {
+            boolean jfif = isJpeg(reader) && hasJfifMarker(imageInput);
+            reader.setInput(imageInput, false, false);
+            if ("gif".equalsIgnoreCase(reader.getFormatName())) {
+                return GifDecoder.firstFrame(reader);
             }
+            if (jfif && !reader.getImageTypes(0).hasNext()) {
+                return readUnsupportedJfif(reader);
+            }
+            return reader.read(0);
+        } finally {
+            reader.dispose();
         }
     }
 

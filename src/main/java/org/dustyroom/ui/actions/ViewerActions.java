@@ -49,7 +49,7 @@ public interface ViewerActions {
 
     Action settings();
 
-    Action resetApplication();
+    Action resetComicDatabase();
 
     Action showAbout();
 }

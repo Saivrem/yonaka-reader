@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.dustyroom.persistence.PersistenceSql.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,22 +21,19 @@ class RecentBooksTest extends BasePersistenceTest {
     }
 
     @Test
-    void hidingSurvivesProgressUpdatesAndRestartButExplicitOpenRestoresIt() throws Exception {
+    void removalClearsOnlySelectedHistoryAcrossRestarts() throws Exception {
         Path file = Files.writeString(directory.resolve("日本語 book.zip"), "untouched");
         BookState state = book(file.toString(), 3);
         try (SqliteReaderStore store = openStore()) {
             store.saveBook(state);
-            store.hideRecent(state.getSourceId());
-            store.saveBook(book(state.getSourceId(), 4));
-            assertTrue(store.recentBooks(12).isEmpty());
-            assertEquals(4, store.book(state.getSourceId()).orElseThrow().getPageNumber());
+            store.saveBook(book("second.zip", 2));
+            store.saveBook(book("other.zip", 5));
+            store.removeRecent(List.of(state.getSourceId(), "second.zip"));
         }
         try (SqliteReaderStore store = openStore()) {
-            assertTrue(store.recentBooks(12).isEmpty());
-            store.showRecent(state.getSourceId());
-            assertEquals(4, store.recentBooks(12).getFirst().getPageNumber());
-            store.reset();
-            assertTrue(store.recentBooks(12).isEmpty());
+            assertTrue(store.book(state.getSourceId()).isEmpty());
+            assertTrue(store.book("second.zip").isEmpty());
+            assertEquals(List.of(book("other.zip", 5)), store.recentBooks(12));
         }
         assertEquals("untouched", Files.readString(file));
     }

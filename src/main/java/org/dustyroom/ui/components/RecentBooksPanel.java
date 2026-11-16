@@ -15,12 +15,12 @@ import java.util.function.Consumer;
  */
 public final class RecentBooksPanel extends JPanel {
     private final JCheckBox groupByFolder = new JCheckBox("Group ZIPs by folder", true);
-    private final JPanel cards = new JPanel(new GridLayout(0, 2, 16, 16));
+    private final BookCardGrid cards = new BookCardGrid();
     private final JLabel empty = new JLabel("Your recently read books will appear here.");
     private final Map<String, RecentBookCard> entries = new LinkedHashMap<>();
     private Consumer<String> open = _ -> {
     };
-    private Consumer<String> remove = _ -> {
+    private Consumer<List<String>> remove = _ -> {
     };
 
     public RecentBooksPanel() {
@@ -35,12 +35,20 @@ public final class RecentBooksPanel extends JPanel {
         setMaximumSize(new Dimension(760, Integer.MAX_VALUE));
     }
 
+    void fitShelf(int width, int height) {
+        cards.fit(width, height - 288, 6);
+        if (width != getMaximumSize().width) {
+            setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
+            revalidate();
+        }
+    }
+
     public void setGrouping(boolean grouped, Consumer<Boolean> change) {
         groupByFolder.setSelected(grouped);
         groupByFolder.addActionListener(_ -> change.accept(groupByFolder.isSelected()));
     }
 
-    public void setHandlers(Consumer<String> open, Consumer<String> remove) {
+    public void setHandlers(Consumer<String> open, Consumer<List<String>> remove) {
         this.open = open;
         this.remove = remove;
     }
@@ -57,7 +65,7 @@ public final class RecentBooksPanel extends JPanel {
             for (RecentBook book : books) {
                 RecentBookCard card = new RecentBookCard(book.getState().getSourceId(), id -> open.accept(id), id -> remove.accept(id));
                 entries.put(book.getState().getSourceId(), card);
-                cards.add(card);
+                cards.addCard(card);
             }
         }
         for (RecentBook book : books) {

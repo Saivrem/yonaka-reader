@@ -1,7 +1,5 @@
 package org.dustyroom.ui.components;
 
-import org.dustyroom.be.models.direction.ReadingMode;
-import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.ui.actions.ViewerActions;
 
@@ -12,130 +10,97 @@ import java.awt.event.KeyEvent;
 
 public class NavigationPanel extends JPanel {
     private final JButton position;
-    private final JButton fit = new JButton("Fit to window ▾");
-    private final JButton direction = new JButton("Manga ▾");
     private String pageLabel = "No book open";
 
     public NavigationPanel(ViewerActions actions) {
         setLayout(new BorderLayout(12, 0));
         setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
         JPanel files = group();
-        files.add(button(actions.home(), ReaderIconKind.HOME, null));
-        files.add(readerMenu(actions));
-        files.add(button(actions.prevVolume(), ReaderIconKind.PREVIOUS_VOLUME, null));
-        files.add(button(actions.nextVolume(), ReaderIconKind.NEXT_VOLUME, null));
+        files.add(button(actions.home(), ReaderIconKind.HOME));
+        files.add(button(actions.openFile(), ReaderIconKind.OPEN));
+        files.add(button(actions.openPageGrid(), ReaderIconKind.PAGE_GRID));
+        files.add(toggle(actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN));
+        files.add(button(actions.prevVolume(), ReaderIconKind.PREVIOUS_VOLUME));
+        files.add(button(actions.nextVolume(), ReaderIconKind.NEXT_VOLUME));
         add(files, BorderLayout.WEST);
 
         JPanel pages = group();
-        pages.add(button(actions.firstImage(), ReaderIconKind.FIRST, null));
-        pages.add(button(actions.prevImage(), ReaderIconKind.PREVIOUS, null));
+        pages.add(button(actions.firstImage(), ReaderIconKind.FIRST));
+        pages.add(button(actions.prevImage(), ReaderIconKind.PREVIOUS));
         position = new JButton(actions.goToPage());
+        position.setRequestFocusEnabled(false);
         position.setText(pageLabel);
         position.setPreferredSize(new Dimension(116, 36));
         position.setToolTipText("Go to page (G)");
         position.getAccessibleContext().setAccessibleName("Page position; activate to go to a page");
         pages.add(position);
-        pages.add(button(actions.nextImage(), ReaderIconKind.NEXT, null));
-        pages.add(button(actions.lastImage(), ReaderIconKind.LAST, null));
+        pages.add(button(actions.nextImage(), ReaderIconKind.NEXT));
+        pages.add(button(actions.lastImage(), ReaderIconKind.LAST));
         add(pages, BorderLayout.CENTER);
 
         JPanel settings = group();
-        JPopupMenu fitMenu = new JPopupMenu();
-        radioItems(fitMenu, actions.fitScreen(), actions.fitWidth(), actions.fitHeight());
-        fitMenu.addSeparator();
-        fitMenu.add(actions.zoomIn());
-        fitMenu.add(actions.zoomOut());
-        fit.addActionListener(_ -> {
-            SwingUtilities.updateComponentTreeUI(fitMenu);
-            fitMenu.show(fit, 0, fit.getHeight());
-        });
-        fit.setToolTipText("Page scale: S window, W width, H height");
-        settings.add(fit);
-        JPopupMenu readingMenu = new JPopupMenu();
-        radioItems(readingMenu, actions.setMangaReadingMode(), actions.setComicsReadingMode());
-        direction.addActionListener(_ -> {
-            SwingUtilities.updateComponentTreeUI(readingMenu);
-            readingMenu.show(direction, 0, direction.getHeight());
-        });
-        direction.setToolTipText("Reading direction: M manga, C comics");
-        settings.add(direction);
-        JToggleButton spread = new JToggleButton(actions.toggleTwoPageMode());
-        decorate(spread, ReaderIconKind.SPREAD, null);
-        settings.add(spread);
+        settings.add(toggle(actions.fitScreen(), ReaderIconKind.FIT_SCREEN));
+        settings.add(toggle(actions.fitWidth(), ReaderIconKind.FIT_WIDTH));
+        settings.add(toggle(actions.fitHeight(), ReaderIconKind.FIT_HEIGHT));
+        settings.add(button(actions.zoomOut(), ReaderIconKind.ZOOM_OUT));
+        settings.add(button(actions.zoomIn(), ReaderIconKind.ZOOM_IN));
+        settings.add(toggle(actions.setMangaReadingMode(), ReaderIconKind.READ_RIGHT_TO_LEFT));
+        settings.add(toggle(actions.setComicsReadingMode(), ReaderIconKind.READ_LEFT_TO_RIGHT));
+        settings.add(toggle(actions.toggleTwoPageMode(), ReaderIconKind.SPREAD));
         add(settings, BorderLayout.EAST);
-        fit.setEnabled(false);
-        direction.setEnabled(false);
-    }
-
-    private static JButton readerMenu(ViewerActions actions) {
-        JPopupMenu menu = new JPopupMenu();
-        menu.add(actions.openFile()).setIcon(new ReaderIcon(ReaderIconKind.OPEN, 16));
-        menu.add(actions.openPageGrid()).setIcon(new ReaderIcon(ReaderIconKind.PAGE_GRID, 16));
-        menu.add(new JCheckBoxMenuItem(actions.toggleFullscreen()));
-
-        JButton button = new JButton(new ReaderIcon(ReaderIconKind.MENU));
-        button.setPreferredSize(new Dimension(36, 36));
-        button.putClientProperty("JButton.buttonType", "toolBarButton");
-        button.setToolTipText("Reader menu");
-        button.getAccessibleContext().setAccessibleName("Reader menu");
-        button.addActionListener(_ -> {
-            SwingUtilities.updateComponentTreeUI(menu);
-            menu.show(button, 0, -menu.getPreferredSize().height);
-        });
-        return button;
     }
 
     private static JPanel group() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
         panel.setOpaque(false);
         return panel;
     }
 
-    private static JButton button(Action action, ReaderIconKind icon, String text) {
+    private static JButton button(Action action, ReaderIconKind icon) {
         JButton button = new JButton(action);
-        decorate(button, icon, text);
+        decorate(button, icon);
         return button;
     }
 
-    private static void decorate(AbstractButton button, ReaderIconKind icon, String text) {
-        button.setText(text);
+    private static JToggleButton toggle(Action action, ReaderIconKind icon) {
+        JToggleButton button = new JToggleButton(action);
+        decorate(button, icon);
+        button.putClientProperty("FlatLaf.style", "selectedBackground: $Component.accentColor");
+        updateToggleShape(button);
+        button.addItemListener(_ -> updateToggleShape(button));
+        return button;
+    }
+
+    private static void updateToggleShape(JToggleButton button) {
+        button.putClientProperty("JButton.buttonType", button.isSelected() ? "roundRect" : "toolBarButton");
+    }
+
+    private static void decorate(AbstractButton button, ReaderIconKind icon) {
+        button.setHideActionText(true);
+        button.setRequestFocusEnabled(false);
         Object shortcut = button.getAction().getValue(Action.ACCELERATOR_KEY);
         String description = (String) button.getAction().getValue(Action.SHORT_DESCRIPTION);
+        if (description == null) {
+            description = (String) button.getAction().getValue(Action.NAME);
+        }
         if (shortcut instanceof KeyStroke key) {
             String modifiers = InputEvent.getModifiersExText(key.getModifiers());
-            button.setToolTipText(description + " (" + (modifiers.isEmpty() ? "" : modifiers + "+")
-                    + KeyEvent.getKeyText(key.getKeyCode()) + ")");
+            description += " (" + (modifiers.isEmpty() ? "" : modifiers + "+")
+                    + KeyEvent.getKeyText(key.getKeyCode()) + ")";
         }
+        button.setToolTipText(description);
         button.setIcon(new ReaderIcon(icon));
-        button.setPreferredSize(new Dimension(text == null ? 36 : 82, 36));
+        button.setPreferredSize(new Dimension(36, 36));
         button.putClientProperty("JButton.buttonType", "toolBarButton");
         button.getAccessibleContext().setAccessibleName((String) button.getAction().getValue(Action.NAME));
     }
 
-    private static void radioItems(JPopupMenu menu, Action... actions) {
-        ButtonGroup group = new ButtonGroup();
-        for (Action action : actions) {
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem(action);
-            group.add(item);
-            menu.add(item);
-        }
-    }
-
-    public void updateState(ViewerFrame frame, FitMode mode) {
+    public void updateState(ViewerFrame frame) {
         if (frame != null) {
             pageLabel = (frame.getFirstPage() == frame.getLastPage() ? String.valueOf(frame.getFirstPage())
                     : frame.getFirstPage() + "–" + frame.getLastPage()) + " / " + frame.getPageCount();
-            direction.setText(frame.getReadingMode() == ReadingMode.MANGA ? "Manga ▾" : "Comics ▾");
         }
         position.setText(pageLabel);
-        fit.setText(switch (mode) {
-            case FIT_SCREEN -> "Fit to window ▾";
-            case FIT_WIDTH -> "Fit width ▾";
-            case FIT_HEIGHT -> "Fit height ▾";
-            case ORIGINAL -> "Custom zoom ▾";
-        });
-        fit.setEnabled(frame != null);
-        direction.setEnabled(frame != null);
     }
 
     public void setLoading(boolean loading) {

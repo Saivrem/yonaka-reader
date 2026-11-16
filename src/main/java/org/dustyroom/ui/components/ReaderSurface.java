@@ -73,6 +73,18 @@ public final class ReaderSurface extends JPanel {
         cards.show(this, "welcome");
     }
 
+    @Override
+    public void doLayout() {
+        if (compact.isVisible()) {
+            int shelfWidth = Math.min(2048, Math.max(0, getWidth() - 80));
+            if (shelfWidth != compact.getMaximumSize().width) {
+                compact.setMaximumSize(new Dimension(shelfWidth, 72));
+            }
+            recent.fitShelf(shelfWidth, getHeight());
+        }
+        super.doLayout();
+    }
+
     private static JButton openButton(Action open) {
         JButton button = new JButton(open);
         button.setText("Open a book");
@@ -98,7 +110,7 @@ public final class ReaderSurface extends JPanel {
         recent.setGrouping(grouped, change);
     }
 
-    public void setRecentHandlers(Consumer<String> open, Consumer<String> remove) {
+    public void setRecentHandlers(Consumer<String> open, Consumer<List<String>> remove) {
         recent.setHandlers(open, remove);
     }
 

@@ -79,6 +79,13 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
             }
             g.setStroke(new BasicStroke(1.7f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             switch (kind) {
+                case TRASH -> {
+                    line(g, 4, 6, 20, 6);
+                    line(g, 9, 6, 9, 3, 15, 3, 15, 6);
+                    line(g, 6, 7, 7, 21, 17, 21, 18, 7);
+                    line(g, 10, 10, 10, 17);
+                    line(g, 14, 10, 14, 17);
+                }
                 case HOME -> {
                     line(g, 3, 11, 12, 3, 21, 11);
                     line(g, 5, 10, 5, 21, 10, 21, 10, 15, 14, 15, 14, 21, 19, 21, 19, 10);
@@ -99,17 +106,39 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
                 }
                 case PREVIOUS_VOLUME -> volume(g, false);
                 case NEXT_VOLUME -> volume(g, true);
-                case SPREAD, BOOK -> {
-                    line(g, 12, 6, 8, 4, 3, 4, 3, 19, 8, 19, 12, 21, 16, 19, 21, 19, 21, 4, 16, 4, 12, 6, 12, 21);
-                    if (kind == ReaderIconKind.BOOK) {
-                        line(g, 6, 9, 9, 10);
-                        line(g, 15, 10, 18, 9);
+                case SPREAD -> line(g, 12, 6, 8, 4, 3, 4, 3, 19, 8, 19, 12, 21,
+                        16, 19, 21, 19, 21, 4, 16, 4, 12, 6, 12, 21);
+                case FIT_SCREEN -> {
+                    g.drawRoundRect(2, 4, 20, 16, 2, 2);
+                    g.drawRect(8, 6, 8, 12);
+                }
+                case FIT_WIDTH, FIT_HEIGHT -> {
+                    if (kind == ReaderIconKind.FIT_HEIGHT) {
+                        g.rotate(Math.PI / 2, 12, 12);
+                    }
+                    line(g, 3, 5, 3, 19);
+                    line(g, 21, 5, 21, 19);
+                    line(g, 6, 12, 18, 12);
+                    line(g, 9, 9, 6, 12, 9, 15);
+                    line(g, 15, 9, 18, 12, 15, 15);
+                }
+                case ZOOM_IN, ZOOM_OUT -> {
+                    g.drawOval(3, 3, 13, 13);
+                    line(g, 15, 15, 21, 21);
+                    line(g, 6, 9.5, 13, 9.5);
+                    if (kind == ReaderIconKind.ZOOM_IN) {
+                        line(g, 9.5, 6, 9.5, 13);
                     }
                 }
-                case MENU -> {
-                    line(g, 3, 6, 21, 6);
-                    line(g, 3, 12, 21, 12);
-                    line(g, 3, 18, 21, 18);
+                case READ_RIGHT_TO_LEFT, READ_LEFT_TO_RIGHT -> {
+                    if (kind == ReaderIconKind.READ_RIGHT_TO_LEFT) {
+                        g.translate(24, 0);
+                        g.scale(-1, 1);
+                    }
+                    line(g, 4, 5, 20, 5);
+                    line(g, 4, 9, 14, 9);
+                    line(g, 4, 16, 20, 16);
+                    line(g, 16, 12, 20, 16, 16, 20);
                 }
                 case PAGE_GRID -> {
                     for (int row = 0; row < 3; row++) {

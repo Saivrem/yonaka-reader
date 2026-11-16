@@ -13,8 +13,16 @@ public class ThumbnailRenderer {
     public static final int PIXEL_DENSITY = 3;
 
     public static BufferedImage render(BufferedImage image) {
-        double scale = Math.min(1.0, Math.min((double) LOGICAL_WIDTH * PIXEL_DENSITY / image.getWidth(),
-                (double) LOGICAL_HEIGHT * PIXEL_DENSITY / image.getHeight()));
+        return render(image, LOGICAL_WIDTH * PIXEL_DENSITY, LOGICAL_HEIGHT * PIXEL_DENSITY);
+    }
+
+    public static BufferedImage renderCover(BufferedImage image) {
+        return render(image, 960, 1152);
+    }
+
+    private static BufferedImage render(BufferedImage image, int maxWidth, int maxHeight) {
+        double scale = Math.min(1.0, Math.min((double) maxWidth / image.getWidth(),
+                (double) maxHeight / image.getHeight()));
         int width = Math.max(1, (int) Math.round(image.getWidth() * scale));
         int height = Math.max(1, (int) Math.round(image.getHeight() * scale));
         BufferedImage current = image;

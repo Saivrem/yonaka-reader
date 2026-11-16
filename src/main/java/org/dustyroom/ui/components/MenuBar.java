@@ -1,11 +1,10 @@
 package org.dustyroom.ui.components;
 
 import org.dustyroom.be.models.state.BookState;
-import org.dustyroom.be.models.state.ViewerTheme;
+import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.ui.actions.ViewerActions;
 import org.dustyroom.ui.listeners.MenuOpenListener;
-import org.dustyroom.ui.utils.UiUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -19,13 +18,14 @@ import java.util.function.Predicate;
 public class MenuBar extends JMenuBar {
     private final JMenu recentMenu = menu("Open Recent", KeyEvent.VK_R);
     private final JMenuItem home;
-    private final Map<ViewerTheme, JRadioButtonMenuItem> themeItems = new EnumMap<>(ViewerTheme.class);
-    private ViewerTheme selectedTheme = UiUtils.currentTheme();
+    private final Map<ThemeMode, JRadioButtonMenuItem> themeItems = new EnumMap<>(ThemeMode.class);
+    private ThemeMode selectedTheme;
     private Consumer<String> openRecent = _ -> {
     };
     private List<RecentBook> recentBooks = List.of();
 
-    public MenuBar(ViewerActions actions, Predicate<ViewerTheme> selectTheme) {
+    public MenuBar(ViewerActions actions, ThemeMode initialTheme, Predicate<ThemeMode> selectTheme) {
+        selectedTheme = initialTheme;
         home = new JMenuItem(actions.home());
         home.setMnemonic(KeyEvent.VK_H);
         JMenu fileMenu = menu("File", KeyEvent.VK_F);
@@ -61,12 +61,13 @@ public class MenuBar extends JMenuBar {
         addActions(optionsMenu, actions.settings());
         optionsMenu.addSeparator();
         optionsMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
-        addActions(helpMenu, actions.showAbout());
 
         optionsMenu.add(readingModeMenu);
         optionsMenu.add(themeMenu(selectTheme));
-        optionsMenu.addSeparator();
-        addActions(optionsMenu, actions.resetApplication());
+
+        addActions(helpMenu, actions.showAbout());
+        helpMenu.addSeparator();
+        addActions(helpMenu, actions.resetComicDatabase());
 
         add(fileMenu);
         add(viewMenu);
@@ -110,6 +111,7 @@ public class MenuBar extends JMenuBar {
                 case "comicsReadingMode" -> KeyEvent.VK_C;
                 case "mangaReadingMode" -> KeyEvent.VK_M;
                 case "goToPage", "openPageGrid" -> KeyEvent.VK_G;
+                case "resetComicDatabase" -> KeyEvent.VK_R;
                 case "showAbout" -> KeyEvent.VK_A;
                 default -> 0;
             };
@@ -124,19 +126,19 @@ public class MenuBar extends JMenuBar {
         }
     }
 
-    private JMenu themeMenu(Predicate<ViewerTheme> selectTheme) {
+    private JMenu themeMenu(Predicate<ThemeMode> selectTheme) {
         JMenu menu = menu("Theme", KeyEvent.VK_T);
         ButtonGroup group = new ButtonGroup();
-        for (ViewerTheme theme : ViewerTheme.values()) {
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem(theme.label());
-            item.setSelected(theme == UiUtils.currentTheme());
-            item.addActionListener(_ -> {
+        for (ThemeMode theme : ThemeMode.values()) {
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem(theme.getLabel());
+            item.setSelected(theme == selectedTheme);
+            item.addActionListener(_ -> SwingUtilities.invokeLater(() -> {
                 if (selectTheme.test(theme)) {
                     selectedTheme = theme;
                 }
                 // Also restore the previous selection if installation failed.
                 showTheme(selectedTheme);
-            });
+            }));
             group.add(item);
             themeItems.put(theme, item);
             menu.add(item);
@@ -144,7 +146,7 @@ public class MenuBar extends JMenuBar {
         return menu;
     }
 
-    public void showTheme(ViewerTheme theme) {
+    public void showTheme(ThemeMode theme) {
         selectedTheme = theme;
         themeItems.get(theme).setSelected(true);
     }

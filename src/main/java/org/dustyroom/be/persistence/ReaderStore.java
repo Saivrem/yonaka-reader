@@ -32,7 +32,7 @@ public interface ReaderStore extends AutoCloseable, LibraryStore {
         return List.of();
     }
 
-    default void hideRecent(String sourceId) {
+    default void removeRecent(List<String> sourceIds) {
     }
 
     default void showRecent(String sourceId) {

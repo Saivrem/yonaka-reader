@@ -34,7 +34,7 @@ class LibraryStoreTest extends BasePersistenceTest {
         BookState saved = new BookState(source, "日本語.png", 4, 20, true, ReadingMode.COMICS);
         try (ReaderStore store = openStore()) {
             store.saveBook(saved);
-            store.hideRecent(source);
+            execute(HIDE_LEGACY_BOOK, source);
             store.importLibrary(selection);
             LibraryWork work = store.libraryWorks().getFirst();
             workId = work.getId();
@@ -64,6 +64,9 @@ class LibraryStoreTest extends BasePersistenceTest {
         try (ReaderStore store = openStore()) {
             assertEquals(workId, store.libraryWorks().getFirst().getId());
             store.reset();
+        }
+        try (ReaderStore store = openStore()) {
+            assertTrue(store.recentBooks(12).isEmpty());
             assertTrue(store.libraryWorks().isEmpty());
             assertTrue(store.book(source).isEmpty());
         }
@@ -75,7 +78,7 @@ class LibraryStoreTest extends BasePersistenceTest {
         BookState saved = new BookState("old-book", "page", 3, 7, true, ReadingMode.COMICS);
         try (ReaderStore store = openStore()) {
             store.saveBook(saved);
-            store.hideRecent(saved.getSourceId());
+            execute(HIDE_LEGACY_BOOK, saved.getSourceId());
         }
         execute(DROP_COMPONENTS);
         execute(DROP_CHAPTERS);
@@ -96,7 +99,7 @@ class LibraryStoreTest extends BasePersistenceTest {
         try (ReaderStore store = openStore()) {
             store.importLibrary(selection());
             store.saveBook(saved);
-            store.hideRecent(saved.getSourceId());
+            execute(HIDE_LEGACY_BOOK, saved.getSourceId());
             id = store.libraryWorks().getFirst().getId();
             store.finishChapter(store.libraryWorks().getFirst().getChapters().getFirst().getId(), true);
         }

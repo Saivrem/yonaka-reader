@@ -160,18 +160,30 @@ public final class SqliteReaderStore implements ReaderStore {
     }
 
     @Override
-    public void hideRecent(String sourceId) {
-        setRecentHidden(sourceId, true);
+    public void removeRecent(List<String> sourceIds) {
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement sql = connection.prepareStatement(ReaderSql.DELETE_BOOK)) {
+                for (String id : sourceIds) {
+                    SqliteUtils.addBatch(sql, id);
+                }
+                sql.executeBatch();
+                connection.commit();
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException exception) {
+            throw failure(exception);
+        }
     }
 
     @Override
     public void showRecent(String sourceId) {
-        setRecentHidden(sourceId, false);
-    }
-
-    private void setRecentHidden(String sourceId, boolean hidden) {
         try {
-            SqliteUtils.update(connection, ReaderSql.SET_RECENT_HIDDEN, hidden ? 1 : 0, sourceId);
+            SqliteUtils.update(connection, ReaderSql.SHOW_RECENT, sourceId);
         } catch (SQLException exception) {
             throw failure(exception);
         }

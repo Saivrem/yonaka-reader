@@ -41,6 +41,37 @@ class ReaderUiTest {
     }
 
     @Test
+    void toolbarFitsOneRowAtTheMinimumWindowWidth() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ViewerActions actions = actions();
+            NavigationPanel panel = new NavigationPanel(actions);
+            // Allow for native window borders inside the 940-pixel minimum frame width.
+            panel.setSize(920, panel.getPreferredSize().height);
+            panel.doLayout();
+            for (Component component : panel.getComponents()) {
+                JPanel group = (JPanel) component;
+                group.doLayout();
+                for (Component button : group.getComponents()) {
+                    assertTrue(group.getVisibleRect().contains(button.getBounds()));
+                }
+            }
+
+            Map<Action, ReaderIconKind> shortcuts = Map.of(
+                    actions.openFile(), ReaderIconKind.OPEN,
+                    actions.openPageGrid(), ReaderIconKind.PAGE_GRID,
+                    actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN);
+            shortcuts.forEach((action, icon) -> {
+                AbstractButton button = children(panel)
+                        .filter(AbstractButton.class::isInstance)
+                        .map(AbstractButton.class::cast)
+                        .filter(item -> item.getAction() == action)
+                        .findFirst().orElseThrow();
+                assertEquals(icon, assertInstanceOf(ReaderIcon.class, button.getIcon()).kind());
+            });
+        });
+    }
+
+    @Test
     void toolbarTracksDisplayedPagesModesAndAvailability() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ViewerActions actions = actions();
@@ -52,12 +83,14 @@ class ReaderUiTest {
                     .anyMatch(button -> button.getAction() == actions.firstImage()));
             assertTrue(children(panel).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast)
                     .anyMatch(button -> button.getAction() == actions.lastImage()));
+            assertFalse(children(panel).filter(JToggleButton.class::isInstance)
+                    .map(JToggleButton.class::cast).anyMatch(AbstractButton::isSelected));
             assertFalse(actions.nextImage().isEnabled());
             assertFalse(actions.goToPage().isEnabled());
             assertTrue(actions.openFile().isEnabled());
             ViewerFrame frame = new ViewerFrame(null, "Book", null, 2, 3, 10, true, ReadingMode.COMICS, null);
             ViewerActionState.apply(actions, frame, FitMode.FIT_WIDTH, true);
-            panel.updateState(frame, FitMode.FIT_WIDTH);
+            panel.updateState(frame);
             assertEquals(Boolean.TRUE, actions.fitWidth().getValue(Action.SELECTED_KEY));
             assertEquals(Boolean.FALSE, actions.fitScreen().getValue(Action.SELECTED_KEY));
             assertEquals(Boolean.TRUE, actions.toggleTwoPageMode().getValue(Action.SELECTED_KEY));
@@ -67,7 +100,15 @@ class ReaderUiTest {
             assertTrue(children(panel).filter(JButton.class::isInstance).map(JButton.class::cast)
                     .anyMatch(button -> "2–3 / 10".equals(button.getText())));
             children(panel).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast)
-                    .forEach(button -> assertEquals(0, button.getMnemonic()));
+                    .forEach(button -> {
+                        assertEquals(0, button.getMnemonic());
+                        assertFalse(button.isRequestFocusEnabled());
+                        assertNotNull(button.getToolTipText());
+                        if (button.getAction() != actions.goToPage()) {
+                            assertNotNull(button.getIcon());
+                            assertTrue(button.getText() == null || button.getText().isEmpty());
+                        }
+                    });
             ViewerActionState.apply(actions, new ViewerFrame(null, "Book", null, 10, 10, 10, false,
                     ReadingMode.MANGA, null), FitMode.ORIGINAL, false);
             assertFalse(actions.lastImage().isEnabled());
@@ -94,16 +135,18 @@ class ReaderUiTest {
     }
 
     @Test
-    void preservesCustomZoomAcrossPagesAndKeepsItWithinTheStoredRange() throws Exception {
+    void restoresLastPageFitAfterManualZoom() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ImageComponent component = new ImageComponent();
             JScrollPane scroll = new JScrollPane(component);
             scroll.getViewport().setSize(800, 600);
-            component.restoreView(FitMode.ORIGINAL, 1.75);
+            component.setFitMode(FitMode.FIT_WIDTH);
             component.setImageAndCenter(new BufferedImage(4, 8, BufferedImage.TYPE_INT_RGB), scroll);
-            assertEquals(1.75, component.getScale());
+            component.zoomIn();
+            assertEquals(FitMode.ORIGINAL, component.getFitMode());
+            component.restorePageFit();
             component.setImageAndCenter(new BufferedImage(8, 16, BufferedImage.TYPE_INT_RGB), scroll);
-            assertEquals(1.75, component.getScale());
+            assertEquals(FitMode.FIT_WIDTH, component.getFitMode());
             component.setFitMode(FitMode.FIT_SCREEN);
             component.zoomOut();
             assertTrue(component.getScale() <= 20);

@@ -35,13 +35,13 @@ public class DefaultViewerActions implements ViewerActions {
     private final Action setComicsReadingMode;
     private final Action setMangaReadingMode;
     private final Action showAbout;
-    private final Action resetApplication;
+    private final Action resetComicDatabase;
     private final Action settings;
     private final Action goToPage;
     private final Action exitFullscreen;
 
     public DefaultViewerActions(ViewerController controller) {
-        this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", null, controller::openPageGrid);
+        this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
         this.toggleThumbnails = action("toggleThumbnails", "Thumbnails", "Show or hide page thumbnails (T)",
                 key(KeyEvent.VK_T), controller::toggleThumbnails);
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
@@ -87,8 +87,8 @@ public class DefaultViewerActions implements ViewerActions {
                 key(KeyEvent.VK_ESCAPE), controller::exitFullscreen);
         this.settings = action("settings", "Settings…", "Appearance, reading defaults, library and data",
                 menuShortcut(KeyEvent.VK_COMMA), controller::showSettings);
-        this.resetApplication = action("resetApplication", "Reset Application…",
-                "Reset settings, library and reading history", null, controller::resetApplication);
+        this.resetComicDatabase = action("resetComicDatabase", "Reset comic database…",
+                "Reset settings, library and reading history", null, controller::resetComicDatabase);
         this.showAbout = action("showAbout", "About Yonaka Reader", "Show application information",
                 null, controller::showAboutDialog);
     }

@@ -12,6 +12,14 @@ public enum ThemeMode {
 
     private final String label;
 
+    public ViewerTheme resolve(ViewerTheme systemFallback) {
+        return switch (this) {
+            case SYSTEM -> systemFallback;
+            case LIGHT -> ViewerTheme.LIGHT;
+            case DARK -> ViewerTheme.DARK;
+        };
+    }
+
     @Override
     public String toString() {
         return label;

@@ -26,6 +26,15 @@ public class ImageComponent extends JComponent {
     @Getter
     private FitMode fitMode = FitMode.FIT_SCREEN;
 
+    private FitMode pageFit = FitMode.FIT_SCREEN;
+
+    public void restorePageFit() {
+        fitMode = pageFit;
+        if (pageFit == FitMode.ORIGINAL) {
+            scale = 1.0;
+        }
+    }
+
     public ImageComponent() {
         addHierarchyListener(_ -> {
             if (isShowing()) {
@@ -135,6 +144,7 @@ public class ImageComponent extends JComponent {
 
     public void setFitMode(FitMode mode) {
         this.fitMode = mode;
+        pageFit = mode;
         updateScale();
         revalidate();
         repaint();
@@ -142,6 +152,7 @@ public class ImageComponent extends JComponent {
 
     public void restoreView(FitMode mode, double zoom) {
         fitMode = mode;
+        pageFit = mode == FitMode.ORIGINAL && zoom != 1.0 ? FitMode.FIT_SCREEN : mode;
         scale = zoom;
         updateScale();
         revalidate();
@@ -167,7 +178,7 @@ public class ImageComponent extends JComponent {
                     parentSize.getWidth() / image.getWidth(),
                     parentSize.getHeight() / image.getHeight()
             );
-            case ORIGINAL -> { /* Preserve the explicit zoom across page changes. */ }
+            case ORIGINAL -> { /* Zoom is set by the caller. */ }
         }
     }
 

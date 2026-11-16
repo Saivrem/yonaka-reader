@@ -19,7 +19,7 @@ Run the full verification and build an executable fat JAR:
 The resulting application is written to:
 
 ```text
-build/libs/yonaka-reader-0.10.0.jar
+build/libs/yonaka-reader-0.11.0.jar
 ```
 
 ## Run
@@ -27,7 +27,7 @@ build/libs/yonaka-reader-0.10.0.jar
 Open the application without an initial file:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.10.0.jar
+java -jar build/libs/yonaka-reader-0.11.0.jar
 ```
 
 For development, use `./gradlew run` or the shared **Yonaka Reader** run configuration
@@ -39,9 +39,9 @@ in its VM options; executable JAR and native-package launches already enable it.
 Open an image, a directory of images, or a ZIP archive immediately:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.10.0.jar /path/to/page.jpg
-java -jar build/libs/yonaka-reader-0.10.0.jar /path/to/chapter
-java -jar build/libs/yonaka-reader-0.10.0.jar /path/to/volume.zip
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/page.jpg
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/chapter
+java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/volume.zip
 ```
 
 ## Settings
@@ -51,7 +51,7 @@ Open **Options → Settings…** (Command+, on macOS, Ctrl+, elsewhere).
 
 - **Appearance:** Ayu Light, Ayu Dark, or System. System appearance is checked in the
   background every five seconds on macOS, Windows and GNOME/Ubuntu. If detection is
-  unavailable, the last resolved theme is retained. The Theme menu selects a fixed theme.
+  unavailable, the last resolved theme is retained. The Theme menu also supports following the system appearance.
 - **Reading:** default direction, single/two-page mode and scale for newly opened books,
   plus thumbnail visibility. Existing books retain saved direction and spread mode;
   these defaults do not overwrite their progress. Original size starts at 100%.
@@ -69,22 +69,23 @@ The explicit `yonaka.dataDir` launch option takes precedence and disables the fo
 
 ## Recently read
 
-The home screen shows up to 12 recently read books/series with a first-page cover and saved
-page progress. The same list is available under **File → Open Recent**. Use
+The home screen shows up to 6 recently read books/series with a first-page cover and saved
+page progress. ZIP cards show the parent folder as the series title and the last opened
+filename below it, including when only one volume has been read. The same list is available under **File → Open Recent**. Use
 **File → Home** (Command+Shift+H on macOS, Ctrl+Shift+H elsewhere) to return to the shelf while a book is open.
 
 **Group ZIPs by folder** is enabled by default and can be disabled on the home screen.
 Archives in the same parent folder share a card; Continue resumes the most recently
-read chapter. The chapter menu lists up to 20 recent chapters. Grouping examines up
-to 1,000 recent book states, while only 12 covers are decoded. Removing a group hides
-its listed history entries but preserves every chapter's progress and files.
+read chapter. **Chapters** shows the chapters on the card with individual open and
+delete controls. The card's trash button clears the reading history of every chapter
+on that card. Grouping examines up to 1,000 recent book states and loads up to 6 covers.
 Grouping is by folder, not by filename guesses; keep different series in separate
 folders or switch grouping off. This preference survives restarts.
 
 Click a book to resume its saved page, spread mode and reading direction. Images
 opened individually share the history entry of their containing directory.
-**Remove from recent** hides an entry without deleting files or saved progress;
-opening that book again adds it back. Missing or inaccessible sources remain visible
+Removing an entry clears its saved page and reading modes. Reopening starts a new
+reading history. Files, library membership and completion marks are preserved. Missing or inaccessible sources remain visible
 as unavailable. Reopen Home or Open Recent to refresh their availability after
 reconnecting a drive. A moved book must currently be opened from its new location;
 automatic move detection and transferring progress to a new path are future library work.
@@ -107,7 +108,8 @@ ZIPs and archives without supported pages are reported in the preview. Scanning 
 be cancelled. Previously imported chapters keep their original book and reading state
 when the same files are found from another root.
 
-Open a work to view chapters and their saved positions. **Continue reading** opens
+Library and Recently read use the same card layout. In the library, click the cover or title
+to view chapters and their saved positions. **Continue reading** opens
 the last-read chapter with the existing page, reading direction and spread mode.
 Use **Toggle finished** for explicit completion; reaching the last page does not
 mark a chapter finished automatically. Search by title/path, filter by reading or
@@ -151,10 +153,12 @@ and sidebar thumbnails intentionally stay static.
 ### Scrolling, zoom and panning
 
 The reader uses precise wheel/trackpad deltas, with a faster wheel step. Shift+wheel
-scrolls horizontally. Drag the image with the left or middle mouse button to pan.
+scrolls horizontally when the page is wider than the viewport. When the page fits
+horizontally, a horizontal swipe or left-button drag turns one page. Swipe right to
+advance in manga mode and left in comics mode. Drag wide images to pan.
 Ctrl+wheel (or Command+wheel on macOS) zooms around the pointer. Native macOS pinch
 zooms around the viewport center; Windows/Linux use Ctrl+wheel, including trackpads
-that emit that gesture. Zoom remains within 5%–2000% and is saved with the view settings.
+that emit that gesture. Manual zoom ranges from 5% to 2000%. Turning the page restores the last fit mode.
 
 The packaged macOS app and executable JAR enable Java's macOS magnification API.
 When running the main class directly from an IDE, add VM option
@@ -166,13 +170,14 @@ Ctrl/Command+wheel works without it.
 - A welcome screen provides a single Open action and a supported-format hint.
 - The toolbar shows the displayed page or spread range and total page count. Click it or press G to jump to a page.
 - Vector navigation icons replace font-dependent symbols and emoji.
+- The toolbar has dedicated buttons for fit, zoom and reading direction. Hover over a button for its action and shortcut.
 - Scale, two-page spread, reading direction and fullscreen states stay synchronized between toolbar, menus and shortcuts.
-- Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous retain wrap-around navigation.
+- Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous wrap within the volume by default. In Settings → Reading, turn wrapping off to stop at the ends, or select adjacent-volume navigation. At the ends of a series the reader stays on the page.
 - Escape leaves fullscreen without closing the application; Q and Cmd/Ctrl+Q still quit.
 
 ## Appearance and platform behavior
 
-- Options → Theme selects Yonaka Reader Ayu Dark (default) or Ayu Light.
+- Options → Theme offers System, Ayu Dark and Ayu Light.
 - Both application themes use the [Ayu palette](https://github.com/ayu-theme/ayu-colors), implemented with FlatLaf.
 - macOS uses the global screen menu and Command shortcuts.
 - Windows and Linux use a menu inside the window, Control shortcuts, and native window decorations. Windows retains its system window controls and Alt+F4 behavior.
@@ -206,12 +211,12 @@ Storage locations:
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.10.0.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.11.0.jar
 ```
 
 ### Reset and compatibility
 
-Use **Options → Reset Application…** to clear settings, library membership, completion marks and reading history. The
+Use **Help → Reset comic database…** to clear settings, library membership, completion marks and reading history. The
 confirmation defaults to Cancel. After a successful reset the app closes; the next
 launch uses defaults. Image files, folders and ZIP archives are never deleted.
 Reset is transactional: if clearing any table fails, all retain their data.
@@ -224,7 +229,7 @@ schema version is independent: an unchanged schema is opened without running DDL
 Schema upgrades use ordered transactional migrations without automatic backups.
 Failures roll back; migrations never trigger an automatic wipe or database recreation.
 A newer, unsupported schema is rejected without changing its contents; the app can
-still read books without saving progress. **Options → Reset Application…** remains
+still read books without saving progress. **Help → Reset comic database…** remains
 available when initialization fails: after explicit confirmation it clears application
 data transactionally, allowing a fresh startup. If SQLite cannot read a corrupt database,
 reset is refused rather than deleting an unreadable file blindly.
@@ -242,6 +247,7 @@ without preventing reading. No book images or archive contents are stored in the
 | `O`, `Cmd/Ctrl+O` | Open a file |
 | `Right`, `Page Down` | Next page |
 | `Left`, `Page Up` | Previous page |
+| `Shift+G` | Open the page grid |
 | `Home`, `End` | First or last page |
 | `Command+Shift+H` / `Ctrl+Shift+H` | Home / recently read |
 | `Up`, `Down` | Previous or next volume |
@@ -274,7 +280,7 @@ is saved between launches. Click a thumbnail to open that page, or focus the lis
 select a page with the arrow keys and press Enter. The current page or spread is
 highlighted and follows reading progress. The panel is shown once a book is open.
 
-Use **View → Grid** or the **Grid** item in the reader menu next to Home (the grid button is at the foot of the sidebar in Fullscreen) to fill the reading area with a responsive
+Use **View → Grid** or the **Grid** button on the bottom toolbar (the grid button is at the foot of the sidebar in Fullscreen) to fill the reading area with a responsive
 thumbnail grid, including while in Fullscreen. Click a page or select it with the
 arrow keys and press Enter: the grid returns to the vertical sidebar and opens that
 page. **Back to reader** or **Esc** returns without changing the page. Keyboard
@@ -327,7 +333,7 @@ Command-line paths containing spaces must be quoted.
 To uninstall, quit Yonaka Reader and move the app from Applications to Trash.
 The bundled Java is removed with it. Reading history and settings remain in
 `~/Library/Application Support/YonakaReader` for future reinstalls. To clear them
-as well, use **Options → Reset Application…** before deleting the app. Books are
+as well, use **Help → Reset comic database…** before deleting the app. Books are
 never deleted by reset or uninstall.
 
 These development packages are ad-hoc signed, not Developer ID signed or notarized;
@@ -363,7 +369,7 @@ Windows Settings → Apps. A stable upgrade UUID identifies future MSI upgrades.
 The portable ZIP contains `Yonaka Reader.exe` and its Java runtime; extract the
 whole directory before launching. Portable builds do not register file associations.
 Deleting a portable directory removes the app. Both forms preserve user settings
-and reading history; use Reset Application to clear them explicitly.
+and reading history; use **Help → Reset comic database…** to clear them explicitly.
 
 The binaries are currently unsigned. SmartScreen may warn about an unknown publisher;
 Smart App Control or managed-device policies can block unsigned software. There is

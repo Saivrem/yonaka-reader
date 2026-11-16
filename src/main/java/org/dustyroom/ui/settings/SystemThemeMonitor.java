@@ -1,7 +1,5 @@
 package org.dustyroom.ui.settings;
 
-import lombok.Setter;
-
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.state.ViewerTheme;
 import org.dustyroom.be.settings.SystemThemeDetector;
@@ -10,6 +8,7 @@ import javax.swing.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 
 public final class SystemThemeMonitor implements AutoCloseable {
@@ -18,26 +17,38 @@ public final class SystemThemeMonitor implements AutoCloseable {
         thread.setDaemon(true);
         return thread;
     });
-    @Setter
-    private volatile ThemeMode mode;
-    private volatile boolean closed;
+    private final Consumer<ViewerTheme> changed;
+    private final SystemThemeDetector detector = new SystemThemeDetector();
+    private ScheduledFuture<?> polling;
+    private volatile long generation;
 
     public SystemThemeMonitor(ThemeMode initial, Consumer<ViewerTheme> changed) {
-        mode = initial;
-        worker.scheduleWithFixedDelay(() -> {
-            if (mode == ThemeMode.SYSTEM && !closed) {
-                new SystemThemeDetector().detect().ifPresent(theme -> SwingUtilities.invokeLater(() -> {
-                    if (mode == ThemeMode.SYSTEM && !closed) {
-                        changed.accept(theme);
-                    }
-                }));
+        this.changed = changed;
+        setMode(initial);
+    }
+
+    public void setMode(ThemeMode mode) {
+        if (mode == ThemeMode.SYSTEM && polling == null) {
+            long request = ++generation;
+            polling = worker.scheduleWithFixedDelay(() -> detect(request), 0, 5, TimeUnit.SECONDS);
+        } else if (mode != ThemeMode.SYSTEM && polling != null) {
+            generation++;
+            polling.cancel(true);
+            polling = null;
+        }
+    }
+
+    private void detect(long request) {
+        detector.detect().ifPresent(theme -> SwingUtilities.invokeLater(() -> {
+            if (request == generation) {
+                changed.accept(theme);
             }
-        }, 0, 5, TimeUnit.SECONDS);
+        }));
     }
 
     @Override
     public void close() {
-        closed = true;
+        generation++;
         worker.shutdownNow();
     }
 }

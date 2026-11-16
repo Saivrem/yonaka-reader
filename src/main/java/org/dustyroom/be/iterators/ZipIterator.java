@@ -8,6 +8,7 @@ import org.dustyroom.be.models.book.PageRef;
 import org.dustyroom.be.models.book.Picture;
 import org.dustyroom.be.models.book.PictureMetadata;
 
+import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -176,8 +177,9 @@ public class ZipIterator implements ImageIterator {
             throw new ImageIteratorException("ZIP entry no longer exists: " + page.getKey().pageId(), zipFilePath);
         }
         log.debug("File: {}", entry.getName());
-        try (InputStream input = zipFile.getInputStream(entry)) {
-            BufferedImage read = ImageDecoder.read(input);
+        try (InputStream input = zipFile.getInputStream(entry);
+             ImageInputStream imageInput = ImageDecoder.openStream(input, entry.getSize())) {
+            BufferedImage read = ImageDecoder.read(imageInput);
             if (read == null) {
                 throw new ImageIteratorException(
                         "Unsupported or corrupt image in ZIP: " + entry.getName(),

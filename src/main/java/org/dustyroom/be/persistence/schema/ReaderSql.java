@@ -29,7 +29,8 @@ public class ReaderSql {
             two_page=excluded.two_page,reading_mode=excluded.reading_mode,updated_at=excluded.updated_at
             """;
     public static final String SELECT_RECENTS = "SELECT * FROM books WHERE recent_hidden=0 ORDER BY updated_at DESC, source_id LIMIT ?";
-    public static final String SET_RECENT_HIDDEN = "UPDATE books SET recent_hidden=? WHERE source_id=?";
+    public static final String SHOW_RECENT = "UPDATE books SET recent_hidden=0 WHERE source_id=? AND recent_hidden=1";
+    public static final String DELETE_BOOK = "DELETE FROM books WHERE source_id=?";
     public static final String CLEAR_CHAPTERS = "DELETE FROM library_chapters";
     public static final String CLEAR_WORKS = "DELETE FROM library_works";
     public static final String CLEAR_SETTINGS = "DELETE FROM settings";

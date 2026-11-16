@@ -5,14 +5,11 @@ import lombok.experimental.Accessors;
 
 import org.dustyroom.be.library.LibraryInspector;
 import org.dustyroom.be.library.LibraryScanner;
-import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.library.*;
-import org.dustyroom.be.models.state.BookState;
-import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.persistence.ReaderStore;
 import org.dustyroom.ui.loading.AsyncViewerSession;
 import org.dustyroom.ui.loading.BackgroundTask;
-import org.dustyroom.ui.loading.RecentBookLoader;
+import org.dustyroom.ui.loading.BookCoverLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -101,9 +98,7 @@ public final class LibraryController {
             if (next.generation() != coverGeneration.get()) {
                 return null;
             }
-            BookState state = new BookState(next.chapter().getSource().getPath(), "", 1, 1, false, ReadingMode.MANGA);
-            RecentBook preview = RecentBookLoader.cover(RecentBookLoader.inspect(state));
-            return preview.getCover();
+            return BookCoverLoader.load(next.chapter().getSource().getPath());
         }, image -> {
             coverPending = false;
             if (next.generation() == coverGeneration.get()) {

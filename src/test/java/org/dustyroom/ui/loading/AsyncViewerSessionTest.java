@@ -1,6 +1,9 @@
 package org.dustyroom.ui.loading;
 
 import org.dustyroom.be.iterators.ImageIterator;
+import org.dustyroom.be.iterators.ImageIteratorFactory;
+import org.dustyroom.be.iterators.ImageTestFixtures;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.iterators.ImageIteratorException;
 import org.dustyroom.be.models.animation.AnimatedPage;
 import org.dustyroom.be.models.animation.AnimationClip;
@@ -81,6 +84,52 @@ class AsyncViewerSessionTest {
 
     private static BufferedImage image(int width, int height) {
         return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    @Test
+    void adjacentVolumeNavigationStopsAtBothEndsAndRespectsStopSetting(@TempDir Path directory) throws Exception {
+        Path first = ImageTestFixtures.writeZip(directory.resolve("1.zip"), "1.png", "2.png");
+        Path second = ImageTestFixtures.writeZip(directory.resolve("2.zip"), "1.png", "2.png");
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        AsyncViewerSession session = session(ImageIteratorFactory::create, tasks, Runnable::run, view, cache(12));
+        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.STOP));
+        session.open(first.toFile());
+        session.previous();
+        tasks.runAll();
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.last();
+        tasks.runAll();
+        int framesAtEdge = view.frames.size();
+        session.next();
+        tasks.runAll();
+        assertEquals(framesAtEdge, view.frames.size());
+        assertEquals(2, lastFrame(view).getFirstPage());
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+
+        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.NEXT_VOLUME));
+        session.next();
+        tasks.runAll();
+        assertEquals(second.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.last();
+        session.next();
+        tasks.runAll();
+        assertEquals(second.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(2, lastFrame(view).getFirstPage());
+
+        session.first();
+        session.previous();
+        tasks.runAll();
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(2, lastFrame(view).getFirstPage());
+        session.first();
+        session.previous();
+        tasks.runAll();
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.close();
+        tasks.runAll();
     }
 
     @Test
@@ -355,15 +404,15 @@ class AsyncViewerSessionTest {
                 tasks, ui, cache(12), new SpreadPlanner(), new SpreadRenderer(), store);
         session.refreshRecentBooks();
         tasks.runAll(); // Old result is queued for UI delivery.
-        session.hideRecentBook("missing.zip");
+        session.removeRecentBooks(List.of("missing.zip"));
         tasks.runAll();
         ui.runAll();
         assertFalse(published.isEmpty());
         assertTrue(published
                 .stream()
                 .allMatch(List::isEmpty));
-        assertTrue(store.book("missing.zip").isPresent());
-        store.showRecent("missing.zip");
+        assertTrue(store.book("missing.zip").isEmpty());
+        store.saveBook(new BookState("missing.zip", "p", 1, 5, false, ReadingMode.MANGA));
         session.refreshRecentBooks();
         tasks.runAll();
         int beforeReset = published.size();
@@ -624,6 +673,22 @@ class AsyncViewerSessionTest {
     }
 
     @Test
+    void openingPageLargerThanCacheDecodesItOnce() {
+        FakeImageIterator source = FakeImageIterator.portraits("source", "one");
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        AsyncViewerSession session = session(source, tasks, Runnable::run, view, new BoundedImageCache(1, 1));
+
+        session.open(new File("source"));
+        tasks.runNext();
+
+        assertEquals(1, source.loads("one"));
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.close();
+        tasks.runAll();
+    }
+
+    @Test
     void landscapePageRemainsSingleInTwoPageMode() {
         FakeImageIterator source = new FakeImageIterator(
                 "source",
@@ -641,6 +706,7 @@ class AsyncViewerSessionTest {
         tasks.runNext();
         session.toggleTwoPageMode();
         tasks.runNext();
+        assertEquals(0, source.loads("portrait"));
         assertFalse(lastFrame(view).getTitle().contains("+"));
 
         session.next();
@@ -811,24 +877,18 @@ class AsyncViewerSessionTest {
 
     private static class MemoryStore implements ReaderStore {
         final Map<String, BookState> books = new HashMap<>();
-        final Set<String> hidden = new HashSet<>();
         boolean closed;
 
         public List<BookState> recentBooks(int limit) {
             assertFalse(closed);
             return books.values()
                     .stream()
-                    .filter(book -> !hidden.contains(book.getSourceId()))
                     .limit(limit)
                     .toList();
         }
 
-        public void hideRecent(String id) {
-            hidden.add(id);
-        }
-
-        public void showRecent(String id) {
-            hidden.remove(id);
+        public void removeRecent(List<String> ids) {
+            ids.forEach(books::remove);
         }
 
         public ReaderSettings settings() {

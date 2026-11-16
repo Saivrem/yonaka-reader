@@ -3,6 +3,7 @@ package org.dustyroom.ui;
 import org.dustyroom.be.models.animation.AnimatedPage;
 import org.dustyroom.be.models.book.PageKey;
 import org.dustyroom.be.models.book.PageRef;
+import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ThemeMode;
@@ -26,6 +27,7 @@ import org.dustyroom.ui.settings.SettingsHost;
 import org.dustyroom.ui.settings.SystemThemeMonitor;
 import org.dustyroom.ui.utils.DialogUtils;
 import org.dustyroom.ui.utils.UiUtils;
+import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -98,12 +100,12 @@ public class ViewerController implements SettingsHost, ViewerView {
         this.actions = actions;
         libraryController = new LibraryController(session, this::openFile);
         readerSurface.setLibrary(libraryController.panel(), libraryController::refresh);
-        ReaderGestures.install(imageComponent, scrollPane, () -> {
+        ReaderGestures.install(imageComponent, scrollPane, this::swipePage, () -> {
             saveSettings();
             refreshControls();
         });
         Consumer<String> openRecent = id -> openFile(new File(id));
-        readerSurface.setRecentHandlers(openRecent, session::hideRecentBook);
+        readerSurface.setRecentHandlers(openRecent, session::removeRecentBooks);
         if (menuBar instanceof MenuBar menu) {
             menu.setRecentHandlers(openRecent, session::refreshRecentBooks);
         }
@@ -262,6 +264,18 @@ public class ViewerController implements SettingsHost, ViewerView {
         }
     }
 
+    private void swipePage(boolean left) {
+        if (displayedFrame == null) {
+            return;
+        }
+        boolean comics = displayedFrame.getReadingMode() == ReadingMode.COMICS;
+        if (left == comics) {
+            showNextImage();
+        } else {
+            showPreviousImage();
+        }
+    }
+
     public void showNextImage() {
         session.next();
     }
@@ -328,32 +342,44 @@ public class ViewerController implements SettingsHost, ViewerView {
         session.setMangaReadingMode();
     }
 
-    public boolean setTheme(ViewerTheme theme) {
-        if (!applyTheme(theme)) {
+    public boolean setTheme(ThemeMode mode) {
+        if (!applyTheme(mode.resolve(UiUtils.currentTheme()))) {
             return false;
         }
-        preferences.setThemeMode(theme == ViewerTheme.LIGHT ? ThemeMode.LIGHT : ThemeMode.DARK);
-        themeMonitor.setMode(preferences.getThemeMode());
+        preferences.setThemeMode(mode);
+        themeMonitor.setMode(mode);
         saveSettings();
         return true;
     }
 
     private boolean applyTheme(ViewerTheme theme) {
+        if (theme == UiUtils.currentTheme()) {
+            return true;
+        }
+        MenuSelectionManager.defaultManager().clearSelectedPath();
         if (!UiUtils.installTheme(theme)) {
             DialogUtils.showError(frame, "Unable to apply the selected theme.");
             return false;
         }
-        SwingUtilities.updateComponentTreeUI(frame);
-        for (Window window : frame.getOwnedWindows()) {
-            SwingUtilities.updateComponentTreeUI(window);
+        JMenuBar nativeMenu = PlatformUi.usesScreenMenuBar() ? frame.getJMenuBar() : null;
+        if (nativeMenu != null) {
+            frame.setJMenuBar(null);
+        }
+        try {
+            SwingUtilities.updateComponentTreeUI(frame);
+            for (Window window : frame.getOwnedWindows()) {
+                if (window.isDisplayable()) {
+                    SwingUtilities.updateComponentTreeUI(window);
+                }
+            }
+        } finally {
+            if (nativeMenu != null) {
+                SwingUtilities.updateComponentTreeUI(nativeMenu);
+                frame.setJMenuBar(nativeMenu);
+            }
         }
         configureViewerSurfaces();
-        frame.revalidate();
-        frame.repaint();
         preferences.setTheme(theme);
-        if (menuBar instanceof MenuBar menu) {
-            menu.showTheme(theme);
-        }
         return true;
     }
 
@@ -361,20 +387,21 @@ public class ViewerController implements SettingsHost, ViewerView {
         showAbout(frame);
     }
 
-    public void resetApplication() {
+    public void resetComicDatabase() {
         if (resetting || profileSwitchPending) {
             return;
         }
         Object[] options = {"Reset and quit", "Cancel"};
         int choice = JOptionPane.showOptionDialog(frame,
                 """
-                        Reset all settings, library and reading history?
+                        Clear all data in the current comic database?
 
-                        Saved page positions and reading modes will be removed.
+                        This removes settings, library entries, completion marks, reading history,
+                        saved page positions and reading modes.
                         Your image files, folders and ZIP archives will not be deleted.
 
                         Yonaka Reader will close. The next launch will start with default settings.""",
-                "Reset Yonaka Reader", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                "Reset comic database", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
                 null, options, options[1]);
         if (choice != 0) {
             return;
@@ -498,11 +525,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             failure.accept("Persistent storage is unavailable. Settings have not been saved.");
             return;
         }
-        ViewerTheme theme = switch (selected.getThemeMode()) {
-            case DARK -> ViewerTheme.DARK;
-            case LIGHT -> ViewerTheme.LIGHT;
-            case SYSTEM -> UiUtils.currentTheme();
-        };
+        ViewerTheme theme = selected.getThemeMode().resolve(UiUtils.currentTheme());
         ReaderSettings saved = selected.toBuilder().theme(theme).build();
         applyingSettings = true;
         session.saveSettings(saved, () -> {
@@ -514,6 +537,9 @@ public class ViewerController implements SettingsHost, ViewerView {
             session.configureDefaults(saved);
             themeMonitor.setMode(saved.getThemeMode());
             applyTheme(theme);
+            if (menuBar instanceof MenuBar menu) {
+                menu.showTheme(saved.getThemeMode());
+            }
             success.run();
         }, message -> {
             applyingSettings = false;
@@ -576,11 +602,14 @@ public class ViewerController implements SettingsHost, ViewerView {
         }
         ViewerActionState.apply(actions, displayedFrame, imageComponent.getFitMode(), fullscreen);
         actions.openPageGrid().setEnabled(displayedFrame != null && thumbnailPanel != null && thumbnailPanel.isVisible());
-        navigationPanel.updateState(displayedFrame, imageComponent.getFitMode());
+        navigationPanel.updateState(displayedFrame);
     }
 
     private void applyFrame(ViewerFrame viewerFrame) {
         frame.setCursor(Cursor.getDefaultCursor());
+        if (displayedFrame != null && !displayedFrame.getPageKey().equals(viewerFrame.getPageKey())) {
+            imageComponent.restorePageFit();
+        }
         displayedFrame = viewerFrame;
         thumbnailPanel.setExpanded(thumbnailsVisible);
         thumbnailPanel.setVisible(true);

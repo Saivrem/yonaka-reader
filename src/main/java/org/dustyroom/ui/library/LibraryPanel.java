@@ -1,11 +1,10 @@
 package org.dustyroom.ui.library;
 
-import org.dustyroom.be.models.library.LibraryChapter;
 import org.dustyroom.be.models.library.LibrarySnapshot;
 import org.dustyroom.be.models.library.LibraryWork;
-import org.dustyroom.ui.components.ReaderIcon;
-import org.dustyroom.ui.components.ReaderIconKind;
-import org.dustyroom.ui.components.ThumbnailIcon;
+import org.dustyroom.ui.components.BookCard;
+import org.dustyroom.ui.components.BookCardGrid;
+import org.dustyroom.ui.listeners.ComponentResizeListener;
 import org.dustyroom.ui.listeners.DocumentChangeListener;
 import org.dustyroom.ui.listeners.MouseClickListener;
 
@@ -24,6 +23,7 @@ public final class LibraryPanel extends JPanel {
     private final JComboBox<String> filter = new JComboBox<>(new String[]{"All", "Unread", "Reading", "Finished", "Unavailable"});
     private final JComboBox<String> sort = new JComboBox<>(new String[]{"Title", "Last read", "Date added"});
     private final JLabel status = new JLabel("Add a folder to start your library. Your files stay where they are.");
+    private final JLabel workCount = new JLabel();
     private LibrarySnapshot snapshot = new LibrarySnapshot(List.of(), Set.of());
     private String selectedWork;
     private String selectedChapter;
@@ -43,7 +43,10 @@ public final class LibraryPanel extends JPanel {
         controls.add(filter);
         controls.add(sort);
         top.add(controls, BorderLayout.NORTH);
-        top.add(status, BorderLayout.SOUTH);
+        JPanel summary = new JPanel(new BorderLayout(12, 0));
+        summary.add(status, BorderLayout.CENTER);
+        summary.add(workCount, BorderLayout.LINE_END);
+        top.add(summary, BorderLayout.SOUTH);
         add(top, BorderLayout.NORTH);
         add(body, BorderLayout.CENTER);
         search.getDocument().addDocumentListener(new DocumentChangeListener(this::changed));
@@ -70,7 +73,9 @@ public final class LibraryPanel extends JPanel {
 
     void showSnapshot(LibrarySnapshot snapshot) {
         this.snapshot = snapshot;
-        status(snapshot.getWorks().size() + " works · Files and reading history are kept separately.");
+        int count = snapshot.getWorks().size();
+        workCount.setText(count + (count == 1 ? " work" : " works"));
+        status("");
         render();
     }
 
@@ -88,15 +93,9 @@ public final class LibraryPanel extends JPanel {
                 yield started && completed < work.getChapters().size();
             }
             case 3 -> !work.getChapters().isEmpty() && work.getCompleted() == work.getChapters().size();
-            case 4 -> hasMissingChapters(work);
+            case 4 -> snapshot.hasMissingChapters(work);
             default -> true;
         };
-    }
-
-    private boolean hasMissingChapters(LibraryWork work) {
-        return work.getChapters()
-                .stream()
-                .anyMatch(chapter -> !snapshot.getAvailable().contains(chapter.getId()));
     }
 
     private void render() {
@@ -130,11 +129,11 @@ public final class LibraryPanel extends JPanel {
                 .sorted(order)
                 .toList();
         page = Math.clamp((works.size() - 1) / PAGE_SIZE, 0, page);
-        JPanel grid = new JPanel(new GridLayout(0, 3, 16, 16));
+        BookCardGrid grid = new BookCardGrid();
         int start = page * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, works.size());
         for (LibraryWork work : works.subList(start, end)) {
-            grid.add(card(work));
+            grid.addCard(card(work));
         }
 
         if (works.isEmpty()) {
@@ -143,6 +142,9 @@ public final class LibraryPanel extends JPanel {
             JPanel aligned = new JPanel(new BorderLayout());
             aligned.add(grid, BorderLayout.NORTH);
             JScrollPane scroll = new JScrollPane(aligned);
+            JViewport viewport = scroll.getViewport();
+            viewport.addComponentListener(new ComponentResizeListener(() ->
+                    grid.fit(viewport.getWidth(), viewport.getHeight(), 6)));
             scroll.getVerticalScrollBar().setUnitIncrement(24);
             body.add(scroll, BorderLayout.CENTER);
         }
@@ -163,39 +165,12 @@ public final class LibraryPanel extends JPanel {
         body.add(paging, BorderLayout.SOUTH);
     }
 
-    private JPanel card(LibraryWork work) {
-        JPanel card = new JPanel(new BorderLayout(8, 8));
-        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground")),
-                BorderFactory.createEmptyBorder(12, 12, 12, 12)));
-
-        JButton cover = button(work.getTitle(), () -> {
+    private BookCard card(LibraryWork work) {
+        LibraryBookCard card = new LibraryBookCard(work, snapshot, () -> {
             selectedWork = work.getId();
             render();
-        });
-        cover.setIcon(new ReaderIcon(ReaderIconKind.BOOK, 64));
-        cover.setIconTextGap(16);
-        cover.setPreferredSize(new Dimension(180, 230));
-        cover.setVerticalTextPosition(SwingConstants.BOTTOM);
-        cover.setHorizontalTextPosition(SwingConstants.CENTER);
-        cover.setToolTipText(work.getRoot());
-        card.add(cover, BorderLayout.CENTER);
-
-        JPanel caption = new JPanel(new GridLayout(0, 1, 0, 4));
-        caption.add(new JLabel(work.getChapters().size() + " chapters · " + work.getCompleted() + " finished"));
-        LibraryChapter resume = work.getResumeChapter();
-        JButton continueReading = button(resume.getLastRead() > 0 ? "Continue reading" : "Start reading", () -> controller.open(resume));
-        continueReading.setEnabled(snapshot.getAvailable().contains(resume.getId()));
-        caption.add(new JLabel(resume.getProgress()));
-        caption.add(continueReading);
-        boolean unavailable = hasMissingChapters(work);
-        caption.add(new JLabel(unavailable ? "Some sources are unavailable" : " "));
-        card.add(caption, BorderLayout.SOUTH);
-
-        controller.cover(work.getChapters().getFirst(), image -> {
-            if (image != null) {
-                cover.setIcon(new ThumbnailIcon(image));
-            }
-        });
+        }, controller::open);
+        controller.cover(work.getChapters().getFirst(), card::setCover);
         return card;
     }
 

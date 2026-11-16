@@ -17,6 +17,7 @@ public final class ReaderSettings {
     private boolean thumbnailsVisible;
     private boolean groupRecentByFolder;
 
+    private VolumeBoundary volumeBoundary;
     private ThemeMode themeMode;
     private ReadingMode defaultReadingMode;
     private boolean defaultTwoPageMode;
@@ -27,7 +28,8 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder, ThemeMode themeMode,
                           ReadingMode defaultReadingMode, boolean defaultTwoPageMode, FitMode defaultFitMode,
-                          String libraryDirectory) {
+                          String libraryDirectory, VolumeBoundary volumeBoundary) {
+        this.volumeBoundary = volumeBoundary == null ? VolumeBoundary.WRAP : volumeBoundary;
         setTheme(theme);
         setFitMode(fitMode);
         setZoom(zoom);
@@ -49,7 +51,7 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder) {
         this(theme, fitMode, zoom, lastDirectory, thumbnailsVisible, groupRecentByFolder,
-                null, ReadingMode.MANGA, false, fitMode, "");
+                null, ReadingMode.MANGA, false, fitMode, "", VolumeBoundary.WRAP);
     }
 
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory, boolean thumbnailsVisible) {

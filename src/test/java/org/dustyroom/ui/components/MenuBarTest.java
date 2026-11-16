@@ -1,8 +1,7 @@
 package org.dustyroom.ui.components;
 
-import org.dustyroom.be.models.state.ViewerTheme;
+import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.ui.actions.ViewerActions;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
@@ -31,9 +30,9 @@ class MenuBarTest {
     }
 
     @Test
-    void offersExactlyTwoApplicationThemes() {
+    void offersSystemAndBothApplicationThemes() {
         NoOpViewerActions actions = new NoOpViewerActions();
-        MenuBar menuBar = new MenuBar(actions, _ -> true);
+        MenuBar menuBar = new MenuBar(actions, ThemeMode.SYSTEM, _ -> true);
 
         assertEquals(5, menuBar.getMenuCount());
         assertFalse(allMenuLabels(menuBar).anyMatch("Color scheme"::equals));
@@ -41,9 +40,12 @@ class MenuBarTest {
 
         JMenu themeMenu = (JMenu) menuBar.getMenu(3).getItem(4);
         assertEquals("Theme", themeMenu.getText());
-        assertEquals(2, themeMenu.getItemCount());
-        assertEquals("Ayu Dark", themeMenu.getItem(0).getText());
+        assertEquals(3, themeMenu.getItemCount());
+        assertTrue(themeMenu.getItem(0).isSelected());
+        assertEquals("System", themeMenu.getItem(0).getText());
         assertEquals("Ayu Light", themeMenu.getItem(1).getText());
+
+        assertEquals("Ayu Dark", themeMenu.getItem(2).getText());
 
         JMenuItem openItem = menuBar.getMenu(0).getItem(0);
         assertSame(actions.openFile(), openItem.getAction());
@@ -53,28 +55,31 @@ class MenuBarTest {
 
     @Test
     void themeSelectionIsExclusiveAndRestoredAfterFailure() throws Exception {
+        AtomicBoolean accept = new AtomicBoolean(true);
+        AtomicReference<ThemeMode> requested = new AtomicReference<>();
+        MenuBar menuBar = new MenuBar(new NoOpViewerActions(), ThemeMode.SYSTEM, theme -> {
+            requested.set(theme);
+            return accept.get();
+        });
+        JMenu themes = (JMenu) menuBar.getMenu(3).getItem(4);
+        JMenuItem light = themes.getItem(1);
+        JMenuItem dark = themes.getItem(2);
+
+        SwingUtilities.invokeAndWait(() -> light.doClick(0));
         SwingUtilities.invokeAndWait(() -> {
-            AtomicBoolean accept = new AtomicBoolean(true);
-            AtomicReference<ViewerTheme> requested =
-                    new AtomicReference<>();
-            MenuBar menuBar = new MenuBar(new NoOpViewerActions(), theme -> {
-                requested.set(theme);
-                return accept.get();
-            });
-            JMenu themes = (JMenu) menuBar.getMenu(3).getItem(4);
-            JMenuItem dark = themes.getItem(0);
-            JMenuItem light = themes.getItem(1);
-            light.doClick(0);
-            assertEquals(ViewerTheme.LIGHT, requested.get());
-            Assertions.assertTrue(light.isSelected());
-            assertFalse(dark.isSelected());
+            assertEquals(ThemeMode.LIGHT, requested.get());
+            assertTrue(light.isSelected());
             accept.set(false);
             dark.doClick(0);
-            Assertions.assertTrue(light.isSelected());
+        });
+        SwingUtilities.invokeAndWait(() -> {
+            assertTrue(light.isSelected());
             assertFalse(dark.isSelected());
             accept.set(true);
             dark.doClick(0);
-            Assertions.assertTrue(dark.isSelected());
+        });
+        SwingUtilities.invokeAndWait(() -> {
+            assertTrue(dark.isSelected());
             assertFalse(light.isSelected());
         });
     }
@@ -205,7 +210,7 @@ class MenuBarTest {
             return action;
         }
 
-        public Action resetApplication() {
+        public Action resetComicDatabase() {
             return action;
         }
 

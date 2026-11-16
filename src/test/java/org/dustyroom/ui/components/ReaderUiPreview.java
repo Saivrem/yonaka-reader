@@ -7,6 +7,7 @@ import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ViewerTheme;
+import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.be.utils.Constants;
@@ -24,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,10 @@ public final class ReaderUiPreview {
                     throw new IllegalStateException("Cannot install " + theme);
                 }
                 renderAbout(output, theme);
+                render(output, theme, false, 1920, 1080, 1, false);
+                render(output, theme, false, 3840, 2160, 1, false);
+                render(output, theme, false, 2560, 1440, 1.5, false);
+                render(output, theme, false, 1920, 1080, 2, false);
                 for (boolean loaded : new boolean[]{false, true}) {
                     render(output, theme, loaded, 1100, false);
                     render(output, theme, loaded, 940, false);
@@ -57,7 +63,7 @@ public final class ReaderUiPreview {
     }
 
     private static void renderAbout(File output, ViewerTheme theme) {
-        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.10.0"),
+        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.11.0"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 BrandAssets.aboutIcon());
         pane.setSize(520, 240);
@@ -78,6 +84,11 @@ public final class ReaderUiPreview {
     }
 
     private static void render(File output, ViewerTheme theme, boolean loaded, int width, boolean grid) {
+        render(output, theme, loaded, width, 720, 2, grid);
+    }
+
+    private static void render(File output, ViewerTheme theme, boolean loaded, int width, int height,
+                               double density, boolean grid) {
         ViewerActions actions = actions();
         ViewerFrame frame = loaded ? new ViewerFrame(samplePage(), "Sample book", null,
                 24, 25, 180, true, ReadingMode.MANGA, null) : null;
@@ -98,7 +109,7 @@ public final class ReaderUiPreview {
         }
 
         NavigationPanel navigation = new NavigationPanel(actions);
-        navigation.updateState(frame, FitMode.FIT_SCREEN);
+        navigation.updateState(frame);
         ThumbnailPanel thumbnails = new ThumbnailPanel((_, _, result) ->
                 result.accept(ThumbnailRenderer.render(samplePage())), _ -> {
         }, () -> {
@@ -107,12 +118,12 @@ public final class ReaderUiPreview {
         });
         thumbnails.setVisible(loaded);
         JRootPane root = new JRootPane();
-        root.setJMenuBar(new MenuBar(actions, UiUtils::installTheme));
+        root.setJMenuBar(new MenuBar(actions, theme == ViewerTheme.LIGHT ? ThemeMode.LIGHT : ThemeMode.DARK, _ -> true));
         root.setContentPane(content);
         JPanel host = new JPanel(new BorderLayout());
         host.add(root);
-        host.setSize(width, 720);
-        root.setSize(width, 720);
+        host.setSize(width, height);
+        root.setSize(width, height);
         if (loaded) {
             surface.showReading();
             host.addNotify();
@@ -138,22 +149,52 @@ public final class ReaderUiPreview {
             pageList.ensureIndexIsVisible(23);
             layout(root);
         }
-        BufferedImage screenshot = new BufferedImage(width * 2, 1440, BufferedImage.TYPE_INT_RGB);
+        if (!loaded && width >= 1920) {
+            verifyShelf(root);
+        }
+        BufferedImage screenshot = new BufferedImage((int) (width * density), (int) (height * density), BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = screenshot.createGraphics();
         try {
-            graphics.scale(2, 2);
+            graphics.scale(density, density);
             root.printAll(graphics);
         } finally {
             graphics.dispose();
         }
         try {
             ImageIO.write(screenshot, "png", new File(output,
-                    theme.name().toLowerCase() + (grid ? "-grid-" : loaded ? "-reading-" : "-welcome-") + width + ".png"));
+                    theme.name().toLowerCase() + (grid ? "-grid-" : loaded ? "-reading-" : "-welcome-") + width + (height == 720 ? "" : "-" + density + "x") + ".png"));
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
         if (loaded) {
             host.removeNotify();
+        }
+    }
+
+    private static void verifyShelf(Container root) {
+        List<RecentBookCard> cards = new ArrayList<>();
+        collectCards(root, cards);
+        if (cards.size() != 6) {
+            throw new AssertionError("Expected six recent cards");
+        }
+        for (RecentBookCard card : cards) {
+            JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, card);
+            JScrollPane scroll = (JScrollPane) viewport.getParent();
+            Rectangle bounds = SwingUtilities.convertRectangle(card.getParent(), card.getBounds(), viewport);
+            if (scroll.getVerticalScrollBar().isVisible() || scroll.getHorizontalScrollBar().isVisible()
+                    || !new Rectangle(viewport.getExtentSize()).contains(bounds)) {
+                throw new AssertionError("Recent shelf overflows at " + root.getSize());
+            }
+        }
+    }
+
+    private static void collectCards(Container container, List<RecentBookCard> cards) {
+        for (Component child : container.getComponents()) {
+            if (child instanceof RecentBookCard card) {
+                cards.add(card);
+            } else if (child instanceof Container nested) {
+                collectCards(nested, cards);
+            }
         }
     }
 
@@ -172,7 +213,14 @@ public final class ReaderUiPreview {
         }
 
         boolean available = index != 2;
-        BufferedImage cover = available ? ThumbnailRenderer.render(samplePage()) : null;
+        BufferedImage cover = null;
+        if (available) {
+            BufferedImage page = samplePage();
+            if (index % 2 == 0) {
+                page = page.getSubimage(0, 0, page.getWidth() / 2, page.getHeight());
+            }
+            cover = ThumbnailRenderer.renderCover(page);
+        }
         return new RecentBook(state, available, cover, chapters);
     }
 
