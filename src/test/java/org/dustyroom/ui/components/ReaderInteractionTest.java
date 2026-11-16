@@ -10,9 +10,32 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ReaderInteractionTest {
+    @Test
+    void horizontalWheelGestureTurnsOncePerBurstOnFittedPages() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ImageComponent image = new ImageComponent();
+            JScrollPane scroll = new JScrollPane(image);
+            scroll.setSize(600, 400);
+            image.setImageAndCenter(new BufferedImage(100, 200, BufferedImage.TYPE_INT_RGB), scroll);
+            List<Boolean> swipes = new ArrayList<>();
+            ReaderGestures.install(image, scroll, swipes::add, () -> {});
+            for (int time : List.of(1000, 1010, 1020, 2000)) {
+                double rotation = time == 2000 ? -1 : 1;
+                scroll.dispatchEvent(new MouseWheelEvent(scroll, MouseEvent.MOUSE_WHEEL, time,
+                        InputEvent.SHIFT_DOWN_MASK, 100, 100, 100, 100, 0, false,
+                        MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, (int) rotation, rotation));
+            }
+            assertEquals(List.of(true, false), swipes);
+        });
+    }
+
     @Test
     void pageIsCenteredSynchronouslyAndDoesNotJumpOnTheNextEdtTurn() throws Exception {
         Point[] expected = new Point[1];
@@ -60,7 +83,7 @@ class ReaderInteractionTest {
             scroll.setSize(600, 400);
             image.restoreView(FitMode.ORIGINAL, 1);
             image.setImageAndCenter(new BufferedImage(1200, 1000, BufferedImage.TYPE_INT_RGB), scroll);
-            ReaderGestures.install(image, scroll, () -> {
+            ReaderGestures.install(image, scroll, _ -> fail("Panning a wide page must not turn it"), () -> {
             });
             MouseWheelEvent wheel = new MouseWheelEvent(scroll, MouseEvent.MOUSE_WHEEL, 0, 0, 100, 100,
                     100, 100, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, 1, 0.25);

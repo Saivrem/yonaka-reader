@@ -3,6 +3,7 @@ package org.dustyroom.ui.settings;
 import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.settings.ProfileManager;
 import org.dustyroom.be.utils.StorageUtils;
@@ -19,6 +20,8 @@ public final class SettingsDialog extends JDialog {
     private final JComboBox<String> direction = new JComboBox<>(new String[]{"Manga · right to left", "Comics · left to right"});
     private final JCheckBox spread = new JCheckBox("Two-page spreads");
     private final JComboBox<String> scale = new JComboBox<>(new String[]{"Fit to window", "Fit width", "Fit height", "Original size · 100%"});
+    private final JCheckBox wrap = new JCheckBox("Wrap pages within the volume");
+    private final JCheckBox adjacent = new JCheckBox("Continue into the adjacent volume");
     private final JCheckBox thumbnails = new JCheckBox("Show thumbnails");
     private final JTextField library = new JTextField();
     private final JButton apply = new JButton("Apply");
@@ -99,6 +102,18 @@ public final class SettingsDialog extends JDialog {
         panel.row(spread);
         panel.row(scale);
         panel.row(thumbnails);
+        wrap.addActionListener(_ -> {
+            if (wrap.isSelected()) {
+                adjacent.setSelected(false);
+            }
+        });
+        adjacent.addActionListener(_ -> {
+            if (adjacent.isSelected()) {
+                wrap.setSelected(false);
+            }
+        });
+        panel.row(wrap);
+        panel.row(adjacent);
         return top(panel);
     }
 
@@ -199,6 +214,8 @@ public final class SettingsDialog extends JDialog {
             case FIT_HEIGHT -> 2;
             case ORIGINAL -> 3;
         });
+        wrap.setSelected(settings.getVolumeBoundary() == VolumeBoundary.WRAP);
+        adjacent.setSelected(settings.getVolumeBoundary() == VolumeBoundary.NEXT_VOLUME);
         thumbnails.setSelected(settings.isThumbnailsVisible());
         library.setText(settings.getLibraryDirectory());
     }
@@ -207,7 +224,14 @@ public final class SettingsDialog extends JDialog {
         if (busy) {
             return;
         }
+        VolumeBoundary boundary = VolumeBoundary.STOP;
+        if (wrap.isSelected()) {
+            boundary = VolumeBoundary.WRAP;
+        } else if (adjacent.isSelected()) {
+            boundary = VolumeBoundary.NEXT_VOLUME;
+        }
         ReaderSettings selected = host.currentSettings().toBuilder()
+                .volumeBoundary(boundary)
                 .themeMode((ThemeMode) theme.getSelectedItem())
                 .defaultReadingMode(direction.getSelectedIndex() == 0 ? ReadingMode.MANGA : ReadingMode.COMICS)
                 .defaultTwoPageMode(spread.isSelected())

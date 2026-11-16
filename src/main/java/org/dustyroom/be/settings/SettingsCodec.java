@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.state.ViewerTheme;
 
@@ -32,11 +33,13 @@ public class SettingsCodec {
                 EnumUtils.getEnum(ReadingMode.class, values.get("default_reading_mode"), ReadingMode.MANGA),
                 "true".equals(values.get("default_two_page")),
                 EnumUtils.getEnum(FitMode.class, values.get("default_fit_mode"), fit),
-                values.getOrDefault("library_directory", ""));
+                values.getOrDefault("library_directory", ""),
+                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()));
     }
 
     public static Map<String, String> encode(ReaderSettings settings) {
         return Map.ofEntries(
+                Map.entry("volume_boundary", settings.getVolumeBoundary().name()),
                 Map.entry("theme", settings.getTheme().name()),
                 Map.entry("fit_mode", settings.getFitMode().name()),
                 Map.entry("zoom", Double.toString(settings.getZoom())),

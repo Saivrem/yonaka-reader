@@ -1,6 +1,9 @@
 package org.dustyroom.ui.loading;
 
 import org.dustyroom.be.iterators.ImageIterator;
+import org.dustyroom.be.iterators.ImageIteratorFactory;
+import org.dustyroom.be.iterators.ImageTestFixtures;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.iterators.ImageIteratorException;
 import org.dustyroom.be.models.animation.AnimatedPage;
 import org.dustyroom.be.models.animation.AnimationClip;
@@ -81,6 +84,52 @@ class AsyncViewerSessionTest {
 
     private static BufferedImage image(int width, int height) {
         return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    @Test
+    void adjacentVolumeNavigationStopsAtBothEndsAndRespectsStopSetting(@TempDir Path directory) throws Exception {
+        Path first = ImageTestFixtures.writeZip(directory.resolve("1.zip"), "1.png", "2.png");
+        Path second = ImageTestFixtures.writeZip(directory.resolve("2.zip"), "1.png", "2.png");
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        AsyncViewerSession session = session(ImageIteratorFactory::create, tasks, Runnable::run, view, cache(12));
+        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.STOP));
+        session.open(first.toFile());
+        session.previous();
+        tasks.runAll();
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.last();
+        tasks.runAll();
+        int framesAtEdge = view.frames.size();
+        session.next();
+        tasks.runAll();
+        assertEquals(framesAtEdge, view.frames.size());
+        assertEquals(2, lastFrame(view).getFirstPage());
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+
+        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.NEXT_VOLUME));
+        session.next();
+        tasks.runAll();
+        assertEquals(second.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.last();
+        session.next();
+        tasks.runAll();
+        assertEquals(second.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(2, lastFrame(view).getFirstPage());
+
+        session.first();
+        session.previous();
+        tasks.runAll();
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(2, lastFrame(view).getFirstPage());
+        session.first();
+        session.previous();
+        tasks.runAll();
+        assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
+        assertEquals(1, lastFrame(view).getFirstPage());
+        session.close();
+        tasks.runAll();
     }
 
     @Test
@@ -363,7 +412,7 @@ class AsyncViewerSessionTest {
                 .stream()
                 .allMatch(List::isEmpty));
         assertTrue(store.book("missing.zip").isEmpty());
-        store.showRecent("missing.zip");
+        store.saveBook(new BookState("missing.zip", "p", 1, 5, false, ReadingMode.MANGA));
         session.refreshRecentBooks();
         tasks.runAll();
         int beforeReset = published.size();

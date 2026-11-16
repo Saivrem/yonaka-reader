@@ -41,7 +41,7 @@ public class DefaultViewerActions implements ViewerActions {
     private final Action exitFullscreen;
 
     public DefaultViewerActions(ViewerController controller) {
-        this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", null, controller::openPageGrid);
+        this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
         this.toggleThumbnails = action("toggleThumbnails", "Thumbnails", "Show or hide page thumbnails (T)",
                 key(KeyEvent.VK_T), controller::toggleThumbnails);
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);

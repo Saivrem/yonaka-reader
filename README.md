@@ -70,7 +70,8 @@ The explicit `yonaka.dataDir` launch option takes precedence and disables the fo
 ## Recently read
 
 The home screen shows up to 12 recently read books/series with a first-page cover and saved
-page progress. The same list is available under **File → Open Recent**. Use
+page progress. ZIP cards show the parent folder as the series title and the last opened
+filename below it, including when only one volume has been read. The same list is available under **File → Open Recent**. Use
 **File → Home** (Command+Shift+H on macOS, Ctrl+Shift+H elsewhere) to return to the shelf while a book is open.
 
 **Group ZIPs by folder** is enabled by default and can be disabled on the home screen.
@@ -151,10 +152,12 @@ and sidebar thumbnails intentionally stay static.
 ### Scrolling, zoom and panning
 
 The reader uses precise wheel/trackpad deltas, with a faster wheel step. Shift+wheel
-scrolls horizontally. Drag the image with the left or middle mouse button to pan.
+scrolls horizontally when the page is wider than the viewport. When the page fits
+horizontally, a horizontal swipe or left-button drag turns one page. Swipe right to
+advance in manga mode and left in comics mode. Drag wide images to pan.
 Ctrl+wheel (or Command+wheel on macOS) zooms around the pointer. Native macOS pinch
 zooms around the viewport center; Windows/Linux use Ctrl+wheel, including trackpads
-that emit that gesture. Zoom remains within 5%–2000% and is saved with the view settings.
+that emit that gesture. Manual zoom ranges from 5% to 2000%. Turning the page restores the last fit mode.
 
 The packaged macOS app and executable JAR enable Java's macOS magnification API.
 When running the main class directly from an IDE, add VM option
@@ -168,7 +171,7 @@ Ctrl/Command+wheel works without it.
 - Vector navigation icons replace font-dependent symbols and emoji.
 - The toolbar has dedicated buttons for fit, zoom and reading direction. Hover over a button for its action and shortcut.
 - Scale, two-page spread, reading direction and fullscreen states stay synchronized between toolbar, menus and shortcuts.
-- Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous retain wrap-around navigation.
+- Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous wrap within the volume by default. In Settings → Reading, turn wrapping off to stop at the ends, or select adjacent-volume navigation. At the ends of a series the reader stays on the page.
 - Escape leaves fullscreen without closing the application; Q and Cmd/Ctrl+Q still quit.
 
 ## Appearance and platform behavior
@@ -243,6 +246,7 @@ without preventing reading. No book images or archive contents are stored in the
 | `O`, `Cmd/Ctrl+O` | Open a file |
 | `Right`, `Page Down` | Next page |
 | `Left`, `Page Up` | Previous page |
+| `Shift+G` | Open the page grid |
 | `Home`, `End` | First or last page |
 | `Command+Shift+H` / `Ctrl+Shift+H` | Home / recently read |
 | `Up`, `Down` | Previous or next volume |

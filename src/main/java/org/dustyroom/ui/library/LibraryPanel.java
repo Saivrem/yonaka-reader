@@ -24,6 +24,7 @@ public final class LibraryPanel extends JPanel {
     private final JComboBox<String> filter = new JComboBox<>(new String[]{"All", "Unread", "Reading", "Finished", "Unavailable"});
     private final JComboBox<String> sort = new JComboBox<>(new String[]{"Title", "Last read", "Date added"});
     private final JLabel status = new JLabel("Add a folder to start your library. Your files stay where they are.");
+    private final JLabel workCount = new JLabel();
     private LibrarySnapshot snapshot = new LibrarySnapshot(List.of(), Set.of());
     private String selectedWork;
     private String selectedChapter;
@@ -43,7 +44,10 @@ public final class LibraryPanel extends JPanel {
         controls.add(filter);
         controls.add(sort);
         top.add(controls, BorderLayout.NORTH);
-        top.add(status, BorderLayout.SOUTH);
+        JPanel summary = new JPanel(new BorderLayout(12, 0));
+        summary.add(status, BorderLayout.CENTER);
+        summary.add(workCount, BorderLayout.LINE_END);
+        top.add(summary, BorderLayout.SOUTH);
         add(top, BorderLayout.NORTH);
         add(body, BorderLayout.CENTER);
         search.getDocument().addDocumentListener(new DocumentChangeListener(this::changed));
@@ -70,7 +74,9 @@ public final class LibraryPanel extends JPanel {
 
     void showSnapshot(LibrarySnapshot snapshot) {
         this.snapshot = snapshot;
-        status(snapshot.getWorks().size() + " works · Files and reading history are kept separately.");
+        int count = snapshot.getWorks().size();
+        workCount.setText(count + (count == 1 ? " work" : " works"));
+        status("");
         render();
     }
 

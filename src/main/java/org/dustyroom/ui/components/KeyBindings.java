@@ -30,6 +30,7 @@ public class KeyBindings {
         InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = rootPane.getActionMap();
 
+        bindPrimary(inputMap, actionMap, actions.openPageGrid());
         bindPrimary(inputMap, actionMap, actions.toggleThumbnails());
         bindPrimary(inputMap, actionMap, actions.openFile());
         bindPrimary(inputMap, actionMap, actions.settings());

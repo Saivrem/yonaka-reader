@@ -4,6 +4,7 @@ import org.dustyroom.be.models.animation.AnimationClip;
 import org.dustyroom.be.models.book.PageRef;
 import org.dustyroom.be.models.book.Picture;
 import org.dustyroom.be.models.direction.Direction;
+import org.dustyroom.be.utils.FileUtils;
 
 import java.io.File;
 import java.util.List;
@@ -49,6 +50,22 @@ public interface ImageIterator extends AutoCloseable {
     }
 
     default PageRef switchVolume(Predicate<File> fileType, Direction dir) {
+        File target = findVolume(fileType, dir, true);
+        if (target == null) {
+            return null;
+        }
+        setFile(target);
+        init();
+        List<PageRef> pages = pages();
+        return pages.isEmpty() ? null : pages.get(initialPageIndex());
+    }
+
+    default File adjacentVolume(Direction direction) {
+        Predicate<File> volumes = FileUtils.isZipFile.test(getVolumeRoot()) ? FileUtils.isZipFile : FileUtils.containsImages;
+        return findVolume(volumes, direction, false);
+    }
+
+    private File findVolume(Predicate<File> fileType, Direction dir, boolean wrap) {
         File filePath = getVolumeRoot();
         List<File> sortedFiles = getSortedFilesFromParent(filePath, fileType);
         if (sortedFiles.isEmpty()) {
@@ -62,10 +79,10 @@ public interface ImageIterator extends AutoCloseable {
         if (currentIndex < 0) {
             throw new ImageIteratorException("Current volume no longer exists", filePath);
         }
-        int targetIndex = Math.floorMod(currentIndex + dir.getShift(), sortedFiles.size());
-        setFile(sortedFiles.get(targetIndex));
-        init();
-        List<PageRef> pages = pages();
-        return pages.isEmpty() ? null : pages.get(initialPageIndex());
+        int target = currentIndex + dir.getShift();
+        if (!wrap && (target < 0 || target >= sortedFiles.size())) {
+            return null;
+        }
+        return sortedFiles.get(Math.floorMod(target, sortedFiles.size()));
     }
 }

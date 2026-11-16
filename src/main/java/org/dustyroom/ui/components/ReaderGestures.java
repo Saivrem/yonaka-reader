@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.function.DoubleConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -17,13 +18,13 @@ import java.util.logging.Logger;
 @UtilityClass
 public class ReaderGestures {
 
-    public static void install(ImageComponent image, JScrollPane scroll, Runnable changed) {
+    public static void install(ImageComponent image, JScrollPane scroll, Consumer<Boolean> swipe, Runnable changed) {
         scroll.setWheelScrollingEnabled(false);
         scroll.getVerticalScrollBar().setUnitIncrement(48);
         scroll.getHorizontalScrollBar().setUnitIncrement(48);
         Timer save = new Timer(200, _ -> changed.run());
         save.setRepeats(false);
-        MouseAdapter mouse = new ReaderMouseGestures(image, scroll, save);
+        MouseAdapter mouse = new ReaderMouseGestures(image, scroll, save, swipe);
         scroll.addMouseWheelListener(mouse);
         image.addMouseListener(mouse);
         image.addMouseMotionListener(mouse);

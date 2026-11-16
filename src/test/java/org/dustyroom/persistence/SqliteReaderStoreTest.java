@@ -4,6 +4,7 @@ import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.models.state.ViewerTheme;
 import org.dustyroom.be.persistence.ReaderStore;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,8 @@ class SqliteReaderStoreTest extends BasePersistenceTest {
     @Test
     void persistsSettingsAndIndependentBooksAcrossReopen() {
         database = directory.resolve("nested/reader.sqlite3");
-        ReaderSettings settings = new ReaderSettings(ViewerTheme.LIGHT, FitMode.ORIGINAL, 1.75, directory.resolve("日本語 books").toString(), false, false);
+        ReaderSettings settings = new ReaderSettings(ViewerTheme.LIGHT, FitMode.ORIGINAL, 1.75, directory.resolve("日本語 books").toString(), false, false)
+                .setVolumeBoundary(VolumeBoundary.NEXT_VOLUME);
         BookState a = new BookState("/books/日本語 'vol'.zip", "chapter/02.png", 2, 10, true, ReadingMode.MANGA);
         BookState b = new BookState("/books/other", "/books/other/3.png", 3, 8, false, ReadingMode.COMICS);
         try (ReaderStore store = openStore()) {

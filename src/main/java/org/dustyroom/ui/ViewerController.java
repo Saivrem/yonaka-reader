@@ -3,6 +3,7 @@ package org.dustyroom.ui;
 import org.dustyroom.be.models.animation.AnimatedPage;
 import org.dustyroom.be.models.book.PageKey;
 import org.dustyroom.be.models.book.PageRef;
+import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ThemeMode;
@@ -99,7 +100,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         this.actions = actions;
         libraryController = new LibraryController(session, this::openFile);
         readerSurface.setLibrary(libraryController.panel(), libraryController::refresh);
-        ReaderGestures.install(imageComponent, scrollPane, () -> {
+        ReaderGestures.install(imageComponent, scrollPane, this::swipePage, () -> {
             saveSettings();
             refreshControls();
         });
@@ -260,6 +261,18 @@ public class ViewerController implements SettingsHost, ViewerView {
             } catch (ParseException exception) {
                 DialogUtils.showError(frame, "Enter a page number between 1 and " + displayedFrame.getPageCount() + ".");
             }
+        }
+    }
+
+    private void swipePage(boolean left) {
+        if (displayedFrame == null) {
+            return;
+        }
+        boolean comics = displayedFrame.getReadingMode() == ReadingMode.COMICS;
+        if (left == comics) {
+            showNextImage();
+        } else {
+            showPreviousImage();
         }
     }
 
@@ -593,6 +606,9 @@ public class ViewerController implements SettingsHost, ViewerView {
 
     private void applyFrame(ViewerFrame viewerFrame) {
         frame.setCursor(Cursor.getDefaultCursor());
+        if (displayedFrame != null && !displayedFrame.getPageKey().equals(viewerFrame.getPageKey())) {
+            imageComponent.restorePageFit();
+        }
         displayedFrame = viewerFrame;
         thumbnailPanel.setExpanded(thumbnailsVisible);
         thumbnailPanel.setVisible(true);

@@ -104,16 +104,18 @@ class ReaderUiTest {
     }
 
     @Test
-    void preservesCustomZoomAcrossPagesAndKeepsItWithinTheStoredRange() throws Exception {
+    void restoresLastPageFitAfterManualZoom() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ImageComponent component = new ImageComponent();
             JScrollPane scroll = new JScrollPane(component);
             scroll.getViewport().setSize(800, 600);
-            component.restoreView(FitMode.ORIGINAL, 1.75);
+            component.setFitMode(FitMode.FIT_WIDTH);
             component.setImageAndCenter(new BufferedImage(4, 8, BufferedImage.TYPE_INT_RGB), scroll);
-            assertEquals(1.75, component.getScale());
+            component.zoomIn();
+            assertEquals(FitMode.ORIGINAL, component.getFitMode());
+            component.restorePageFit();
             component.setImageAndCenter(new BufferedImage(8, 16, BufferedImage.TYPE_INT_RGB), scroll);
-            assertEquals(1.75, component.getScale());
+            assertEquals(FitMode.FIT_WIDTH, component.getFitMode());
             component.setFitMode(FitMode.FIT_SCREEN);
             component.zoomOut();
             assertTrue(component.getScale() <= 20);

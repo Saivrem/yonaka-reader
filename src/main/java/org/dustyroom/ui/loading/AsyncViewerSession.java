@@ -9,9 +9,11 @@ import org.dustyroom.be.models.book.PageRef;
 import org.dustyroom.be.models.book.PageShape;
 import org.dustyroom.be.models.book.Picture;
 import org.dustyroom.be.models.direction.ReadingMode;
+import org.dustyroom.be.models.direction.Direction;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
+import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.be.persistence.ReaderStore;
@@ -50,6 +52,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private final AtomicLong generation = new AtomicLong();
     private final AtomicLong requestSequence = new AtomicLong();
     private final AtomicLong latestRequest = new AtomicLong();
+    private volatile long displayedRequest = -1;
     private final AtomicBoolean closed = new AtomicBoolean();
     private final Object closeMonitor = new Object();
     private final List<Runnable> closeCallbacks = new ArrayList<>();
@@ -62,6 +65,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private ImageIterator source;
     private List<PageRef> pages = List.of();
     private int pageIndex = -1;
+    private VolumeBoundary volumeBoundary = VolumeBoundary.WRAP;
     private boolean defaultTwoPageMode;
     private ReadingMode defaultReadingMode = MANGA;
     private FitMode defaultFitMode = FitMode.FIT_SCREEN;
@@ -130,7 +134,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         long targetGeneration = generation.incrementAndGet();
         long requestId = nextRequest();
         postLoading(targetGeneration, requestId);
-        tasks.execute(INTERACTIVE, () -> openOnWorker(file, targetGeneration, requestId));
+        tasks.execute(INTERACTIVE, () -> openOnWorker(file, targetGeneration, requestId, false));
     }
 
     public void resetAndClose(Runnable afterReset, Consumer<String> onFailure) {
@@ -289,6 +293,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                 defaultTwoPageMode = snapshot.isDefaultTwoPageMode();
                 defaultReadingMode = snapshot.getDefaultReadingMode();
                 defaultFitMode = snapshot.getDefaultFitMode();
+                volumeBoundary = snapshot.getVolumeBoundary();
             });
         }
     }
@@ -381,11 +386,11 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     public void next() {
-        navigate(this::moveNext);
+        turnPage(Direction.NEXT);
     }
 
     public void previous() {
-        navigate(this::movePrevious);
+        turnPage(Direction.PREV);
     }
 
     public void first() {
@@ -514,7 +519,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         }
     }
 
-    private void openOnWorker(File file, long targetGeneration, long requestId) {
+    private void openOnWorker(File file, long targetGeneration, long requestId, boolean fromEnd) {
         if (!isActive(targetGeneration)) {
             return;
         }
@@ -531,7 +536,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             if (candidatePages.isEmpty()) {
                 throw new IllegalStateException("Image source contains no pages");
             }
-            int candidateIndex = candidate.initialPageIndex();
+            int candidateIndex = fromEnd ? candidatePages.size() - 1 : candidate.initialPageIndex();
             if (candidateIndex < 0 || candidateIndex >= candidatePages.size()) {
                 throw new IllegalStateException("Image source has an invalid initial page");
             }
@@ -630,6 +635,10 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private void submitInteractive(WorkerCommand command) {
+        submitInteractive(true, command);
+    }
+
+    private void submitInteractive(boolean showLoading, WorkerCommand command) {
         if (closed.get()) {
             return;
         }
@@ -649,7 +658,9 @@ public final class AsyncViewerSession implements AutoCloseable {
                 }
                 return;
             }
-            postLoading(targetGeneration, requestId);
+            if (showLoading) {
+                postLoading(targetGeneration, requestId);
+            }
             try {
                 command.run(targetGeneration, requestId);
             } catch (RuntimeException e) {
@@ -658,10 +669,43 @@ public final class AsyncViewerSession implements AutoCloseable {
         });
     }
 
-    private void moveNext() {
-        PageRef secondPage = resolveSecondPage(pageIndex);
-        int step = secondPage == null ? 1 : 2;
-        pageIndex = Math.floorMod(pageIndex + step, pages.size());
+    private void turnPage(Direction direction) {
+        long previousRequest = latestRequest.get();
+        submitInteractive(false, (targetGeneration, requestId) -> {
+            int original = pageIndex;
+            int next = pageIndex + 1;
+            if (direction == Direction.NEXT && resolveSecondPage(pageIndex) != null) {
+                next++;
+            }
+            boolean boundary = direction == Direction.NEXT ? next >= pages.size() : pageIndex == 0;
+            if (boundary && volumeBoundary != VolumeBoundary.WRAP) {
+                if (volumeBoundary == VolumeBoundary.NEXT_VOLUME) {
+                    File adjacent = source.adjacentVolume(direction);
+                    if (adjacent != null) {
+                        postLoading(targetGeneration, requestId);
+                        openOnWorker(adjacent, targetGeneration, requestId, direction == Direction.PREV);
+                        return;
+                    }
+                }
+                // Keep the displayed page, scroll and GIF timeline on an ignored keypress.
+                // A previous turn still awaiting display must publish its frame instead.
+                if (displayedRequest == previousRequest && latestRequest.compareAndSet(requestId, previousRequest)) {
+                    return;
+                }
+            } else if (direction == Direction.NEXT) {
+                pageIndex = boundary ? 0 : next;
+            } else {
+                movePrevious();
+            }
+
+            try {
+                postLoading(targetGeneration, requestId);
+                renderAndPublish(targetGeneration, requestId);
+            } catch (RuntimeException error) {
+                pageIndex = original;
+                throw error;
+            }
+        });
     }
 
     private void movePrevious() {
@@ -859,6 +903,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         uiExecutor.execute(() -> {
             if (isLatest(targetGeneration, requestId)) {
                 view.showPages(capturedPages);
+                displayedRequest = requestId;
                 view.showFrame(frame);
             }
         });
