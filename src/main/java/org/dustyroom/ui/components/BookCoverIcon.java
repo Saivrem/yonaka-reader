@@ -7,12 +7,12 @@ import java.awt.image.BufferedImage;
 /**
  * Paints a cached cover without resizing the original image.
  */
-final class RecentCoverIcon implements Icon {
+final class BookCoverIcon implements Icon {
     private final BufferedImage image;
 
     private final Dimension size;
 
-    RecentCoverIcon(BufferedImage image, Dimension size) {
+    BookCoverIcon(BufferedImage image, Dimension size) {
         this.size = size;
         this.image = image;
     }

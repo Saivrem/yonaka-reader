@@ -106,13 +106,8 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
                 }
                 case PREVIOUS_VOLUME -> volume(g, false);
                 case NEXT_VOLUME -> volume(g, true);
-                case SPREAD, BOOK -> {
-                    line(g, 12, 6, 8, 4, 3, 4, 3, 19, 8, 19, 12, 21, 16, 19, 21, 19, 21, 4, 16, 4, 12, 6, 12, 21);
-                    if (kind == ReaderIconKind.BOOK) {
-                        line(g, 6, 9, 9, 10);
-                        line(g, 15, 10, 18, 9);
-                    }
-                }
+                case SPREAD -> line(g, 12, 6, 8, 4, 3, 4, 3, 19, 8, 19, 12, 21,
+                        16, 19, 21, 19, 21, 4, 16, 4, 12, 6, 12, 21);
                 case FIT_SCREEN -> {
                     g.drawRoundRect(2, 4, 20, 16, 2, 2);
                     g.drawRect(8, 6, 8, 12);

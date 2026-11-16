@@ -108,7 +108,8 @@ ZIPs and archives without supported pages are reported in the preview. Scanning 
 be cancelled. Previously imported chapters keep their original book and reading state
 when the same files are found from another root.
 
-Open a work to view chapters and their saved positions. **Continue reading** opens
+Library and Recently read use the same card layout. In the library, click the cover or title
+to view chapters and their saved positions. **Continue reading** opens
 the last-read chapter with the existing page, reading direction and spread mode.
 Use **Toggle finished** for explicit completion; reaching the last page does not
 mark a chapter finished automatically. Search by title/path, filter by reading or

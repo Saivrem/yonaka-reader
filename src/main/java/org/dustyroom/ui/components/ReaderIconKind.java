@@ -19,6 +19,5 @@ public enum ReaderIconKind {
     READ_LEFT_TO_RIGHT,
     SPREAD,
     PAGE_GRID,
-    FULLSCREEN,
-    BOOK
+    FULLSCREEN
 }

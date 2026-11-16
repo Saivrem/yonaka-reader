@@ -24,6 +24,12 @@ public final class LibrarySnapshot {
         this.available = available;
     }
 
+    public boolean hasMissingChapters(LibraryWork work) {
+        return work.getChapters()
+                   .stream()
+                   .anyMatch(chapter -> !available.contains(chapter.getId()));
+    }
+
     public LibrarySnapshot setWorks(List<LibraryWork> works) {
         this.works = List.copyOf(works);
         return this;

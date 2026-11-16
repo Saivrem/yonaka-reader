@@ -2,7 +2,6 @@ package org.dustyroom.ui.components;
 
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.view.RecentBook;
-import org.dustyroom.ui.listeners.MouseClickListener;
 import org.dustyroom.be.utils.FileUtils;
 
 import javax.swing.*;
@@ -11,65 +10,20 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
-final class RecentBookCard extends JPanel {
-    private final JLabel cover = new JLabel(new ReaderIcon(ReaderIconKind.OPEN));
-    private final JButton title = new JButton();
-    private final JLabel progress = new JLabel();
-    private final JLabel availability = new JLabel();
-    private final JLabel subtitle = new JLabel("", SwingConstants.CENTER);
+final class RecentBookCard extends BookCard {
     private final JButton trash;
     private final JButton chapters = new JButton();
-    private final JProgressBar bar = new JProgressBar(0, 100);
     private RecentBook current;
 
     RecentBookCard(String id, Consumer<String> open, Consumer<List<String>> remove) {
-        super(new BorderLayout(12, 0));
-        setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")),
-                BorderFactory.createEmptyBorder(12, 12, 12, 12)));
-        setCoverSize(new Dimension(72, 104));
-        cover.setHorizontalAlignment(SwingConstants.CENTER);
-        JPanel heading = new JPanel(new BorderLayout());
-        heading.add(title, BorderLayout.NORTH);
-        heading.add(subtitle, BorderLayout.CENTER);
-        add(heading, BorderLayout.NORTH);
-        JPanel body = new JPanel(new BorderLayout(12, 0));
-        body.add(cover, BorderLayout.WEST);
-        add(body, BorderLayout.CENTER);
-        JPanel footer = new JPanel(new BorderLayout());
-        add(footer, BorderLayout.SOUTH);
-        JPanel details = new JPanel();
-        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        title.setFont(title.getFont().deriveFont(Font.BOLD));
-        title.putClientProperty("JButton.buttonType", "borderless");
-        title.addActionListener(_ -> open.accept(id));
-        title.setToolTipText(id);
-        bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 5));
+        super(id, () -> open.accept(id));
         trash = trashButton("Remove from recent", () -> remove.accept(current.getChapters()
                 .stream()
                 .map(BookState::getSourceId)
                 .toList()));
         chapters.putClientProperty("JButton.buttonType", "borderless");
         chapters.addActionListener(_ -> showChapters(open, remove));
-        footer.add(chapters, BorderLayout.WEST);
-        footer.add(trash, BorderLayout.EAST);
-        subtitle.putClientProperty("html.disable", true);
-        MouseClickListener continueReading = new MouseClickListener(event -> {
-            if (SwingUtilities.isLeftMouseButton(event) && title.isEnabled()) {
-                title.doClick(0);
-            }
-        });
-        for (JComponent surface : List.of(this, heading, body, footer, details, cover, progress, subtitle, availability, bar)) {
-            surface.addMouseListener(continueReading);
-        }
-        details.add(Box.createVerticalGlue());
-        for (JComponent item : List.of(progress, bar, availability)) {
-            item.setAlignmentX(LEFT_ALIGNMENT);
-            details.add(item);
-        }
-        details.add(Box.createVerticalGlue());
-        body.add(details, BorderLayout.CENTER);
+        setFooter(chapters, trash);
     }
 
     private static JButton trashButton(String label, Runnable remove) {
@@ -115,14 +69,6 @@ final class RecentBookCard extends JPanel {
         dialog.setVisible(true);
     }
 
-    void setCoverSize(Dimension size) {
-        cover.setPreferredSize(size);
-        setPreferredSize(new Dimension(350, size.height + 108));
-        if (current != null && current.getCover() != null) {
-            cover.setIcon(new RecentCoverIcon(current.getCover(), size));
-        }
-    }
-
     void update(RecentBook book) {
         current = book;
         boolean grouped = book.getChapters().size() > 1;
@@ -134,8 +80,6 @@ final class RecentBookCard extends JPanel {
             heading = detail;
             detail = file.getName();
         }
-        subtitle.setText(detail);
-        subtitle.setVisible(!detail.isBlank());
         String scope = grouped ? "all " + book.getChapters().size() + " chapters" : book.getTitle();
         String label = "Clear reading history for " + scope;
         trash.setToolTipText(label);
@@ -143,20 +87,9 @@ final class RecentBookCard extends JPanel {
         chapters.setVisible(grouped);
         chapters.setText("Chapters (" + book.getChapters().size() + ") ▾");
         chapters.setToolTipText("Show recently read chapters. Continue: " + file.getName());
-        // Treat filenames as plain text, never as Swing HTML markup.
-        title.putClientProperty("html.disable", true);
-        title.setText(heading);
-        title.setEnabled(book.isAvailable());
-        title.getAccessibleContext().setAccessibleName("Continue " + heading + ", " + detail + ", " + book.getProgress());
-        progress.setText(book.getProgress());
-        bar.setValue((int) (100L * book.getState().getPageNumber() / Math.max(1, book.getState().getPageCount())));
-        availability.setText("Moved, missing or unavailable");
-        availability.setVisible(!book.isAvailable());
-        availability.setToolTipText(book.getState().getSourceId());
-        if (book.getCover() != null) {
-            cover.setIcon(new RecentCoverIcon(book.getCover(), cover.getPreferredSize()));
-        } else {
-            cover.setIcon(new ReaderIcon(ReaderIconKind.OPEN));
-        }
+        setHeading(heading, detail, book.isAvailable(), "Continue " + heading + ", " + detail + ", " + book.getProgress());
+        setProgress(book.getProgress(), book.getState().getPageNumber(), book.getState().getPageCount());
+        setAvailability(book.isAvailable() ? "" : "Moved, missing or unavailable");
+        setCover(book.getCover());
     }
 }
