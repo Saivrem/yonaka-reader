@@ -70,7 +70,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private String lastSourceError;
     private String lastRememberedSource;
     private volatile boolean groupRecentByFolder = true;
-    private volatile List<RecentBook> shownRecent = List.of();
+    private String removedActiveSource;
 
     public AsyncViewerSession(ViewerView view) {
         this(view, ReaderStore.disabled());
@@ -170,6 +170,9 @@ public final class AsyncViewerSession implements AutoCloseable {
         BookState state = new BookState(frame.getPageKey().sourceId(), frame.getPageKey().pageId(),
                 frame.getFirstPage(), frame.getPageCount(), frame.isTwoPageMode(), frame.getReadingMode());
         tasks.execute(INTERACTIVE, () -> {
+            if (state.getSourceId().equals(removedActiveSource)) {
+                return;
+            }
             persist(() -> store.saveBook(state));
             if (!state.getSourceId().equals(lastRememberedSource)) {
                 lastRememberedSource = state.getSourceId();
@@ -183,27 +186,22 @@ public final class AsyncViewerSession implements AutoCloseable {
         refreshRecentBooks();
     }
 
-    public void hideRecentBook(String sourceId) {
+    public void removeRecentBooks(List<String> sourceIds) {
         if (closed.get()) {
             return;
         }
-        List<String> ids = shownRecent
-                .stream()
-                .filter(book -> book.getState().getSourceId().equals(sourceId))
-                .findFirst()
-                .map(book -> book.getChapters()
-                        .stream()
-                        .map(BookState::getSourceId)
-                        .toList()
-                )
-                .orElse(List.of(sourceId));
-
+        List<String> ids = List.copyOf(sourceIds);
         recentRequest.incrementAndGet();
         tasks.execute(INTERACTIVE, () -> {
             if (closed.get()) {
                 return;
             }
-            persist(() -> ids.forEach(store::hideRecent));
+            persist(() -> {
+                store.removeRecent(ids);
+                if (!pages.isEmpty() && ids.contains(pages.getFirst().getKey().sourceId())) {
+                    removedActiveSource = pages.getFirst().getKey().sourceId();
+                }
+            });
             refreshRecentBooks();
         });
     }
@@ -251,7 +249,6 @@ public final class AsyncViewerSession implements AutoCloseable {
         List<RecentBook> snapshot = List.copyOf(books);
         uiExecutor.execute(() -> {
             if (recentActive(request)) {
-                shownRecent = snapshot;
                 view.showRecentBooks(snapshot);
             }
         });
@@ -575,6 +572,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             }
 
             persist(() -> store.showRecent(initialPage.getKey().sourceId()));
+            removedActiveSource = null;
             lastRememberedSource = null;
             renderAndPublish(targetGeneration, requestId, initialImage);
         } catch (RuntimeException e) {
@@ -618,6 +616,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             shapes.clear();
             cache.clear();
             persist(() -> store.showRecent(selected.getKey().sourceId()));
+            removedActiveSource = null;
             lastRememberedSource = null;
             renderAndPublish(targetGeneration, requestId);
         });

@@ -98,7 +98,7 @@ public final class ReaderSurface extends JPanel {
         recent.setGrouping(grouped, change);
     }
 
-    public void setRecentHandlers(Consumer<String> open, Consumer<String> remove) {
+    public void setRecentHandlers(Consumer<String> open, Consumer<List<String>> remove) {
         recent.setHandlers(open, remove);
     }
 

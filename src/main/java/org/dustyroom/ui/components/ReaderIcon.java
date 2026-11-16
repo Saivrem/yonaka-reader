@@ -79,6 +79,13 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
             }
             g.setStroke(new BasicStroke(1.7f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             switch (kind) {
+                case TRASH -> {
+                    line(g, 4, 6, 20, 6);
+                    line(g, 9, 6, 9, 3, 15, 3, 15, 6);
+                    line(g, 6, 7, 7, 21, 17, 21, 18, 7);
+                    line(g, 10, 10, 10, 17);
+                    line(g, 14, 10, 14, 17);
+                }
                 case HOME -> {
                     line(g, 3, 11, 12, 3, 21, 11);
                     line(g, 5, 10, 5, 21, 10, 21, 10, 15, 14, 15, 14, 21, 19, 21, 19, 10);

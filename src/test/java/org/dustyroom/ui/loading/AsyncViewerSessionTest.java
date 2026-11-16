@@ -355,14 +355,14 @@ class AsyncViewerSessionTest {
                 tasks, ui, cache(12), new SpreadPlanner(), new SpreadRenderer(), store);
         session.refreshRecentBooks();
         tasks.runAll(); // Old result is queued for UI delivery.
-        session.hideRecentBook("missing.zip");
+        session.removeRecentBooks(List.of("missing.zip"));
         tasks.runAll();
         ui.runAll();
         assertFalse(published.isEmpty());
         assertTrue(published
                 .stream()
                 .allMatch(List::isEmpty));
-        assertTrue(store.book("missing.zip").isPresent());
+        assertTrue(store.book("missing.zip").isEmpty());
         store.showRecent("missing.zip");
         session.refreshRecentBooks();
         tasks.runAll();
@@ -828,24 +828,18 @@ class AsyncViewerSessionTest {
 
     private static class MemoryStore implements ReaderStore {
         final Map<String, BookState> books = new HashMap<>();
-        final Set<String> hidden = new HashSet<>();
         boolean closed;
 
         public List<BookState> recentBooks(int limit) {
             assertFalse(closed);
             return books.values()
                     .stream()
-                    .filter(book -> !hidden.contains(book.getSourceId()))
                     .limit(limit)
                     .toList();
         }
 
-        public void hideRecent(String id) {
-            hidden.add(id);
-        }
-
-        public void showRecent(String id) {
-            hidden.remove(id);
+        public void removeRecent(List<String> ids) {
+            ids.forEach(books::remove);
         }
 
         public ReaderSettings settings() {

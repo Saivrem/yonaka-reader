@@ -104,7 +104,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             refreshControls();
         });
         Consumer<String> openRecent = id -> openFile(new File(id));
-        readerSurface.setRecentHandlers(openRecent, session::hideRecentBook);
+        readerSurface.setRecentHandlers(openRecent, session::removeRecentBooks);
         if (menuBar instanceof MenuBar menu) {
             menu.setRecentHandlers(openRecent, session::refreshRecentBooks);
         }

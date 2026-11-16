@@ -6,6 +6,7 @@ import org.dustyroom.be.persistence.schema.SqlitePragmas;
 
 @RequiredArgsConstructor
 enum PersistenceSql {
+    HIDE_LEGACY_BOOK("UPDATE books SET recent_hidden=1 WHERE source_id=?"),
     SCHEMA_VERSION(SqlitePragmas.READ_VERSION),
     CREATE_FUTURE_DATA("CREATE TABLE future_data(value TEXT)"),
     READ_FUTURE_DATA("SELECT value FROM future_data"),

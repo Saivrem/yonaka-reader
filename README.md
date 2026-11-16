@@ -75,16 +75,16 @@ page progress. The same list is available under **File → Open Recent**. Use
 
 **Group ZIPs by folder** is enabled by default and can be disabled on the home screen.
 Archives in the same parent folder share a card; Continue resumes the most recently
-read chapter. The chapter menu lists up to 20 recent chapters. Grouping examines up
-to 1,000 recent book states, while only 12 covers are decoded. Removing a group hides
-its listed history entries but preserves every chapter's progress and files.
+read chapter. **Chapters** shows the chapters on the card with individual open and
+delete controls. The card's trash button clears the reading history of every chapter
+on that card. Grouping examines up to 1,000 recent book states and loads up to 12 covers.
 Grouping is by folder, not by filename guesses; keep different series in separate
 folders or switch grouping off. This preference survives restarts.
 
 Click a book to resume its saved page, spread mode and reading direction. Images
 opened individually share the history entry of their containing directory.
-**Remove from recent** hides an entry without deleting files or saved progress;
-opening that book again adds it back. Missing or inaccessible sources remain visible
+Removing an entry clears its saved page and reading modes. Reopening starts a new
+reading history. Files, library membership and completion marks are preserved. Missing or inaccessible sources remain visible
 as unavailable. Reopen Home or Open Recent to refresh their availability after
 reconnecting a drive. A moved book must currently be opened from its new location;
 automatic move detection and transferring progress to a new path are future library work.

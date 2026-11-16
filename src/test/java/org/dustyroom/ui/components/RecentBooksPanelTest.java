@@ -19,17 +19,17 @@ class RecentBooksPanelTest {
         SwingUtilities.invokeAndWait(() -> {
             RecentBooksPanel panel = new RecentBooksPanel();
             List<String> opened = new ArrayList<>(), removed = new ArrayList<>();
-            panel.setHandlers(opened::add, removed::add);
+            panel.setHandlers(opened::add, removed::addAll);
             BookState state = new BookState("/books/volume.zip", "p2", 2, 10, false, ReadingMode.MANGA);
             panel.showBooks(List.of(new RecentBook(state, false, null)));
             JButton title = buttons(panel)
                     .stream()
-                    .filter(b -> b.getText().equals("volume.zip"))
+                    .filter(b -> "volume.zip".equals(b.getText()))
                     .findFirst()
                     .orElseThrow();
             JButton remove = buttons(panel)
                     .stream()
-                    .filter(b -> b.getText().equals("Remove from recent"))
+                    .filter(b -> b.getAccessibleContext().getAccessibleName().startsWith("Clear reading history"))
                     .findFirst()
                     .orElseThrow();
             assertFalse(title.isEnabled());

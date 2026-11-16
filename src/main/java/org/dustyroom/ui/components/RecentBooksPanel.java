@@ -20,7 +20,7 @@ public final class RecentBooksPanel extends JPanel {
     private final Map<String, RecentBookCard> entries = new LinkedHashMap<>();
     private Consumer<String> open = _ -> {
     };
-    private Consumer<String> remove = _ -> {
+    private Consumer<List<String>> remove = _ -> {
     };
 
     public RecentBooksPanel() {
@@ -40,7 +40,7 @@ public final class RecentBooksPanel extends JPanel {
         groupByFolder.addActionListener(_ -> change.accept(groupByFolder.isSelected()));
     }
 
-    public void setHandlers(Consumer<String> open, Consumer<String> remove) {
+    public void setHandlers(Consumer<String> open, Consumer<List<String>> remove) {
         this.open = open;
         this.remove = remove;
     }
