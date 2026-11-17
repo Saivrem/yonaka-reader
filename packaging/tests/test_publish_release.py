@@ -58,7 +58,7 @@ class ReleaseTest(unittest.TestCase):
     @patch.object(release, "gh")
     @patch.object(release, "api")
     def test_published_version_is_untouched(self, api, gh):
-        api.return_value = {"draft": False}
+        api.return_value = [{"tag_name": "v0.17.0", "draft": False}]
         self.publish()
         api.assert_called_once()
         gh.assert_not_called()
@@ -66,7 +66,7 @@ class ReleaseTest(unittest.TestCase):
 
     @patch.object(release, "api")
     def test_conflicting_draft_is_rejected(self, api):
-        api.return_value = {"draft": True, "target_commitish": "b" * 40}
+        api.return_value = [{"tag_name": "v0.17.0", "draft": True, "target_commitish": "b" * 40}]
         with self.assertRaises(ValueError):
             self.publish()
         api.assert_called_once()
@@ -112,11 +112,11 @@ class ReleaseTest(unittest.TestCase):
         for resume in [False, True]:
             with self.subTest(resume=resume), patch.object(release, "api") as api, \
                     patch.object(release, "gh") as gh:
-                draft = {"draft": True, "target_commitish": COMMIT}
+                draft = {"tag_name": "v0.17.0", "draft": True, "target_commitish": COMMIT}
                 api.side_effect = [
-                    draft if resume else None,
+                    [draft] if resume else [],
                     {"object": {"type": "commit", "sha": COMMIT}},
-                    {"id": 1, "assets": self.uploaded_assets()},
+                    [{"tag_name": "v0.17.0", "id": 1, "assets": self.uploaded_assets()}],
                     {"html_url": "https://example.test/release"},
                 ]
                 self.publish()
@@ -137,9 +137,9 @@ class ReleaseTest(unittest.TestCase):
                 else:
                     assets[0][failure] = "invalid"
                 api.side_effect = [
-                    {"draft": True, "target_commitish": COMMIT},
+                    [{"tag_name": "v0.17.0", "draft": True, "target_commitish": COMMIT}],
                     {"object": {"type": "commit", "sha": COMMIT}},
-                    {"id": 1, "assets": assets},
+                    [{"tag_name": "v0.17.0", "id": 1, "assets": assets}],
                 ]
                 with self.assertRaises(ValueError):
                     self.publish()

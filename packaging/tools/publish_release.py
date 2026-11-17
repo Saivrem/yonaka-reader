@@ -37,6 +37,19 @@ def api(repository, endpoint, method="GET", data=None, optional=False):
     return json.loads(result) if result is not None else None
 
 
+def find_release(repository, tag):
+    # Listing includes authenticated drafts; the by-tag endpoint documents published releases.
+    page = 1
+    while True:
+        releases = api(repository, f"releases?per_page=100&page={page}")
+        for item in releases:
+            if item["tag_name"] == tag:
+                return item
+        if len(releases) < 100:
+            return None
+        page += 1
+
+
 def checksum(path):
     digest = hashlib.sha256()
     with path.open("rb") as source:
@@ -99,7 +112,7 @@ def publish(repository, commit, version, artifacts, output):
         raise ValueError("Release target must be a full commit SHA")
 
     tag = f"v{version}"
-    release = api(repository, f"releases/tags/{tag}", optional=True)
+    release = find_release(repository, tag)
     if release is not None and not release["draft"]:
         print(f"{tag} is already published; no changes made")
         return
@@ -113,7 +126,7 @@ def publish(repository, commit, version, artifacts, output):
            "--verify-tag", "--draft", "--generate-notes", "--title", f"Yonaka Reader {version}")
 
     gh("release", "upload", tag, "--repo", repository, "--clobber", *map(str, assets))
-    release = api(repository, f"releases/tags/{tag}")
+    release = find_release(repository, tag)
     verify_assets(release, assets)
     result = api(repository, f"releases/{release['id']}", "PATCH",
                  {"draft": False, "make_latest": "legacy"})
