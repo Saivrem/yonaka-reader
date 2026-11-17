@@ -45,3 +45,6 @@ bin/
 /reader-data/
 
 todo.txt
+
+### Python packaging tools ###
+__pycache__/
