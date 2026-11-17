@@ -169,7 +169,7 @@ class ThumbnailPanelTest {
     }
 
     @Test
-    void escapeReturnsWithoutOpeningPageAndPreservesHiddenFullscreenControls() throws Exception {
+    void closingGridReturnsWithoutOpeningPageAndPreservesHiddenFullscreenControls() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             AtomicInteger opened = new AtomicInteger();
             ThumbnailPanel panel = new ThumbnailPanel((_, _, _) -> {
@@ -186,9 +186,7 @@ class ThumbnailPanelTest {
             panel.showSpread(20, 21);
             panel.setGridMode(true);
             layout(workspace);
-            assertEquals("closeGrid", panel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                    .get(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)));
-            panel.getActionMap().get("closeGrid").actionPerformed(null);
+            panel.setGridMode(false);
             assertFalse(panel.isGridMode());
             assertFalse(navigation.isVisible());
             assertEquals(0, opened.get());

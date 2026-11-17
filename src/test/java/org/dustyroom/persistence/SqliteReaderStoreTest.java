@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.dustyroom.persistence.PersistenceSql.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +43,21 @@ class SqliteReaderStoreTest extends BasePersistenceTest {
         try (ReaderStore store = openStore()) {
             assertEquals(9, store.book(a.getSourceId()).orElseThrow().getPageNumber());
             assertEquals(b, store.book(b.getSourceId()).orElseThrow());
+        }
+    }
+
+    @Test
+    void persistsClearedAndReassignedShortcutsUntilDefaultsAreRestored() {
+        Map<String, String> shortcuts = Map.of("nextImage", "", "shiftPairing", "meta pressed J");
+        try (ReaderStore store = openStore()) {
+            store.saveSettings(ReaderSettings.defaults().toBuilder().shortcuts(shortcuts).build());
+        }
+        try (ReaderStore store = openStore()) {
+            assertEquals(shortcuts, store.settings().getShortcuts());
+            store.saveSettings(ReaderSettings.defaults());
+        }
+        try (ReaderStore store = openStore()) {
+            assertEquals(Map.of(), store.settings().getShortcuts());
         }
     }
 

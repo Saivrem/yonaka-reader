@@ -75,6 +75,10 @@ so the remaining pages can still be browsed.
 
 ## Keyboard shortcuts
 
+Open **Settings → Shortcuts** to see the current keys for every reader action. Select a row and choose **Assign…**, then press the new combination. If another action uses that key, confirm the move or cancel to keep both assignments. **Clear** removes all keys for the selected action. **Restore defaults** resets the whole list. Choose **Apply** or **OK** to save your changes and update the menus and toolbar hints.
+
+Default bindings:
+
 | Key | Action |
 | --- | --- |
 | `O`, `Cmd/Ctrl+O` | Open a file |

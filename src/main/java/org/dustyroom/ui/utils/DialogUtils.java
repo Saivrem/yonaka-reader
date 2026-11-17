@@ -10,7 +10,7 @@ import java.awt.*;
 public class DialogUtils {
     public static void showAbout(JFrame parent) {
         JOptionPane.showMessageDialog(parent,
-                Constants.ABOUT.formatted("0.14.0"),
+                Constants.ABOUT.formatted("0.15.0"),
                 "About Yonaka Reader", JOptionPane.INFORMATION_MESSAGE,
                 BrandAssets.aboutIcon());
     }

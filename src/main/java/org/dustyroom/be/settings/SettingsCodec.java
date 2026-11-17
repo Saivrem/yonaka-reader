@@ -9,6 +9,7 @@ import org.dustyroom.be.models.state.VolumeBoundary;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.state.ViewerTheme;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @UtilityClass
@@ -27,6 +28,12 @@ public class SettingsCodec {
             // Preserve other valid settings.
         }
         ThemeMode previousTheme = theme == ViewerTheme.LIGHT ? ThemeMode.LIGHT : ThemeMode.DARK;
+        Map<String, String> shortcuts = new HashMap<>();
+        values.forEach((key, value) -> {
+            if (key.startsWith("shortcut.")) {
+                shortcuts.put(key.substring("shortcut.".length()), value);
+            }
+        });
         return new ReaderSettings(theme, fit, zoom, values.getOrDefault("last_directory", ""),
                 !"false".equals(values.get("thumbnails_visible")), !"false".equals(values.get("group_recent_by_folder")),
                 EnumUtils.getEnum(ThemeMode.class, values.get("theme_mode"), previousTheme),
@@ -34,11 +41,11 @@ public class SettingsCodec {
                 "true".equals(values.get("default_two_page")),
                 EnumUtils.getEnum(FitMode.class, values.get("default_fit_mode"), fit),
                 values.getOrDefault("library_directory", ""),
-                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()));
+                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()), shortcuts);
     }
 
     public static Map<String, String> encode(ReaderSettings settings) {
-        return Map.ofEntries(
+        Map<String, String> values = new HashMap<>(Map.ofEntries(
                 Map.entry("volume_boundary", settings.getVolumeBoundary().name()),
                 Map.entry("theme", settings.getTheme().name()),
                 Map.entry("fit_mode", settings.getFitMode().name()),
@@ -50,7 +57,9 @@ public class SettingsCodec {
                 Map.entry("default_reading_mode", settings.getDefaultReadingMode().name()),
                 Map.entry("default_two_page", Boolean.toString(settings.isDefaultTwoPageMode())),
                 Map.entry("default_fit_mode", settings.getDefaultFitMode().name()),
-                Map.entry("library_directory", settings.getLibraryDirectory()));
+                Map.entry("library_directory", settings.getLibraryDirectory())));
+        settings.getShortcuts().forEach((key, value) -> values.put("shortcut." + key, value));
+        return values;
     }
 
 }

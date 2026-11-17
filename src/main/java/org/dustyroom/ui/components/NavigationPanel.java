@@ -5,8 +5,6 @@ import org.dustyroom.ui.actions.ViewerActions;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
 public class NavigationPanel extends JPanel {
     private final JButton position;
@@ -31,7 +29,7 @@ public class NavigationPanel extends JPanel {
         position.setRequestFocusEnabled(false);
         position.setText(pageLabel);
         position.setPreferredSize(new Dimension(116, 36));
-        position.setToolTipText("Go to page (G)");
+
         position.getAccessibleContext().setAccessibleName("Page position; activate to go to a page");
         pages.add(position);
         pages.add(button(actions.nextImage(), ReaderIconKind.NEXT));
@@ -78,17 +76,6 @@ public class NavigationPanel extends JPanel {
     private static void decorate(AbstractButton button, ReaderIconKind icon) {
         button.setHideActionText(true);
         button.setRequestFocusEnabled(false);
-        Object shortcut = button.getAction().getValue(Action.ACCELERATOR_KEY);
-        String description = (String) button.getAction().getValue(Action.SHORT_DESCRIPTION);
-        if (description == null) {
-            description = (String) button.getAction().getValue(Action.NAME);
-        }
-        if (shortcut instanceof KeyStroke key) {
-            String modifiers = InputEvent.getModifiersExText(key.getModifiers());
-            description += " (" + (modifiers.isEmpty() ? "" : modifiers + "+")
-                    + KeyEvent.getKeyText(key.getKeyCode()) + ")";
-        }
-        button.setToolTipText(description);
         button.setIcon(new ReaderIcon(icon));
         button.setPreferredSize(new Dimension(36, 36));
         button.putClientProperty("JButton.buttonType", "toolBarButton");

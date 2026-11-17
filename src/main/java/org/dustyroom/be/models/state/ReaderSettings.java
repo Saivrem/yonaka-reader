@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import org.dustyroom.be.models.direction.ReadingMode;
 
+import java.util.Map;
+
 @Getter
 @EqualsAndHashCode
 @ToString
@@ -17,6 +19,8 @@ public final class ReaderSettings {
     private boolean thumbnailsVisible;
     private boolean groupRecentByFolder;
 
+    @Setter(AccessLevel.NONE)
+    private final Map<String, String> shortcuts;
     private VolumeBoundary volumeBoundary;
     private ThemeMode themeMode;
     private ReadingMode defaultReadingMode;
@@ -28,7 +32,8 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder, ThemeMode themeMode,
                           ReadingMode defaultReadingMode, boolean defaultTwoPageMode, FitMode defaultFitMode,
-                          String libraryDirectory, VolumeBoundary volumeBoundary) {
+                          String libraryDirectory, VolumeBoundary volumeBoundary, Map<String, String> shortcuts) {
+        this.shortcuts = shortcuts == null ? Map.of() : Map.copyOf(shortcuts);
         this.volumeBoundary = volumeBoundary == null ? VolumeBoundary.STOP : volumeBoundary;
         setTheme(theme);
         setFitMode(fitMode);
@@ -51,7 +56,7 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder) {
         this(theme, fitMode, zoom, lastDirectory, thumbnailsVisible, groupRecentByFolder,
-                null, ReadingMode.MANGA, false, fitMode, "", null);
+                null, ReadingMode.MANGA, false, fitMode, "", null, Map.of());
     }
 
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory, boolean thumbnailsVisible) {

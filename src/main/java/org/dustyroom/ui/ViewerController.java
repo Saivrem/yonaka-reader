@@ -56,6 +56,7 @@ public class ViewerController implements SettingsHost, ViewerView {
     private final JScrollPane scrollPane;
     private final AsyncViewerSession session;
     private ReaderSettings preferences;
+    private KeyBindings keyBindings;
     private JComponent menuBar;
     private NavigationPanel navigationPanel;
     private ReaderSurface readerSurface;
@@ -98,6 +99,8 @@ public class ViewerController implements SettingsHost, ViewerView {
         this.navigationPanel = navigationPanel;
         this.readerSurface = readerSurface;
         this.actions = actions;
+        keyBindings = new KeyBindings(actions);
+        keyBindings.apply(frame.getRootPane(), preferences.getShortcuts());
         libraryController = new LibraryController(session, this::openFile);
         readerSurface.setLibrary(libraryController.panel(), libraryController::refresh);
         ReaderGestures.install(imageComponent, scrollPane, this::swipePage, () -> {
@@ -520,7 +523,7 @@ public class ViewerController implements SettingsHost, ViewerView {
 
     public void showSettings() {
         if (!resetting) {
-            new SettingsDialog(frame, this).setVisible(true);
+            new SettingsDialog(frame, this, keyBindings).setVisible(true);
         }
     }
 
@@ -536,6 +539,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         session.saveSettings(saved, () -> {
             applyingSettings = false;
             preferences = saved;
+            keyBindings.apply(frame.getRootPane(), saved.getShortcuts());
             thumbnailsVisible = saved.isThumbnailsVisible();
             thumbnailPanel.setExpanded(thumbnailsVisible);
             actions.toggleThumbnails().putValue(Action.SELECTED_KEY, thumbnailsVisible);
@@ -601,11 +605,12 @@ public class ViewerController implements SettingsHost, ViewerView {
         }));
     }
 
-    private void refreshControls() {
+    void refreshControls() {
         if (actions == null) {
             return;
         }
         ViewerActionState.apply(actions, displayedFrame, imageComponent.getFitMode(), fullscreen);
+        actions.exitFullscreen().setEnabled(fullscreen || (thumbnailPanel != null && thumbnailPanel.isGridMode()));
         actions.openPageGrid().setEnabled(displayedFrame != null && thumbnailPanel != null && thumbnailPanel.isVisible());
         navigationPanel.updateState(displayedFrame);
     }
