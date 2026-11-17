@@ -92,4 +92,29 @@ and repeats the SQLite smoke test with the extracted runtime. On disposable GitH
 runners it also installs and uninstalls MSI/DEB, checks that binaries are removed and
 that sentinel user data/books remain. Windows checks the uninstall registration too.
 The lifecycle script refuses to run on developer workstations. Installer UI and desktop
-integration still require manual platform checks. No workflow publishes a release.
+integration still require manual platform checks.
+
+## Automatic releases
+
+A successful push to `main` publishes the version declared in `build.gradle` as
+`vMAJOR.MINOR.PATCH`. Merging a pull request triggers this automatically. PR builds
+only verify packages; they cannot publish releases. Update the application version
+consistently before merging a new release. A merge that keeps an already published
+version still runs CI but skips publication.
+
+The release job waits for all three platform jobs and reuses their artifacts from
+that workflow run. It attaches the macOS ARM64 DMG, Windows x64 MSI and portable ZIP,
+Linux x64 DEB and portable TAR.GZ, runnable JAR, and `SHA256SUMS`. Native packages
+include Java; the JAR requires JDK 25. Signing status is unchanged by publication.
+
+The tag points to the tested commit. GitHub generates release notes from the previous
+release. Binaries are uploaded to a draft and verified by size and SHA-256 before
+publication. GitHub selects Latest using its release-date/semantic-version policy.
+See [GitHub's release API](https://docs.github.com/en/rest/releases/releases).
+
+If an upload fails, rerun the failed job in Actions: it resumes the draft for the
+same commit. Existing published releases are never overwritten. A tag or draft
+belonging to another commit fails explicitly; investigate that conflict before
+retrying. The release job uses the built-in `GITHUB_TOKEN` with `contents: write`;
+no personal access token is needed. Repository rules must permit this token to
+create release tags.

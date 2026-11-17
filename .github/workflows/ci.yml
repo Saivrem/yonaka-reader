@@ -10,14 +10,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
     name: Test and package / ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     strategy:
       fail-fast: false
       matrix:
@@ -52,6 +54,13 @@ jobs:
           java-version: '25'
           architecture: ${{ matrix.arch }}
       - uses: gradle/actions/setup-gradle@v5
+      - name: Read release version
+        id: version
+        shell: bash
+        run: echo "version=$(bash ./gradlew --quiet printVersion)" >> "$GITHUB_OUTPUT"
+      - name: Test release automation
+        if: runner.os == 'Linux'
+        run: python3 -m unittest discover -s packaging/tests -v
       - name: Install DEB packaging tools
         if: runner.os == 'Linux'
         run: |
@@ -105,3 +114,39 @@ jobs:
             build/desktop-packages/${{ matrix.platform }}/msi-*.log
           if-no-files-found: warn
           retention-days: 14
+
+  release:
+    name: Publish release
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    concurrency:
+      group: release-${{ needs.verify.outputs.version }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download native packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: YonakaReader-*
+          path: release-input
+          merge-multiple: true
+      - name: Download runnable JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: yonaka-reader-jar
+          path: release-input
+      - name: Publish tested binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+        run: >-
+          python3 packaging/tools/publish_release.py
+          --repository "$GITHUB_REPOSITORY"
+          --commit "$GITHUB_SHA"
+          --version "$RELEASE_VERSION"
+          --artifacts release-input
+          --output release-assets
