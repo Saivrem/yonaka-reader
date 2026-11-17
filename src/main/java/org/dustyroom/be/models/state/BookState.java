@@ -15,6 +15,7 @@ public final class BookState {
     private int pageNumber;
     private int pageCount;
     private boolean twoPageMode;
+    private boolean shiftedPairing;
     private ReadingMode readingMode;
 
     @Builder

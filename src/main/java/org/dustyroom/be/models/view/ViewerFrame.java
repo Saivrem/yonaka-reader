@@ -21,6 +21,7 @@ public final class ViewerFrame {
     private int lastPage;
     private int pageCount;
     private boolean twoPageMode;
+    private boolean shiftedPairing;
     private ReadingMode readingMode;
     private PageKey pageKey;
 

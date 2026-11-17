@@ -39,6 +39,8 @@ public interface ViewerActions {
 
     Action toggleTwoPageMode();
 
+    Action shiftPairing();
+
     Action setComicsReadingMode();
 
     Action setMangaReadingMode();

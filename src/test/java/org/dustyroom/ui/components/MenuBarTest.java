@@ -181,6 +181,11 @@ class MenuBarTest {
         }
 
         @Override
+        public Action shiftPairing() {
+            return action;
+        }
+
+        @Override
         public Action toggleTwoPageMode() {
             return action;
         }

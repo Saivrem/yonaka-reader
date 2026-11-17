@@ -46,6 +46,7 @@ public class MenuBar extends JMenuBar {
         JMenuItem grid = item(new JMenuItem(actions.openPageGrid()));
         grid.setIcon(new ReaderIcon(ReaderIconKind.PAGE_GRID, 16));
         viewMenu.add(grid);
+        viewMenu.add(item(new JCheckBoxMenuItem(actions.shiftPairing())));
         viewMenu.addSeparator();
         addRadioActions(viewMenu, actions.fitHeight(), actions.fitWidth(), actions.fitScreen());
         viewMenu.addSeparator();

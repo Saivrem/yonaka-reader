@@ -75,6 +75,7 @@ class ReadingPersistenceTest extends BasePersistenceTest {
             first.goToPage(2);
             first.toggleTwoPageMode();
             first.setComicsReadingMode();
+            first.shiftPairing();
             first.remember(shown.get());
         }
 
@@ -85,6 +86,7 @@ class ReadingPersistenceTest extends BasePersistenceTest {
             assertEquals(2, frame.getFirstPage());
             assertEquals(3, frame.getLastPage());
             assertTrue(frame.isTwoPageMode());
+            assertTrue(frame.isShiftedPairing());
             assertEquals(ReadingMode.COMICS, frame.getReadingMode());
         }
     }
@@ -99,11 +101,13 @@ class ReadingPersistenceTest extends BasePersistenceTest {
             reader.open(firstFolder.toFile());
             assertEquals(ReadingMode.COMICS, shown.get().getReadingMode());
             assertTrue(shown.get().isTwoPageMode());
+            reader.shiftPairing();
             reader.remember(shown.get());
             reader.configureDefaults(ReaderSettings.defaults());
             reader.open(secondFolder.toFile());
             assertEquals(ReadingMode.MANGA, shown.get().getReadingMode());
             assertFalse(shown.get().isTwoPageMode());
+            assertFalse(shown.get().isShiftedPairing());
             reader.open(firstFolder.toFile());
             assertEquals(ReadingMode.COMICS, shown.get().getReadingMode());
             assertTrue(shown.get().isTwoPageMode());

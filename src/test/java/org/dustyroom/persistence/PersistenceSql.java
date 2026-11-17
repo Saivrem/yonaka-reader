@@ -11,6 +11,7 @@ enum PersistenceSql {
     CREATE_FUTURE_DATA("CREATE TABLE future_data(value TEXT)"),
     READ_FUTURE_DATA("SELECT value FROM future_data"),
     INSERT_FUTURE_DATA("INSERT INTO future_data(value) VALUES(?)"),
+    DROP_SHIFTED_PAIRING("ALTER TABLE books DROP COLUMN shifted_pairing"),
     DROP_COMPONENTS("DROP TABLE reader_components"),
     DROP_CHAPTERS("DROP TABLE library_chapters"),
     DROP_WORKS("DROP TABLE library_works"),

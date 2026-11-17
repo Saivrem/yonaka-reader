@@ -22,6 +22,8 @@ import org.dustyroom.ui.rendering.SpreadRenderer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -655,6 +657,66 @@ class AsyncViewerSessionTest {
 
         session.close();
         tasks.runAll();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"4, MANGA", "4, COMICS", "5, MANGA", "5, COMICS"})
+    void shiftedSpreadsNavigateInBothDirections(int count, ReadingMode direction) {
+        String[] names = Arrays.copyOf(new String[]{"one", "two", "three", "four", "five"}, count);
+        FakeImageIterator source = FakeImageIterator.portraits("source", names);
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        try (AsyncViewerSession reader = session(source, tasks, Runnable::run, view, cache(12))) {
+            reader.configureDefaults(ReaderSettings.defaults().setDefaultReadingMode(direction).setDefaultTwoPageMode(true));
+            reader.open(new File("source"));
+            assertSpread(tasks, view, 1, 2);
+            reader.next();
+            assertSpread(tasks, view, 3, 4);
+            reader.shiftPairing();
+            assertSpread(tasks, view, 2, 3);
+            reader.previous();
+            assertSpread(tasks, view, 1, 1);
+            reader.previous();
+            assertSpread(tasks, view, 1, 1);
+            reader.next();
+            assertSpread(tasks, view, 2, 3);
+            reader.next();
+            assertSpread(tasks, view, 4, count);
+            reader.next();
+            assertSpread(tasks, view, 4, count);
+            reader.previous();
+            assertSpread(tasks, view, 2, 3);
+            reader.shiftPairing();
+            assertSpread(tasks, view, 1, 2);
+        }
+    }
+
+    @Test
+    void shiftedLandscapePairIsSplitIntoTwoSinglePages() {
+        List<PageRef> pages = List.of(page("source", "cover"), page("source", "wide"), page("source", "portrait"));
+        FakeImageIterator source = new FakeImageIterator("source", pages,
+                Map.of("cover", image(4, 8), "wide", image(8, 4), "portrait", image(4, 8)));
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        try (AsyncViewerSession reader = session(source, tasks, Runnable::run, view, cache(12))) {
+            reader.open(new File("source"));
+            reader.toggleTwoPageMode();
+            reader.shiftPairing();
+            assertSpread(tasks, view, 1, 1);
+            reader.next();
+            assertSpread(tasks, view, 2, 2);
+            reader.next();
+            assertSpread(tasks, view, 3, 3);
+            reader.previous();
+            assertSpread(tasks, view, 2, 2);
+        }
+    }
+
+    private static void assertSpread(ManualTaskExecutor tasks, RecordingView view, int first, int last) {
+        tasks.runAll();
+        ViewerFrame frame = lastFrame(view);
+        assertEquals(first, frame.getFirstPage());
+        assertEquals(last, frame.getLastPage());
     }
 
     @Test

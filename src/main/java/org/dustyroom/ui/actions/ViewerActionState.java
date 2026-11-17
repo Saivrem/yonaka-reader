@@ -29,6 +29,8 @@ public class ViewerActionState {
         selected(actions.fitHeight(), loaded && fit == FitMode.FIT_HEIGHT);
         selected(actions.fitWidth(), loaded && fit == FitMode.FIT_WIDTH);
         selected(actions.fitScreen(), loaded && fit == FitMode.FIT_SCREEN);
+        actions.shiftPairing().setEnabled(loaded && frame.isTwoPageMode());
+        selected(actions.shiftPairing(), loaded && frame.isShiftedPairing());
         selected(actions.toggleTwoPageMode(), loaded && frame.isTwoPageMode());
         selected(actions.setMangaReadingMode(), loaded && frame.getReadingMode() == ReadingMode.MANGA);
         selected(actions.setComicsReadingMode(), loaded && frame.getReadingMode() == ReadingMode.COMICS);
