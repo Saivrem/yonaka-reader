@@ -39,6 +39,8 @@ Ctrl/Command+wheel works without it.
 
 ## Reader interface
 
+See the [illustrated toolbar guide](../README.md#toolbar-controls) for each button.
+
 - A welcome screen provides a single Open action and a supported-format hint.
 - The toolbar shows the displayed page or spread range and total page count. Click it or press G to jump to a page.
 - Vector navigation icons replace font-dependent symbols and emoji.

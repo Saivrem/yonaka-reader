@@ -36,6 +36,21 @@ local package builds and uninstall instructions.
 - Use **F** for fullscreen, **G** to jump to a page number, or **Shift+G** to pick
   a page from the thumbnail grid.
 
+## Toolbar controls
+
+The bottom toolbar has three groups. Within each group, the buttons appear in the order shown below.
+
+| Books and views | Page navigation | Zoom and reading mode |
+| --- | --- | --- |
+| <img src="docs/images/controls/home.png" width="24" height="24" alt=""> Return to the home shelf | <img src="docs/images/controls/first.png" width="24" height="24" alt=""> First page | <img src="docs/images/controls/fit-screen.png" width="24" height="24" alt=""> Fit the whole page |
+| <img src="docs/images/controls/open.png" width="24" height="24" alt=""> Open a book | <img src="docs/images/controls/previous.png" width="24" height="24" alt=""> Previous page or spread | <img src="docs/images/controls/fit-width.png" width="24" height="24" alt=""> Fit page width |
+| <img src="docs/images/controls/page-grid.png" width="24" height="24" alt=""> Browse the page grid | **24 / 180** · Jump to a page | <img src="docs/images/controls/fit-height.png" width="24" height="24" alt=""> Fit page height |
+| <img src="docs/images/controls/fullscreen.png" width="24" height="24" alt=""> Toggle fullscreen | <img src="docs/images/controls/next.png" width="24" height="24" alt=""> Next page or spread | <img src="docs/images/controls/zoom-out.png" width="24" height="24" alt=""> Zoom out |
+| <img src="docs/images/controls/previous-volume.png" width="24" height="24" alt=""> Previous volume | <img src="docs/images/controls/last.png" width="24" height="24" alt=""> Last page | <img src="docs/images/controls/zoom-in.png" width="24" height="24" alt=""> Zoom in |
+| <img src="docs/images/controls/next-volume.png" width="24" height="24" alt=""> Next volume |  | <img src="docs/images/controls/read-right-to-left.png" width="24" height="24" alt=""> Read right to left |
+|  |  | <img src="docs/images/controls/read-left-to-right.png" width="24" height="24" alt=""> Read left to right |
+|  |  | <img src="docs/images/controls/spread.png" width="24" height="24" alt=""> Toggle two-page spreads |
+
 ## Pick up where you left off
 
 **Recently read** keeps your six most recent books or series on the home screen.
