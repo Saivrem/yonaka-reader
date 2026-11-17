@@ -3,6 +3,8 @@ package org.dustyroom.ui.loading;
 import lombok.experimental.UtilityClass;
 import org.dustyroom.be.models.state.BookState;
 
+import org.dustyroom.be.utils.FileUtils;
+
 import java.nio.file.Path;
 import java.util.*;
 
@@ -18,7 +20,7 @@ public class RecentGroups {
         Map<String, List<BookState>> groups = new LinkedHashMap<>();
         for (BookState book : history) {
             String key = "book:" + book.getSourceId();
-            if (grouped && book.getSourceId().toLowerCase(Locale.ROOT).endsWith(".zip")) {
+            if (grouped && FileUtils.isSupportedArchive(book.getSourceId())) {
                 Path parent = Path.of(book.getSourceId()).getParent();
                 if (parent != null) {
                     key = "folder:" + parent;

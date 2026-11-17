@@ -398,7 +398,7 @@ public class ViewerController implements SettingsHost, ViewerView {
 
                         This removes settings, library entries, completion marks, reading history,
                         saved page positions and reading modes.
-                        Your image files, folders and ZIP archives will not be deleted.
+                        Your image files, folders and ZIP/CBZ archives will not be deleted.
 
                         Yonaka Reader will close. The next launch will start with default settings.""",
                 "Reset comic database", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,

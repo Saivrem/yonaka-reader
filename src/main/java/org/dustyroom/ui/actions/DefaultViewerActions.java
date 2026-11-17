@@ -47,7 +47,7 @@ public class DefaultViewerActions implements ViewerActions {
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
         this.home = action("home", "Home", "Return to recently read books",
                 KeyStroke.getKeyStroke(KeyEvent.VK_H, homeShortcut.getModifiers() | InputEvent.SHIFT_DOWN_MASK), controller::showHome);
-        this.openFile = action("openFile", "Open…", "Open an image, ZIP archive or folder",
+        this.openFile = action("openFile", "Open…", "Open an image, ZIP/CBZ archive or folder",
                 menuShortcut(KeyEvent.VK_O), controller::chooseFile);
         this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "Quit" : "Exit", "Close Yonaka Reader",
                 menuShortcut(KeyEvent.VK_Q), controller::exit);
