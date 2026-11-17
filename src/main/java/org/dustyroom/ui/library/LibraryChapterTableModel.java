@@ -1,5 +1,6 @@
 package org.dustyroom.ui.library;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibraryChapter;
 
 import javax.swing.table.AbstractTableModel;
@@ -28,9 +29,9 @@ final class LibraryChapterTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         return switch (column) {
-            case 0 -> "Chapter";
-            case 1 -> "Progress";
-            default -> "Source";
+            case 0 -> I18n.text("ui.chapter");
+            case 1 -> I18n.text("ui.progress");
+            default -> I18n.text("ui.source");
         };
     }
 
@@ -40,7 +41,7 @@ final class LibraryChapterTableModel extends AbstractTableModel {
         return switch (column) {
             case 0 -> chapter.getSource().getTitle();
             case 1 -> chapter.getProgress();
-            default -> available.contains(chapter.getId()) ? "Available" : "Unavailable";
+            default -> available.contains(chapter.getId()) ? I18n.text("ui.available") : I18n.text("ui.unavailable");
         };
     }
 }

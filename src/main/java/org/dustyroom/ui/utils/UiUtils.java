@@ -1,5 +1,6 @@
 package org.dustyroom.ui.utils;
 
+import org.dustyroom.ui.i18n.UiText;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -29,6 +30,7 @@ public class UiUtils {
             Properties properties = new Properties();
             properties.load(stream);
             UIManager.setLookAndFeel(new FlatPropertiesLaf("Yonaka Reader " + theme.label(), properties));
+            UiText.installDefaults();
             // Preserve OS window controls, system menus and window-management behavior.
             JFrame.setDefaultLookAndFeelDecorated(false);
             JDialog.setDefaultLookAndFeelDecorated(false);

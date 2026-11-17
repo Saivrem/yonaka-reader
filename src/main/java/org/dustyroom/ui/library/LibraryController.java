@@ -1,5 +1,7 @@
 package org.dustyroom.ui.library;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -52,7 +54,7 @@ public final class LibraryController {
             availability.cancel(true);
         }
         invalidateCovers();
-        panel.status("Checking library…");
+        panel.status("ui.checking_library");
         session.libraryTask(ReaderStore::libraryWorks, works -> {
             if (current != request) {
                 return;
@@ -67,7 +69,7 @@ public final class LibraryController {
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
                 } catch (ExecutionException exception) {
-                    error("Cannot check library locations: " + exception.getCause().getMessage());
+                    error(I18n.text("errors.checkLibrary", exception.getCause().getMessage()));
                 }
             });
             availability.execute();
@@ -118,18 +120,16 @@ public final class LibraryController {
     }
 
     void rename(LibraryWork work) {
-        String name = JOptionPane.showInputDialog(panel, "Library title (files will not be renamed):", work.getTitle());
+        String name = JOptionPane.showInputDialog(panel, I18n.text("ui.library_title_files_will_not_be_renamed"), work.getTitle());
         if (name != null && !name.isBlank()) {
             mutate(store -> store.renameLibrary(work.getId(), name));
         }
     }
 
     void remove(LibraryWork work) {
-        String message = """
-                Remove “%s” from the library?
-                Files, recent history, reading progress and completion marks will be kept.""".formatted(work.getTitle());
+        String message = I18n.text("library.remove", work.getTitle());
         if (JOptionPane.showConfirmDialog(panel, message,
-                "Remove from library", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                I18n.text("ui.remove_from_library_label"), JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             mutate(store -> store.removeLibrary(work.getId()));
         }
     }
@@ -150,7 +150,7 @@ public final class LibraryController {
             return;
         }
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Add books from a folder");
+        chooser.setDialogTitle(I18n.text("ui.add_books_from_a_folder"));
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(panel) != JFileChooser.APPROVE_OPTION) {
             return;
@@ -164,9 +164,9 @@ public final class LibraryController {
         }
         File selected = directory.toFile();
         importing = true;
-        JDialog progress = new JDialog(SwingUtilities.getWindowAncestor(panel), "Scanning folder", Dialog.ModalityType.APPLICATION_MODAL);
-        JLabel label = new JLabel("  Checking books in the folder and its immediate subfolders…  ");
-        JButton cancel = new JButton("Cancel");
+        JDialog progress = new JDialog(SwingUtilities.getWindowAncestor(panel), I18n.text("ui.scanning_folder"), Dialog.ModalityType.APPLICATION_MODAL);
+        JLabel label = UiText.label("library.scanning");
+        JButton cancel = UiText.button("ui.cancel");
         progress.add(label, BorderLayout.CENTER);
         progress.add(cancel, BorderLayout.SOUTH);
         progress.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -181,7 +181,7 @@ public final class LibraryController {
                     } catch (InterruptedException exception) {
                         Thread.currentThread().interrupt();
                     } catch (ExecutionException exception) {
-                        error("Cannot scan this folder: " + exception.getCause().getMessage());
+                        error(I18n.text("errors.scan", exception.getCause().getMessage()));
                     }
                 });
         cancel.addActionListener(_ -> scan.cancel(true));
@@ -194,9 +194,7 @@ public final class LibraryController {
     private void preview(LibraryScan found) {
         String warningsText = String.join("\n", found.warnings());
         if (found.works().isEmpty()) {
-            error("""
-                    No supported books found in the folder or its immediate subfolders.
-                    %s""".formatted(warningsText));
+            error(I18n.text("library.noBooks", warningsText));
             return;
         }
         LibraryImportTableModel model = new LibraryImportTableModel(found.works());
@@ -207,16 +205,14 @@ public final class LibraryController {
         JScrollPane scroll = new JScrollPane(chapters);
         scroll.setPreferredSize(new Dimension(580, 300));
         preview.add(scroll, BorderLayout.CENTER);
-        JTextArea explanation = new JTextArea("""
-                Select chapters to import. Existing chapters keep their library book and progress.
-                %s""".formatted(warningsText));
+        JTextArea explanation = new JTextArea(I18n.text("library.importHint", warningsText));
         explanation.setEditable(false);
         explanation.setLineWrap(true);
         explanation.setWrapStyleWord(true);
         JScrollPane warnings = new JScrollPane(explanation);
         warnings.setPreferredSize(new Dimension(580, 85));
         preview.add(warnings, BorderLayout.SOUTH);
-        while (JOptionPane.showConfirmDialog(panel, preview, "Import preview", JOptionPane.OK_CANCEL_OPTION,
+        while (JOptionPane.showConfirmDialog(panel, preview, I18n.text("ui.import_preview"), JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             if (chapters.isEditing()) {
                 chapters.getCellEditor().stopCellEditing();
@@ -226,7 +222,7 @@ public final class LibraryController {
                     .stream()
                     .anyMatch(work -> work.getTitle().isBlank());
             if (selected.isEmpty() || missingTitle) {
-                error("Select at least one chapter and enter a title for each selected book.");
+                error(I18n.text("library.selectionRequired"));
                 continue;
             }
             mutate(store -> store.importWorks(selected));
@@ -235,7 +231,7 @@ public final class LibraryController {
     }
 
     private void error(String message) {
-        panel.status("Library operation failed; existing data was kept.");
-        JOptionPane.showMessageDialog(panel, message, "Library", JOptionPane.ERROR_MESSAGE);
+        panel.status("library.operationFailed");
+        JOptionPane.showMessageDialog(panel, message, I18n.text("ui.library"), JOptionPane.ERROR_MESSAGE);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Map;
 @Setter
 @Accessors(chain = true)
 public final class ReaderSettings {
+    private final String language;
     private ViewerTheme theme;
     private FitMode fitMode;
     private double zoom;
@@ -32,7 +33,8 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder, ThemeMode themeMode,
                           ReadingMode defaultReadingMode, boolean defaultTwoPageMode, FitMode defaultFitMode,
-                          String libraryDirectory, VolumeBoundary volumeBoundary, Map<String, String> shortcuts) {
+                          String libraryDirectory, VolumeBoundary volumeBoundary, Map<String, String> shortcuts, String language) {
+        this.language = language == null ? "en-US" : language;
         this.shortcuts = shortcuts == null ? Map.of() : Map.copyOf(shortcuts);
         this.volumeBoundary = volumeBoundary == null ? VolumeBoundary.STOP : volumeBoundary;
         setTheme(theme);
@@ -56,7 +58,7 @@ public final class ReaderSettings {
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory,
                           boolean thumbnailsVisible, boolean groupRecentByFolder) {
         this(theme, fitMode, zoom, lastDirectory, thumbnailsVisible, groupRecentByFolder,
-                null, ReadingMode.MANGA, false, fitMode, "", null, Map.of());
+                null, ReadingMode.MANGA, false, fitMode, "", null, Map.of(), "en-US");
     }
 
     public ReaderSettings(ViewerTheme theme, FitMode fitMode, double zoom, String lastDirectory, boolean thumbnailsVisible) {

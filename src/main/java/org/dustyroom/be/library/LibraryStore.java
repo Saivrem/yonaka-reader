@@ -1,5 +1,6 @@
 package org.dustyroom.be.library;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibraryImport;
 import org.dustyroom.be.models.library.LibraryWork;
 
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface LibraryStore {
     private static IllegalStateException unavailable() {
-        return new IllegalStateException("Library storage is unavailable. Your books were not changed.");
+        return new IllegalStateException(I18n.text("library.storageUnavailable"));
     }
 
     default List<LibraryWork> libraryWorks() {

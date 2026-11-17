@@ -1,5 +1,6 @@
 package org.dustyroom.ui.library;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibraryChapter;
 import org.dustyroom.be.models.library.LibraryWork;
 import org.dustyroom.be.models.library.LibrarySnapshot;
@@ -12,21 +13,21 @@ final class LibraryBookCard extends BookCard {
     LibraryBookCard(LibraryWork work, LibrarySnapshot snapshot, Runnable details, Consumer<LibraryChapter> open) {
         super(work.getRoot(), details);
         LibraryChapter resume = work.getResumeChapter();
-        setHeading(work.getTitle(), resume.getSource().getTitle(), true, "View chapters of " + work.getTitle());
+        setHeading(work.getTitle(), resume.getSource().getTitle(), true, I18n.text("library.viewChapters", work.getTitle()));
         if (resume.isFinished()) {
             setProgress(resume.getProgress(), 1, 1);
         } else {
             setProgress(resume.getProgress(), resume.getPage(), resume.getPageCount());
         }
-        setAvailability(snapshot.hasMissingChapters(work) ? "Some sources are unavailable" : "");
+        setAvailability(snapshot.hasMissingChapters(work) ? I18n.text("ui.some_sources_are_unavailable") : "");
 
         int count = work.getChapters().size();
-        String summary = count + (count == 1 ? " chapter" : " chapters") + " · " + work.getCompleted() + " finished";
+        String summary = I18n.text("library.chapterCount", count, work.getCompleted());
         JButton chapters = new JButton(summary);
         chapters.putClientProperty("JButton.buttonType", "borderless");
         chapters.addActionListener(_ -> details.run());
 
-        JButton read = new JButton(resume.getLastRead() > 0 ? "Continue reading" : "Start reading");
+        JButton read = new JButton(resume.getLastRead() > 0 ? I18n.text("ui.continue_reading") : I18n.text("ui.start_reading"));
         read.setEnabled(snapshot.getAvailable().contains(resume.getId()));
         read.addActionListener(_ -> open.accept(resume));
         setFooter(chapters, read);

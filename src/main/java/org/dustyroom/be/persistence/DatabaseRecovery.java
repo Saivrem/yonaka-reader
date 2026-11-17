@@ -1,5 +1,6 @@
 package org.dustyroom.be.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.utils.SqliteUtils;
 import org.dustyroom.be.persistence.schema.SqlitePragmas;
 import lombok.experimental.UtilityClass;
@@ -45,7 +46,7 @@ final class DatabaseRecovery {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException exception) {
-            throw new IllegalStateException("Cannot safely reset reader data. The reset failed; the existing database was kept.", exception);
+            throw new IllegalStateException(I18n.text("reset.unsafe"), exception);
         }
     }
 }

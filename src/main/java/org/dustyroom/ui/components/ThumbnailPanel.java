@@ -1,5 +1,7 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,8 +50,8 @@ public final class ThumbnailPanel extends JPanel {
         this.loader = loader;
         this.navigate = navigate;
 
-        gridButton.setToolTipText("Expand page grid");
-        gridButton.getAccessibleContext().setAccessibleName("Expand page grid");
+        UiText.tooltip(gridButton, "ui.expand_page_grid");
+        UiText.accessible(gridButton, "ui.expand_page_grid");
         gridButton.addActionListener(_ -> setGridMode(!gridMode));
         gridButton.setEnabled(false);
         gridButton.putClientProperty("JButton.buttonType", "toolBarButton");
@@ -57,7 +59,7 @@ public final class ThumbnailPanel extends JPanel {
         list.setFixedCellHeight(228);
         list.setFixedCellWidth(160);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.getAccessibleContext().setAccessibleName("Book pages");
+        UiText.accessible(list, "ui.book_pages");
         list.setCellRenderer(new ThumbnailCellRenderer(cache, () -> first, () -> last, () -> gridMode));
         list.addMouseListener(new MouseClickListener(e -> {
             int index = list.locationToIndex(e.getPoint());
@@ -66,7 +68,7 @@ public final class ThumbnailPanel extends JPanel {
             }
         }));
         list.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "openPage");
-        list.getActionMap().put("openPage", new RunnableAction("Open page", () -> {
+        list.getActionMap().put("openPage", new RunnableAction(I18n.text("ui.open_page"), () -> {
             if (list.getSelectedIndex() >= 0) {
                 openPage(list.getSelectedIndex());
             }
@@ -88,6 +90,7 @@ public final class ThumbnailPanel extends JPanel {
         rail.add(handle);
         add(rail, BorderLayout.EAST);
         add(gridButton, BorderLayout.SOUTH);
+        UiText.bind(this, "labels", ThumbnailPanel::refreshLanguage);
         setExpanded(true);
         addComponentListener(new ComponentShownListener(() -> {
             followCurrent();
@@ -98,6 +101,16 @@ public final class ThumbnailPanel extends JPanel {
     public void setFullscreen(boolean fullscreen) {
         this.fullscreen = fullscreen;
         updateGridButton();
+    }
+
+    private void refreshLanguage() {
+        gridButton.setText(gridMode ? I18n.text("ui.back_to_reader") : null);
+        gridButton.setIcon(new ReaderIcon(gridMode ? ReaderIconKind.PREVIOUS : ReaderIconKind.PAGE_GRID, 16));
+        gridButton.setToolTipText(gridMode ? I18n.text("ui.return_to_reader") : I18n.text("ui.expand_page_grid"));
+        gridButton.getAccessibleContext().setAccessibleName(gridButton.getToolTipText());
+        String label = expanded ? I18n.text("ui.hide_thumbnails") : I18n.text("ui.show_thumbnails");
+        handle.setToolTipText(label);
+        handle.getAccessibleContext().setAccessibleName(label);
     }
 
     private void updateGridButton() {
@@ -118,10 +131,7 @@ public final class ThumbnailPanel extends JPanel {
             list.setFixedCellWidth(160);
         }
         rail.setVisible(!gridMode);
-        gridButton.setText(gridMode ? "Back to reader" : null);
-        gridButton.setIcon(new ReaderIcon(gridMode ? ReaderIconKind.PREVIOUS : ReaderIconKind.PAGE_GRID, 16));
-        gridButton.setToolTipText(gridMode ? "Return to reader" : "Expand page grid");
-        gridButton.getAccessibleContext().setAccessibleName(gridButton.getToolTipText());
+        refreshLanguage();
         updateGridButton();
         gridChanged.accept(gridMode);
         revalidate();
@@ -154,9 +164,7 @@ public final class ThumbnailPanel extends JPanel {
         updateGridButton();
         scroll.setVisible(expanded);
         setPreferredSize(new Dimension(expanded ? 200 : 16, 0));
-        String label = expanded ? "Hide thumbnails" : "Show thumbnails";
-        handle.setToolTipText(label + " (T)");
-        handle.getAccessibleContext().setAccessibleName(label);
+        refreshLanguage();
         revalidate();
         repaint();
         if (expanded) {

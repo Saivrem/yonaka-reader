@@ -1,5 +1,6 @@
 package org.dustyroom.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ViewerTheme;
@@ -13,14 +14,23 @@ import java.nio.file.Path;
  */
 public final class PackagedStoreSmoke {
     static void main(String[] args) {
+        for (String id : new String[]{"en-US", "ru-RU", "ja-JP"}) {
+            I18n.select(id);
+            if (!id.equals(I18n.language().getId()) || I18n.text("ui.open_a_book").isBlank()) {
+                throw new AssertionError("Packaged translation missing: " + id);
+            }
+        }
+        I18n.select("en-US");
         Path database = Path.of("build", "packaged-smoke.sqlite3");
         ReaderSettings expected = new ReaderSettings(ViewerTheme.LIGHT, FitMode.FIT_WIDTH, 1);
         try (ReaderStore store = new SqliteReaderStore(database)) {
             store.saveSettings(expected);
         }
         try (ReaderStore store = new SqliteReaderStore(database)) {
-            if (!expected.equals(store.settings())) throw new AssertionError("Packaged SQLite round trip failed");
+            if (!expected.equals(store.settings())) {
+                throw new AssertionError("Packaged SQLite round trip failed");
+            }
         }
-        System.out.println("Packaged SQLite round trip passed");
+        System.out.println("Packaged SQLite and language catalogs passed");
     }
 }

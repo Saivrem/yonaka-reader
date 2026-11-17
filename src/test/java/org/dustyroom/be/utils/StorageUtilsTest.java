@@ -1,6 +1,9 @@
 package org.dustyroom.be.utils;
 
-import org.junit.jupiter.api.Test;
+import org.dustyroom.be.i18n.I18n;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -8,8 +11,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StorageUtilsTest {
-    @Test
-    void resolvesPlatformDirectoriesWithoutAccessingThem() {
+    @AfterEach
+    void restoreLanguage() {
+        I18n.select("en-US");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"en-US", "ru-RU", "ja-JP"})
+    void resolvesPlatformDirectoriesWithoutAccessingThem(String language) {
+        I18n.select(language);
         // Use host-native absolute paths so the same cases also run on Windows.
         Path root = Path.of("build", "path-fixtures").toAbsolutePath();
         String home = root.resolve("home").toString();

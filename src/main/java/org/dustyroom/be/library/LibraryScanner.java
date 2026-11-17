@@ -1,5 +1,6 @@
 package org.dustyroom.be.library;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibraryImport;
 import org.dustyroom.be.models.library.LibraryScan;
 import org.dustyroom.be.models.library.LibrarySource;
@@ -28,7 +29,7 @@ public final class LibraryScanner {
     public LibraryScan scan(Path directory, BooleanSupplier cancelled) throws IOException {
         Path root = directory.toAbsolutePath().normalize();
         if (!Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IOException("Select a real folder, not a symbolic link.");
+            throw new IOException(I18n.text("errors.select_a_real_folder_not_a_symbolic_link"));
         }
         List<LibraryImport> works = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -45,7 +46,7 @@ public final class LibraryScanner {
                     works.add(new LibraryImport(folder.toString(), folder.getFileName().toString(), chapters));
                 }
             } catch (IOException exception) {
-                warnings.add(root.relativize(folder) + ": unreadable folder");
+                warnings.add(I18n.text("scan.folder", root.relativize(folder)));
             }
         }
         works.sort(Comparator.comparing(LibraryImport::getTitle, NaturalOrderComparator.INSTANCE));
@@ -94,9 +95,9 @@ public final class LibraryScanner {
             if (hasPages) {
                 return true;
             }
-            warnings.add(root.relativize(archive) + ": no supported pages");
+            warnings.add(I18n.text("scan.empty", root.relativize(archive)));
         } catch (IOException exception) {
-            warnings.add(root.relativize(archive) + ": unreadable ZIP");
+            warnings.add(I18n.text("scan.zip", root.relativize(archive)));
         }
         return false;
     }

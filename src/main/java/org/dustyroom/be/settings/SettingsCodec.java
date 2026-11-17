@@ -41,12 +41,13 @@ public class SettingsCodec {
                 "true".equals(values.get("default_two_page")),
                 EnumUtils.getEnum(FitMode.class, values.get("default_fit_mode"), fit),
                 values.getOrDefault("library_directory", ""),
-                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()), shortcuts);
+                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()), shortcuts, values.getOrDefault("language", "en-US"));
     }
 
     public static Map<String, String> encode(ReaderSettings settings) {
         Map<String, String> values = new HashMap<>(Map.ofEntries(
                 Map.entry("volume_boundary", settings.getVolumeBoundary().name()),
+                Map.entry("language", settings.getLanguage()),
                 Map.entry("theme", settings.getTheme().name()),
                 Map.entry("fit_mode", settings.getFitMode().name()),
                 Map.entry("zoom", Double.toString(settings.getZoom())),

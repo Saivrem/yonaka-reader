@@ -1,5 +1,6 @@
 package org.dustyroom.be.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.ReaderSettings;
 
@@ -22,7 +23,7 @@ final class DisabledReaderStore implements ReaderStore {
     }
 
     public void reset() {
-        throw new IllegalStateException("Persistent storage is unavailable; the database was not reset.");
+        throw new IllegalStateException(I18n.text("reset.storageUnavailable"));
     }
 
     public void close() {

@@ -1,5 +1,6 @@
 package org.dustyroom.be.iterators;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.animation.AnimationClip;
 import org.dustyroom.be.models.book.PageRef;
 import org.dustyroom.be.models.book.Picture;
@@ -70,14 +71,14 @@ public interface ImageIterator extends AutoCloseable {
         List<File> sortedFiles = getSortedFilesFromParent(filePath, fileType);
         if (sortedFiles.isEmpty()) {
             if (filePath == null || !fileType.test(filePath)) {
-                throw new ImageIteratorException("Current volume no longer exists", filePath);
+                throw new ImageIteratorException(I18n.text("errors.current_volume_no_longer_exists"), filePath);
             }
             return null;
         }
 
         int currentIndex = sortedFiles.indexOf(filePath);
         if (currentIndex < 0) {
-            throw new ImageIteratorException("Current volume no longer exists", filePath);
+            throw new ImageIteratorException(I18n.text("errors.current_volume_no_longer_exists"), filePath);
         }
         int target = currentIndex + dir.getShift();
         if (!wrap && (target < 0 || target >= sortedFiles.size())) {

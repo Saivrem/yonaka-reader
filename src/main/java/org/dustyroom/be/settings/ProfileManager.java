@@ -1,5 +1,6 @@
 package org.dustyroom.be.settings;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.utils.SqliteUtils;
 import org.dustyroom.be.persistence.schema.SqlitePragmas;
 import lombok.experimental.UtilityClass;
@@ -25,7 +26,7 @@ public class ProfileManager {
         try {
             ProfileSwitchJournal.recover(standardDirectory);
         } catch (IOException | RuntimeException exception) {
-            throw new IllegalStateException("Cannot finish the pending profile switch; existing data was kept.", exception);
+            throw new IllegalStateException(I18n.text("profile.pendingFailed"), exception);
         }
         Path pointer = standardDirectory.resolve("profile.path");
         if (!Files.exists(pointer)) {
@@ -34,15 +35,15 @@ public class ProfileManager {
         try {
             Path selected = Path.of(Files.readString(pointer, StandardCharsets.UTF_8).strip());
             if (!selected.isAbsolute()) {
-                throw new IOException("Profile path must be absolute");
+                throw new IOException(I18n.text("errors.profile_path_must_be_absolute"));
             }
             Path database = selected.resolve("reader.sqlite3");
             if (!Files.isRegularFile(database)) {
-                throw new IOException("Selected reader profile is unavailable: " + selected);
+                throw new IOException(I18n.text("profile.unavailable", selected));
             }
             return database.normalize();
         } catch (IOException | RuntimeException exception) {
-            throw new IllegalStateException("Cannot resolve the selected reader profile; no new database was created.", exception);
+            throw new IllegalStateException(I18n.text("profile.resolveFailed"), exception);
         }
     }
 
@@ -54,17 +55,17 @@ public class ProfileManager {
         Path directory = target.toAbsolutePath().normalize();
         Files.createDirectories(directory);
         if (Files.isSameFile(currentDatabase.getParent(), directory)) {
-            throw new IOException("This is already the active data directory.");
+            throw new IOException(I18n.text("errors.this_is_already_the_active_data_directory"));
         }
         if (!Files.isWritable(directory)) {
-            throw new IOException("The selected folder is not writable.");
+            throw new IOException(I18n.text("errors.the_selected_folder_is_not_writable"));
         }
         Path database = directory.resolve("reader.sqlite3");
         if (existing != Files.exists(database)) {
-            throw new IOException("The target profile changed. Select the folder again.");
+            throw new IOException(I18n.text("profile.targetChanged"));
         }
         if (!existing && (Files.exists(directory.resolve("reader.sqlite3-wal")) || Files.exists(directory.resolve("reader.sqlite3-shm")))) {
-            throw new IOException("The target contains an unfinished SQLite profile.");
+            throw new IOException(I18n.text("profile.unfinished"));
         }
 
         return directory;
@@ -111,10 +112,10 @@ public class ProfileManager {
         try (Connection connection = SqliteUtils.connect(database);
              Statement sql = connection.createStatement(); ResultSet result = sql.executeQuery(ProfileSql.CHECK_DATABASE)) {
             if (!result.next() || !"ok".equals(result.getString(1))) {
-                throw new IOException("The selected profile is not a readable SQLite database.");
+                throw new IOException(I18n.text("profile.invalidDatabase"));
             }
         } catch (SQLException exception) {
-            throw new IOException("Cannot open the selected profile.", exception);
+            throw new IOException(I18n.text("errors.cannot_open_the_selected_profile"), exception);
         }
     }
 
@@ -124,16 +125,16 @@ public class ProfileManager {
             sql.execute(SqlitePragmas.BUSY_TIMEOUT);
             try (ResultSet rows = sql.executeQuery(ProfileSql.CHECKPOINT)) {
                 if (rows.next() && rows.getInt(1) != 0) {
-                    throw new IOException("The profile is in use by another reader.");
+                    throw new IOException(I18n.text("errors.the_profile_is_in_use_by_another_reader"));
                 }
             }
             try (ResultSet rows = sql.executeQuery(ProfileSql.CLOSE_JOURNAL)) {
                 if (!rows.next() || !"delete".equalsIgnoreCase(rows.getString(1))) {
-                    throw new IOException("The profile is still in use.");
+                    throw new IOException(I18n.text("errors.the_profile_is_still_in_use"));
                 }
             }
         } catch (SQLException exception) {
-            throw new IOException("Cannot close the profile journal. Close other reader instances.", exception);
+            throw new IOException(I18n.text("profile.journalBusy"), exception);
         }
     }
 
@@ -145,7 +146,7 @@ public class ProfileManager {
             try {
                 Files.move(temporary, standardDirectory.resolve("profile.path"), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException exception) {
-                throw new IOException("The profile selector cannot be updated atomically on this filesystem.", exception);
+                throw new IOException(I18n.text("profile.atomicUpdateFailed"), exception);
             }
         } finally {
             Files.deleteIfExists(temporary);

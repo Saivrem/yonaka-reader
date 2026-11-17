@@ -1,5 +1,6 @@
 package org.dustyroom.be.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.utils.SqliteUtils;
 import lombok.RequiredArgsConstructor;
 import org.dustyroom.be.library.LibraryStore;
@@ -26,7 +27,7 @@ final class SqliteLibraryStore implements LibraryStore {
     private final Connection connection;
 
     private static IllegalStateException failure(SQLException exception) {
-        return new IllegalStateException("Cannot read or save the library. Your files were not changed.", exception);
+        return new IllegalStateException(I18n.text("database.library"), exception);
     }
 
     @Override
@@ -63,7 +64,7 @@ final class SqliteLibraryStore implements LibraryStore {
     public void importWorks(List<LibraryImport> selections) {
         for (LibraryImport selection : selections) {
             if (selection.getSources().isEmpty() || selection.getTitle().isBlank()) {
-                throw new IllegalArgumentException("Select at least one chapter and a title.");
+                throw new IllegalArgumentException(I18n.text("errors.select_at_least_one_chapter_and_a_title"));
             }
         }
         try {
@@ -132,7 +133,7 @@ final class SqliteLibraryStore implements LibraryStore {
     @Override
     public void renameLibrary(String id, String title) {
         if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("A title is required.");
+            throw new IllegalArgumentException(I18n.text("errors.a_title_is_required"));
         }
         update(LibrarySql.RENAME_WORK, title.strip(), id);
     }

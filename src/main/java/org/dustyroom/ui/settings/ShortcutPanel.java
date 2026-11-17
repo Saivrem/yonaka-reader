@@ -1,5 +1,7 @@
 package org.dustyroom.ui.settings;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.ui.components.KeyBindings;
 
 import javax.swing.*;
@@ -15,7 +17,7 @@ final class ShortcutPanel extends JPanel {
     private final KeyBindings bindings;
     private final Map<String, String> draft;
     private final List<String> ids;
-    private final DefaultTableModel rows = new DefaultTableModel(new String[]{"Action", "Shortcut"}, 0);
+    private final DefaultTableModel rows = new DefaultTableModel(new String[]{I18n.text("ui.action"), I18n.text("ui.shortcut")}, 0);
     private final JTable table = new JTable(rows);
 
     ShortcutPanel(KeyBindings bindings, Map<String, String> saved) {
@@ -26,16 +28,16 @@ final class ShortcutPanel extends JPanel {
         for (String id : ids) {
             rows.addRow(new Object[]{bindings.name(id), ""});
         }
-        refresh();
+        UiText.bind(this, "rows", ShortcutPanel::refresh);
         table.setDefaultEditor(Object.class, null);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowSelectionInterval(0, 0);
         table.setPreferredScrollableViewportSize(new Dimension(420, 260));
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JButton assign = new JButton("Assign…");
+        JButton assign = UiText.button("ui.assign");
         assign.addActionListener(_ -> capture(selected()));
-        JButton clear = new JButton("Clear");
+        JButton clear = UiText.button("ui.clear");
         clear.addActionListener(_ -> {
             draft.put(selected(), "");
             refresh();
@@ -45,7 +47,7 @@ final class ShortcutPanel extends JPanel {
             assign.setEnabled(selected);
             clear.setEnabled(selected);
         });
-        JButton restore = new JButton("Restore defaults");
+        JButton restore = UiText.button("ui.restore_defaults");
         restore.addActionListener(_ -> {
             draft.clear();
             refresh();
@@ -66,7 +68,11 @@ final class ShortcutPanel extends JPanel {
     }
 
     private void refresh() {
+        table.getColumnModel().getColumn(0).setHeaderValue(I18n.text("ui.action"));
+        table.getColumnModel().getColumn(1).setHeaderValue(I18n.text("ui.shortcut"));
+        table.getTableHeader().repaint();
         for (int row = 0; row < ids.size(); row++) {
+            rows.setValueAt(bindings.name(ids.get(row)), row, 0);
             rows.setValueAt(KeyBindings.display(bindings.keys(ids.get(row), draft)), row, 1);
         }
     }
@@ -75,11 +81,11 @@ final class ShortcutPanel extends JPanel {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog(owner, bindings.name(id), Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = UiText.button("ui.cancel");
         cancel.addActionListener(_ -> dialog.dispose());
         JPanel content = new JPanel(new BorderLayout(8, 12));
         content.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        content.add(new JLabel("Press the new keyboard shortcut."), BorderLayout.CENTER);
+        content.add(UiText.label("ui.press_the_new_keyboard_shortcut"), BorderLayout.CENTER);
         content.add(cancel, BorderLayout.SOUTH);
         dialog.setContentPane(content);
         dialog.pack();
@@ -119,9 +125,8 @@ final class ShortcutPanel extends JPanel {
             }
             List<KeyStroke> existing = bindings.keys(other, draft);
             if (existing.remove(shortcut)) {
-                String message = "This shortcut is assigned to “%s”. Move it to “%s”?"
-                        .formatted(bindings.name(other), bindings.name(id));
-                if (JOptionPane.showConfirmDialog(this, message, "Reassign shortcut",
+                String message = I18n.text("shortcuts.conflict", bindings.name(other), bindings.name(id));
+                if (JOptionPane.showConfirmDialog(this, message, I18n.text("ui.reassign_shortcut"),
                         JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                     return;
                 }

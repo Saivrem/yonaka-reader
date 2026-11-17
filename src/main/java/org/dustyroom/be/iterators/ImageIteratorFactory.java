@@ -1,5 +1,6 @@
 package org.dustyroom.be.iterators;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.experimental.UtilityClass;
 
 import java.io.File;
@@ -16,6 +17,6 @@ public class ImageIteratorFactory {
         if (isImage.test(source) || isDirectory.test(source)) {
             return new FileImageIterator(source);
         }
-        throw new ImageIteratorException("Unsupported or empty image source", source);
+        throw new ImageIteratorException(I18n.text("errors.unsupported_or_empty_image_source"), source);
     }
 }

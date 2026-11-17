@@ -1,5 +1,6 @@
 package org.dustyroom.be.iterators;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -49,7 +50,7 @@ public class FileImageIterator implements ImageIterator {
             File root = singleImage ? candidate.getParentFile() : candidate;
             List<File> files = getSortedFiles(root, isImage);
             if (files.isEmpty()) {
-                throw new ImageIteratorException("No supported images found", candidate);
+                throw new ImageIteratorException(I18n.text("errors.no_supported_images_found"), candidate);
             }
 
             int candidateIndex = singleImage ? Math.max(files.indexOf(candidate), 0) : 0;
@@ -109,7 +110,7 @@ public class FileImageIterator implements ImageIterator {
     @Override
     public AnimationClip animation(PageRef page) {
         if (!page.getKey().sourceId().equals(normalizedPath(getVolumeRoot()))) {
-            throw new IllegalArgumentException("Wrong source");
+            throw new IllegalArgumentException(I18n.text("errors.wrong_source"));
         }
         Path path = Path.of(page.getKey().pageId());
         return GifDecoder.read(() -> Files.newInputStream(path));
@@ -120,17 +121,17 @@ public class FileImageIterator implements ImageIterator {
         File imageFile = new File(page.getKey().pageId());
         String expectedSource = normalizedPath(getVolumeRoot());
         if (!page.getKey().sourceId().equals(expectedSource)) {
-            throw new ImageIteratorException("Page does not belong to the current image source", imageFile);
+            throw new ImageIteratorException(I18n.text("image.foreignPage"), imageFile);
         }
         try (FileImageInputStream input = new FileImageInputStream(imageFile)) {
             BufferedImage read = ImageDecoder.read(input);
             if (read == null) {
-                throw new ImageIteratorException("Unsupported or corrupt image: " + imageFile.getName(), imageFile);
+                throw new ImageIteratorException(I18n.text("image.corrupt", imageFile.getName()), imageFile);
             }
             return new Picture(read, page.getMetadata());
         } catch (IOException e) {
             log.warn("Can't read the file {}", imageFile, e);
-            throw new ImageIteratorException("Can't read image: " + imageFile.getName(), imageFile, e);
+            throw new ImageIteratorException(I18n.text("image.read", imageFile.getName()), imageFile, e);
         }
     }
 
@@ -174,7 +175,7 @@ public class FileImageIterator implements ImageIterator {
         }
         int selectedIndex = pageRefs.indexOf(page);
         if (selectedIndex < 0) {
-            throw new ImageIteratorException("Selected page is not part of the current image source", volumeRoot);
+            throw new ImageIteratorException(I18n.text("image.foreignSelection"), volumeRoot);
         }
         currentIndex = selectedIndex;
         initialSelectionPending = false;

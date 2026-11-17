@@ -1,5 +1,7 @@
 package org.dustyroom.ui;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.animation.AnimatedPage;
 import org.dustyroom.be.models.book.PageKey;
 import org.dustyroom.be.models.book.PageRef;
@@ -172,7 +174,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             actions.openPageGrid().setEnabled(false);
             actions.shiftPairing().setEnabled(false);
         }
-        frame.setTitle("Yonaka Reader");
+        frame.setTitle(I18n.text("brand.name"));
         session.refreshRecentBooks();
     }
 
@@ -207,7 +209,7 @@ public class ViewerController implements SettingsHost, ViewerView {
                 imageComponent.setAnimationPaused(false);
             } catch (ExecutionException exception) {
                 imageComponent.setAnimationPaused(false);
-                DialogUtils.showError(frame, "Unable to access the last open directory.");
+                DialogUtils.showError(frame, I18n.text("ui.unable_to_access_the_last_open_directory"));
             } finally {
                 choosingFile = false;
                 actions.openFile().setEnabled(true);
@@ -228,7 +230,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             details.actionPerformed(null);
         }
 
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Supported Files", SUPPORTED_FORMATS));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(I18n.text("ui.supported_files"), SUPPORTED_FORMATS));
         fileChooser.setFileSelectionMode(FILES_AND_DIRECTORIES);
 
         int result = fileChooser.showOpenDialog(frame);
@@ -250,9 +252,9 @@ public class ViewerController implements SettingsHost, ViewerView {
         }
         JSpinner page = new JSpinner(new SpinnerNumberModel(
                 displayedFrame.getFirstPage(), 1, displayedFrame.getPageCount(), 1));
-        page.getAccessibleContext().setAccessibleName("Page number");
+        UiText.accessible(page, "ui.page_number");
         while (JOptionPane.showConfirmDialog(frame, page,
-                "Go to page (1–" + displayedFrame.getPageCount() + ")",
+                I18n.text("reading.goTo", displayedFrame.getPageCount()),
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             try {
                 page.commitEdit();
@@ -263,7 +265,7 @@ public class ViewerController implements SettingsHost, ViewerView {
                 session.goToPage(number);
                 return;
             } catch (ParseException exception) {
-                DialogUtils.showError(frame, "Enter a page number between 1 and " + displayedFrame.getPageCount() + ".");
+                DialogUtils.showError(frame, I18n.text("reading.invalidPage", displayedFrame.getPageCount()));
             }
         }
     }
@@ -366,7 +368,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         }
         MenuSelectionManager.defaultManager().clearSelectedPath();
         if (!UiUtils.installTheme(theme)) {
-            DialogUtils.showError(frame, "Unable to apply the selected theme.");
+            DialogUtils.showError(frame, I18n.text("ui.unable_to_apply_the_selected_theme"));
             return false;
         }
         JMenuBar nativeMenu = PlatformUi.usesScreenMenuBar() ? frame.getJMenuBar() : null;
@@ -399,17 +401,10 @@ public class ViewerController implements SettingsHost, ViewerView {
         if (resetting || profileSwitchPending) {
             return;
         }
-        Object[] options = {"Reset and quit", "Cancel"};
+        Object[] options = {I18n.text("ui.reset_and_quit"), I18n.text("ui.cancel")};
         int choice = JOptionPane.showOptionDialog(frame,
-                """
-                        Clear all data in the current comic database?
-
-                        This removes settings, library entries, completion marks, reading history,
-                        saved page positions and reading modes.
-                        Your image files, folders and ZIP/CBZ archives will not be deleted.
-
-                        Yonaka Reader will close. The next launch will start with default settings.""",
-                "Reset comic database", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                I18n.text("reset.confirm"),
+                I18n.text("ui.reset_comic_database_label"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
                 null, options, options[1]);
         if (choice != 0) {
             return;
@@ -530,7 +525,7 @@ public class ViewerController implements SettingsHost, ViewerView {
     @Override
     public void applySettings(ReaderSettings selected, Runnable success, Consumer<String> failure) {
         if (database == null) {
-            failure.accept("Persistent storage is unavailable. Settings have not been saved.");
+            failure.accept(I18n.text("settings.storageUnavailable"));
             return;
         }
         ViewerTheme theme = selected.getThemeMode().resolve(UiUtils.currentTheme());
@@ -539,6 +534,10 @@ public class ViewerController implements SettingsHost, ViewerView {
         session.saveSettings(saved, () -> {
             applyingSettings = false;
             preferences = saved;
+            if (!I18n.language().getId().equals(saved.getLanguage())) {
+                I18n.select(saved.getLanguage());
+                UiText.refresh();
+            }
             keyBindings.apply(frame.getRootPane(), saved.getShortcuts());
             thumbnailsVisible = saved.isThumbnailsVisible();
             thumbnailPanel.setExpanded(thumbnailsVisible);
@@ -581,7 +580,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         }).whenComplete((_, error) -> SwingUtilities.invokeLater(() -> {
             if (error != null) {
                 profileSwitchPending = false;
-                DialogUtils.showError(frame, "Cannot select this data folder: " + error.getCause().getMessage());
+                DialogUtils.showError(frame, I18n.text("errors.selectData", error.getCause().getMessage()));
                 return;
             }
             accepted.run();
@@ -596,9 +595,7 @@ public class ViewerController implements SettingsHost, ViewerView {
                 }
             }).whenComplete((_, failure) -> SwingUtilities.invokeLater(() -> {
                 if (failure != null) {
-                    DialogUtils.showError(frame, """
-                            Profile switch failed. Restart the reader to reopen the previous profile.
-                            %s""".formatted(failure.getCause().getMessage()));
+                    DialogUtils.showError(frame, I18n.text("profile.failed", failure.getCause().getMessage()));
                 }
                 System.exit(failure == null ? 0 : 1);
             })));

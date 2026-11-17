@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
@@ -22,11 +23,11 @@ final class ThumbnailCellRenderer extends DefaultListCellRenderer {
         JLabel label = (JLabel) super.getListCellRendererComponent(owner, value, index,
                 visiblePage || gridSelection, focus);
         Icon icon = cache.get(index);
-        String title = "Page " + (index + 1);
+        String title = I18n.text("reading.page", index + 1);
         if (icon == null) {
             title += " · …";
         } else if (icon.getIconWidth() < 0) {
-            title += " · unavailable";
+            title += I18n.text("reading.unavailable");
         }
 
         label.setText(title);

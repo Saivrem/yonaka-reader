@@ -20,3 +20,9 @@ the application supplies its own two palettes and retains native window decorati
 The application uses [Xerial SQLite JDBC](https://github.com/xerial/sqlite-jdbc)
 for its embedded database, under the [Apache License 2.0](https://github.com/xerial/sqlite-jdbc/blob/master/LICENSE).
 SQLite is embedded; a separate database server or SQLite installation is not required.
+
+## Gson
+
+JSON language catalogs are read using [Gson](https://github.com/google/gson),
+Copyright Google Inc., under the
+[Apache License 2.0](https://github.com/google/gson/blob/main/LICENSE).

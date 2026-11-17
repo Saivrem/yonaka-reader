@@ -1,5 +1,6 @@
 package org.dustyroom;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.persistence.ReaderStore;
@@ -37,16 +38,11 @@ public class Main {
             } catch (RuntimeException ignored) { /* initialization already failed */ }
             candidate = database == null ? ReaderStore.disabled() : new RecoverableReaderStore(database);
             String recovery = database == null
-                    ? "The selected data folder is unavailable. Reconnect it and restart the reader."
-                    : "To start fresh, use Help → Reset comic database. Reset requires confirmation.";
-            error = """
-                    %s
-
-                    Cannot open the reader database. Reading is available, but settings and progress will not be saved.
-
-                    If this data belongs to a newer version, open it with that version to keep using it.
-                    %s""".formatted(exception.getMessage(), recovery);
+                    ? I18n.text("startup.dataUnavailable")
+                    : I18n.text("startup.resetHint");
+            error = I18n.text("startup.database", exception.getMessage(), recovery);
         }
+        I18n.select(loaded.getLanguage());
         if (loaded.getThemeMode() == ThemeMode.SYSTEM) {
             loaded.setTheme(new SystemThemeDetector().detect().orElse(loaded.getTheme()));
         }

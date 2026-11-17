@@ -12,7 +12,7 @@ tasks.withType(JavaExec).configureEach {
 }
 
 group = 'org.dustyroom'
-version = '0.15.0'
+version = '0.16.0'
 
 java {
     toolchain {
@@ -28,6 +28,7 @@ dependencies {
     def lombokVersion = '1.18.48'
 
     implementation 'com.formdev:flatlaf:3.8'
+    implementation 'com.google.code.gson:gson:2.15.0'
     implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
     implementation 'ch.qos.logback:logback-classic:1.6.6'
     implementation 'org.apache.commons:commons-lang3:3.21.0'
@@ -116,3 +117,18 @@ tasks.register('launchSmoke', JavaExec) {
     doFirst { smokeTemp.get().asFile.mkdirs() }
     systemProperty 'org.sqlite.tmpdir', smokeTemp.get().asFile.absolutePath
 }
+
+// Discover shipped translations during the build, including in the packaged JAR.
+def languageIndex = layout.buildDirectory.dir('generated/languages')
+tasks.register('languageIndex') {
+    inputs.files(fileTree('src/main/resources/i18n') { include '*.json' })
+    outputs.dir(languageIndex)
+    doLast {
+        def index = languageIndex.get().file('i18n/languages.txt').asFile
+        index.parentFile.mkdirs()
+        index.text = fileTree('src/main/resources/i18n').matching { include '*.json' }
+                .files.collect { it.name }.sort().join('\n')
+    }
+}
+sourceSets.main.resources.srcDir(languageIndex)
+tasks.named('processResources') { dependsOn tasks.named('languageIndex') }
