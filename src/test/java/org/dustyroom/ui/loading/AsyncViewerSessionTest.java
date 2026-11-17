@@ -93,16 +93,18 @@ class AsyncViewerSessionTest {
         ManualTaskExecutor tasks = new ManualTaskExecutor();
         RecordingView view = new RecordingView();
         AsyncViewerSession session = session(ImageIteratorFactory::create, tasks, Runnable::run, view, cache(12));
-        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.STOP));
+        session.configureDefaults(ReaderSettings.defaults());
         session.open(first.toFile());
         session.previous();
         tasks.runAll();
         assertEquals(1, lastFrame(view).getFirstPage());
         session.last();
         tasks.runAll();
+        assertEquals(List.of("First page"), view.hints);
         int framesAtEdge = view.frames.size();
         session.next();
         tasks.runAll();
+        assertEquals(List.of("First page", "Last page"), view.hints);
         assertEquals(framesAtEdge, view.frames.size());
         assertEquals(2, lastFrame(view).getFirstPage());
         assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
@@ -128,6 +130,14 @@ class AsyncViewerSessionTest {
         tasks.runAll();
         assertEquals(first.toString(), lastFrame(view).getPageKey().sourceId());
         assertEquals(1, lastFrame(view).getFirstPage());
+        session.configureDefaults(ReaderSettings.defaults().setVolumeBoundary(VolumeBoundary.WRAP));
+        session.previous();
+        tasks.runAll();
+        assertEquals(2, lastFrame(view).getFirstPage());
+        session.next();
+        tasks.runAll();
+        assertEquals(1, lastFrame(view).getFirstPage());
+        assertEquals(List.of("First page", "Last page"), view.hints);
         session.close();
         tasks.runAll();
     }
@@ -920,7 +930,13 @@ class AsyncViewerSessionTest {
         private final List<ViewerFrame> frames = new ArrayList<>();
         private final List<String> errors = new ArrayList<>();
         private final List<List<AnimatedPage>> animations = new ArrayList<>();
+        private final List<String> hints = new ArrayList<>();
         private int loadingCount;
+
+        @Override
+        public void showBoundaryHint(String message) {
+            hints.add(message);
+        }
 
         @Override
         public void showAnimations(PageKey page, List<AnimatedPage> pages) {

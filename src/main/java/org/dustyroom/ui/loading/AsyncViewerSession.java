@@ -65,7 +65,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private ImageIterator source;
     private List<PageRef> pages = List.of();
     private int pageIndex = -1;
-    private VolumeBoundary volumeBoundary = VolumeBoundary.WRAP;
+    private VolumeBoundary volumeBoundary = ReaderSettings.defaults().getVolumeBoundary();
     private boolean defaultTwoPageMode;
     private ReadingMode defaultReadingMode = MANGA;
     private FitMode defaultFitMode = FitMode.FIT_SCREEN;
@@ -678,6 +678,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                 next++;
             }
             boolean boundary = direction == Direction.NEXT ? next >= pages.size() : pageIndex == 0;
+            boolean showHint = boundary && volumeBoundary == VolumeBoundary.STOP;
             if (boundary && volumeBoundary != VolumeBoundary.WRAP) {
                 if (volumeBoundary == VolumeBoundary.NEXT_VOLUME) {
                     File adjacent = source.adjacentVolume(direction);
@@ -690,6 +691,9 @@ public final class AsyncViewerSession implements AutoCloseable {
                 // Keep the displayed page, scroll and GIF timeline on an ignored keypress.
                 // A previous turn still awaiting display must publish its frame instead.
                 if (displayedRequest == previousRequest && latestRequest.compareAndSet(requestId, previousRequest)) {
+                    if (showHint) {
+                        postBoundaryHint(targetGeneration, previousRequest, direction);
+                    }
                     return;
                 }
             } else if (direction == Direction.NEXT) {
@@ -701,6 +705,9 @@ public final class AsyncViewerSession implements AutoCloseable {
             try {
                 postLoading(targetGeneration, requestId);
                 renderAndPublish(targetGeneration, requestId);
+                if (showHint) {
+                    postBoundaryHint(targetGeneration, requestId, direction);
+                }
             } catch (RuntimeException error) {
                 pageIndex = original;
                 throw error;
@@ -886,6 +893,14 @@ public final class AsyncViewerSession implements AutoCloseable {
                 } catch (RuntimeException ignored) {
                     // Prefetch is opportunistic; interactive loading reports errors.
                 }
+            }
+        });
+    }
+
+    private void postBoundaryHint(long targetGeneration, long requestId, Direction direction) {
+        uiExecutor.execute(() -> {
+            if (isLatest(targetGeneration, requestId)) {
+                view.showBoundaryHint(direction == Direction.NEXT ? "Last page" : "First page");
             }
         });
     }

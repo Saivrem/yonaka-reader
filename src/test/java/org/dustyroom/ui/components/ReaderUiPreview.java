@@ -63,7 +63,7 @@ public final class ReaderUiPreview {
     }
 
     private static void renderAbout(File output, ViewerTheme theme) {
-        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.11.0"),
+        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.12.0"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 BrandAssets.aboutIcon());
         pane.setSize(520, 240);
