@@ -22,7 +22,7 @@ public class ViewerActionState {
                 actions.toggleTwoPageMode(), actions.setMangaReadingMode(), actions.setComicsReadingMode())) {
             action.setEnabled(loaded);
         }
-        // Next/previous intentionally retain the reader's existing wrap-around behavior.
+        // Next and Previous remain available at the edges for the configured boundary action.
         actions.firstImage().setEnabled(loaded && frame.getFirstPage() > 1);
         actions.lastImage().setEnabled(loaded && frame.getLastPage() < frame.getPageCount());
         actions.exitFullscreen().setEnabled(fullscreen);

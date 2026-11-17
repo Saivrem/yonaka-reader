@@ -22,6 +22,9 @@ public interface ViewerView {
     default void useDefaultScale(FitMode mode) {
     }
 
+    default void showBoundaryHint(String message) {
+    }
+
     void showLoading();
 
     void showFrame(ViewerFrame frame);

@@ -112,7 +112,7 @@ class ReaderUiTest {
             ViewerActionState.apply(actions, new ViewerFrame(null, "Book", null, 10, 10, 10, false,
                     ReadingMode.MANGA, null), FitMode.ORIGINAL, false);
             assertFalse(actions.lastImage().isEnabled());
-            assertTrue(actions.nextImage().isEnabled()); // existing wrap-around navigation
+            assertTrue(actions.nextImage().isEnabled());
             assertFalse(actions.exitFullscreen().isEnabled());
         });
     }

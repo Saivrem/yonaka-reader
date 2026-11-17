@@ -20,8 +20,9 @@ public final class SettingsDialog extends JDialog {
     private final JComboBox<String> direction = new JComboBox<>(new String[]{"Manga · right to left", "Comics · left to right"});
     private final JCheckBox spread = new JCheckBox("Two-page spreads");
     private final JComboBox<String> scale = new JComboBox<>(new String[]{"Fit to window", "Fit width", "Fit height", "Original size · 100%"});
-    private final JCheckBox wrap = new JCheckBox("Wrap pages within the volume");
-    private final JCheckBox adjacent = new JCheckBox("Continue into the adjacent volume");
+    private final JRadioButton stop = new JRadioButton("Do nothing");
+    private final JRadioButton wrap = new JRadioButton("Wrap pages within the volume");
+    private final JRadioButton adjacent = new JRadioButton("Continue into the adjacent volume");
     private final JCheckBox thumbnails = new JCheckBox("Show thumbnails");
     private final JTextField library = new JTextField();
     private final JButton apply = new JButton("Apply");
@@ -102,16 +103,12 @@ public final class SettingsDialog extends JDialog {
         panel.row(spread);
         panel.row(scale);
         panel.row(thumbnails);
-        wrap.addActionListener(_ -> {
-            if (wrap.isSelected()) {
-                adjacent.setSelected(false);
-            }
-        });
-        adjacent.addActionListener(_ -> {
-            if (adjacent.isSelected()) {
-                wrap.setSelected(false);
-            }
-        });
+        ButtonGroup boundaries = new ButtonGroup();
+        boundaries.add(stop);
+        boundaries.add(wrap);
+        boundaries.add(adjacent);
+        panel.row(new JLabel("At the first or last page"));
+        panel.row(stop);
         panel.row(wrap);
         panel.row(adjacent);
         return top(panel);
@@ -214,6 +211,7 @@ public final class SettingsDialog extends JDialog {
             case FIT_HEIGHT -> 2;
             case ORIGINAL -> 3;
         });
+        stop.setSelected(settings.getVolumeBoundary() == VolumeBoundary.STOP);
         wrap.setSelected(settings.getVolumeBoundary() == VolumeBoundary.WRAP);
         adjacent.setSelected(settings.getVolumeBoundary() == VolumeBoundary.NEXT_VOLUME);
         thumbnails.setSelected(settings.isThumbnailsVisible());

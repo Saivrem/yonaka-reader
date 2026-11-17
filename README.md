@@ -19,7 +19,7 @@ Run the full verification and build an executable fat JAR:
 The resulting application is written to:
 
 ```text
-build/libs/yonaka-reader-0.11.0.jar
+build/libs/yonaka-reader-0.12.0.jar
 ```
 
 ## Run
@@ -27,7 +27,7 @@ build/libs/yonaka-reader-0.11.0.jar
 Open the application without an initial file:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.11.0.jar
+java -jar build/libs/yonaka-reader-0.12.0.jar
 ```
 
 For development, use `./gradlew run` or the shared **Yonaka Reader** run configuration
@@ -39,9 +39,9 @@ in its VM options; executable JAR and native-package launches already enable it.
 Open an image, a directory of images, or a ZIP archive immediately:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/page.jpg
-java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/chapter
-java -jar build/libs/yonaka-reader-0.11.0.jar /path/to/volume.zip
+java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/page.jpg
+java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/chapter
+java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/volume.zip
 ```
 
 ## Settings
@@ -172,7 +172,7 @@ Ctrl/Command+wheel works without it.
 - Vector navigation icons replace font-dependent symbols and emoji.
 - The toolbar has dedicated buttons for fit, zoom and reading direction. Hover over a button for its action and shortcut.
 - Scale, two-page spread, reading direction and fullscreen states stay synchronized between toolbar, menus and shortcuts.
-- Reading controls become available after a book opens. First/last commands are disabled at their respective boundaries; next/previous wrap within the volume by default. In Settings → Reading, turn wrapping off to stop at the ends, or select adjacent-volume navigation. At the ends of a series the reader stays on the page.
+- Reading controls become available after a book opens. By default, Next on the last page or Previous on the first page keeps the current page and briefly shows “Last page” or “First page”. In Settings → Reading, choose Do nothing, wrap within the volume, or continue into the adjacent volume. At the ends of a series the reader stays on the page.
 - Escape leaves fullscreen without closing the application; Q and Cmd/Ctrl+Q still quit.
 
 ## Appearance and platform behavior
@@ -211,7 +211,7 @@ Storage locations:
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.11.0.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.12.0.jar
 ```
 
 ### Reset and compatibility

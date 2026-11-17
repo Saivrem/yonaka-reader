@@ -640,6 +640,11 @@ public class ViewerController implements SettingsHost, ViewerView {
     }
 
     @Override
+    public void showBoundaryHint(String message) {
+        readerSurface.showBoundaryHint(message);
+    }
+
+    @Override
     public void showLoading() {
         if (thumbnailPanel != null) {
             thumbnailPanel.setGridMode(false);

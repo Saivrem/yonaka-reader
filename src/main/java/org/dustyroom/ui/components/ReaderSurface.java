@@ -18,9 +18,12 @@ public final class ReaderSurface extends JPanel {
     private final JPanel hero = new JPanel();
     private final JPanel compact = new JPanel(new BorderLayout(24, 0));
     private final JTabbedPane home = new JTabbedPane();
+    private final Timer hintTimer = new Timer(1000, _ -> hideBoundaryHint());
+    private Popup boundaryHint;
     private boolean reading;
 
     public ReaderSurface(JScrollPane reader, Action open) {
+        hintTimer.setRepeats(false);
         setLayout(cards);
         JPanel welcome = new JPanel(new BorderLayout());
         JPanel content = new JPanel();
@@ -120,6 +123,29 @@ public final class ReaderSurface extends JPanel {
         recent.showBooks(books);
     }
 
+    public void showBoundaryHint(String message) {
+        hideBoundaryHint();
+        if (!reading || !isShowing()) {
+            return;
+        }
+        JToolTip tip = createToolTip();
+        tip.setTipText(message);
+        Dimension size = tip.getPreferredSize();
+        Point anchor = new Point((getWidth() - size.width) / 2, getHeight() - size.height - 16);
+        SwingUtilities.convertPointToScreen(anchor, this);
+        boundaryHint = PopupFactory.getSharedInstance().getPopup(this, tip, anchor.x, anchor.y);
+        boundaryHint.show();
+        hintTimer.restart();
+    }
+
+    private void hideBoundaryHint() {
+        hintTimer.stop();
+        if (boundaryHint != null) {
+            boundaryHint.hide();
+            boundaryHint = null;
+        }
+    }
+
     public void showWelcome() {
         reading = false;
         setLoading(false);
@@ -132,6 +158,7 @@ public final class ReaderSurface extends JPanel {
     }
 
     public void setLoading(boolean loading) {
+        hideBoundaryHint();
         if (!reading) {
             status.setText(loading ? "Opening your book…" : "JPG · PNG · GIF · ZIP");
         }
