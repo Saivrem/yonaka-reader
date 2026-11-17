@@ -19,7 +19,7 @@ Run the full verification and build an executable fat JAR:
 The resulting application is written to:
 
 ```text
-build/libs/yonaka-reader-0.12.0.jar
+build/libs/yonaka-reader-0.13.0.jar
 ```
 
 ## Run
@@ -27,7 +27,7 @@ build/libs/yonaka-reader-0.12.0.jar
 Open the application without an initial file:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.12.0.jar
+java -jar build/libs/yonaka-reader-0.13.0.jar
 ```
 
 For development, use `./gradlew run` or the shared **Yonaka Reader** run configuration
@@ -36,12 +36,12 @@ created classpath/Main configuration must include `--enable-native-access=ALL-UN
 in its VM options; executable JAR and native-package launches already enable it.
 `./gradlew launchSmoke` verifies SQLite access with unapproved native calls denied.
 
-Open an image, a directory of images, or a ZIP archive immediately:
+Open an image, a directory of images, or a ZIP/CBZ archive immediately:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/page.jpg
-java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/chapter
-java -jar build/libs/yonaka-reader-0.12.0.jar /path/to/volume.zip
+java -jar build/libs/yonaka-reader-0.13.0.jar /path/to/page.jpg
+java -jar build/libs/yonaka-reader-0.13.0.jar /path/to/chapter
+java -jar build/libs/yonaka-reader-0.13.0.jar /path/to/volume.zip
 ```
 
 ## Settings
@@ -70,11 +70,11 @@ The explicit `yonaka.dataDir` launch option takes precedence and disables the fo
 ## Recently read
 
 The home screen shows up to 6 recently read books/series with a first-page cover and saved
-page progress. ZIP cards show the parent folder as the series title and the last opened
+page progress. Archive cards show the parent folder as the series title and the last opened
 filename below it, including when only one volume has been read. The same list is available under **File → Open Recent**. Use
 **File → Home** (Command+Shift+H on macOS, Ctrl+Shift+H elsewhere) to return to the shelf while a book is open.
 
-**Group ZIPs by folder** is enabled by default and can be disabled on the home screen.
+**Group archives by folder** is enabled by default and can be disabled on the home screen.
 Archives in the same parent folder share a card; Continue resumes the most recently
 read chapter. **Chapters** shows the chapters on the card with individual open and
 delete controls. The card's trash button clears the reading history of every chapter
@@ -97,14 +97,14 @@ Existing reading history is preserved by a transactional schema migration.
 ## Library
 
 Open **File → Home → Library** to build an explicit shelf, separate from Recently read.
-Use **Add folder…** to scan a library root. Each ZIP directly in the root becomes a
+Use **Add folder…** to scan a library root. Each ZIP or CBZ directly in the root becomes a
 book named after the file. Loose images in the root share one book. Each immediate
-subfolder becomes a book containing its ZIP chapters in natural order and its loose
+subfolder becomes a book containing its archive chapters in natural order and its loose
 images as one chapter. Deeper directories and symbolic links are skipped.
 
 Review book titles and select chapters before importing. A subfolder containing
-both images and ZIPs starts unchecked so you can choose which to include. Unreadable
-ZIPs and archives without supported pages are reported in the preview. Scanning can
+both images and archives starts unchecked so you can choose which to include. The preview reports
+archives that cannot be read or contain no supported pages. Scanning can
 be cancelled. Previously imported chapters keep their original book and reading state
 when the same files are found from another root.
 
@@ -133,16 +133,16 @@ unrecognized future schemas are never downgraded.
 ## Supported content
 
 - Images: `jpg`, `jpeg`, `png`, and `gif`
-- Archives: `zip`
+- Archives: `zip` and `cbz`
 - Natural file ordering, for example `page2` before `page10`
-- Nested image paths inside ZIP archives
+- Nested image paths inside ZIP/CBZ archives
 - Single-page and two-page spreads
 - Left-to-right comics and right-to-left manga reading modes
 - Fit-to-screen, fit-width, fit-height, zoom, scrolling, and fullscreen modes
 - Background image decoding with stale-request protection
 - Bounded image caching and next-page prefetch
 
-Animated GIFs play both as standalone files and inside ZIP archives, including in
+Animated GIFs play both as standalone files and inside ZIP/CBZ archives, including in
 spreads. Sequential background decoding preserves frame offsets, disposal rules,
 delays and loop counts, with two frames buffered ahead per visible page. Playback follows a monotonic timeline, so delayed UI ticks do not accumulate slowdown.
 There is no frame-count or duration limit; completed passes reopen
@@ -186,7 +186,7 @@ Ctrl/Command+wheel works without it.
 
 ## Drag and drop and saved state
 
-Drop one image, ZIP archive, or image folder anywhere in the application content.
+Drop one image, ZIP/CBZ archive, or image folder anywhere in the application content.
 The Open dialog also accepts folders. Dropping multiple objects is rejected with an
 explanation; unsupported or corrupt sources leave the current book visible.
 
@@ -196,7 +196,7 @@ and failed opens do not change the saved directory; application reset clears it.
 
 A local SQLite database stores theme, scale and last-directory preferences, plus the last displayed
 page, page count, reading direction and spread mode for each book. A book is identified
-by the absolute normalized path of its folder or ZIP archive. Reopening it resumes
+by the absolute normalized path of its folder or ZIP/CBZ archive. Reopening it resumes
 reading; explicitly opening an image always selects that image. Page names are used
 before numeric positions, so inserting earlier pages does not shift the bookmark.
 If the saved page was removed, its old position is clamped to the remaining pages.
@@ -211,14 +211,14 @@ Storage locations:
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.12.0.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.13.0.jar
 ```
 
 ### Reset and compatibility
 
 Use **Help → Reset comic database…** to clear settings, library membership, completion marks and reading history. The
 confirmation defaults to Cancel. After a successful reset the app closes; the next
-launch uses defaults. Image files, folders and ZIP archives are never deleted.
+launch uses defaults. Image files, folders and ZIP/CBZ archives are never deleted.
 Reset is transactional: if clearing any table fails, all retain their data.
 Queued saves are drained before reset, and late loading callbacks cannot repopulate it.
 This is an application reset, not secure erasure of SQLite pages. No automatic database copies are created.
@@ -324,8 +324,8 @@ no system Java, installer, administrator service or background agent is needed.
 The package matches the architecture of the JDK used to build it. CI currently
 builds Apple Silicon; use an Intel JDK on an Intel Mac for an Intel package.
 
-Finder's **Open With → Yonaka Reader** supports `.jpg`, `.jpeg`, `.png`, `.gif`
-and `.zip`. Registration does not force a new default application. Opening from
+Finder's **Open With → Yonaka Reader** supports `.jpg`, `.jpeg`, `.png`, `.gif`,
+`.zip` and `.cbz`. Registration does not force a new default application. Opening from
 Finder works both at startup and while the reader is already running. If multiple
 files are selected, the first is opened because the reader displays one book at a time.
 Command-line paths containing spaces must be quoted.

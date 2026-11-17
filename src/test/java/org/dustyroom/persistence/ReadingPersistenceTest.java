@@ -1,6 +1,7 @@
 package org.dustyroom.persistence;
 
 import org.dustyroom.be.iterators.ImageIteratorFactory;
+import org.dustyroom.be.utils.FileUtils;
 import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.view.ViewerFrame;
@@ -54,7 +55,7 @@ class ReadingPersistenceTest extends BasePersistenceTest {
 
     private Path createBook(String name) throws IOException {
         Path source = directory.resolve(name);
-        if (name.endsWith(".zip")) {
+        if (FileUtils.isSupportedArchive(name)) {
             return writeZip(source, "chapter/01.png", "chapter/02.png", "chapter/03.png");
         }
 
@@ -65,7 +66,7 @@ class ReadingPersistenceTest extends BasePersistenceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"pages", "book.zip"})
+    @ValueSource(strings = {"pages", "book.zip", "book.CBZ"})
     void resumesReadingAfterReopen(String name) throws IOException {
         Path source = createBook(name);
         AtomicReference<ViewerFrame> shown = new AtomicReference<>();

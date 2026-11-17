@@ -1,6 +1,7 @@
 package org.dustyroom.ui.loading;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.io.TempDir;
 
 import javax.imageio.ImageIO;
@@ -17,9 +18,10 @@ class BookCoverLoaderTest {
     @TempDir
     Path directory;
 
-    @Test
-    void archiveCoverIsFirstPageAndHandleIsClosed() throws Exception {
-        Path archive = directory.resolve("日本語 book.zip");
+    @ParameterizedTest
+    @ValueSource(strings = {"日本語 book.zip", "日本語 book.CBZ"})
+    void archiveCoverIsFirstPageAndHandleIsClosed(String name) throws Exception {
+        Path archive = directory.resolve(name);
         BufferedImage image = new BufferedImage(40, 60, BufferedImage.TYPE_INT_RGB);
         try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
             zip.putNextEntry(new ZipEntry("02.png"));

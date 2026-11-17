@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * Small, bounded shelf; cover updates preserve keyboard focus on existing cards.
  */
 public final class RecentBooksPanel extends JPanel {
-    private final JCheckBox groupByFolder = new JCheckBox("Group ZIPs by folder", true);
+    private final JCheckBox groupByFolder = new JCheckBox("Group archives by folder", true);
     private final BookCardGrid cards = new BookCardGrid();
     private final JLabel empty = new JLabel("Your recently read books will appear here.");
     private final Map<String, RecentBookCard> entries = new LinkedHashMap<>();

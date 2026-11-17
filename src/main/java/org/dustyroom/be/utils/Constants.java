@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 @UtilityClass
 public class Constants {
     public static final List<String> IMAGE_FORMATS = List.of("jpg", "jpeg", "png", "gif");
-    public static final List<String> ARCHIVE_FORMATS = List.of("zip");
+    public static final List<String> ARCHIVE_FORMATS = List.of("zip", "cbz");
     public static final String[] SUPPORTED_FORMATS = Stream.concat(
             IMAGE_FORMATS.stream(),
             ARCHIVE_FORMATS.stream()

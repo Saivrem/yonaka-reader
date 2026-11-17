@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  */
 public final class ReaderSurface extends JPanel {
     private final CardLayout cards = new CardLayout();
-    private final JLabel status = new JLabel("JPG · PNG · GIF · ZIP", JLabel.CENTER);
+    private final JLabel status = new JLabel("JPG · PNG · GIF · ZIP · CBZ", JLabel.CENTER);
     private final RecentBooksPanel recent = new RecentBooksPanel();
     private final JPanel hero = new JPanel();
     private final JPanel compact = new JPanel(new BorderLayout(24, 0));
@@ -34,7 +34,7 @@ public final class ReaderSurface extends JPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD, 32f));
         JLabel slogan = new JLabel("もう少し読んでいましょう");
         slogan.setFont(slogan.getFont().deriveFont(15f));
-        JLabel subtitle = new JLabel("Drop an image, ZIP archive or folder here to start reading.");
+        JLabel subtitle = new JLabel("Drop an image, ZIP/CBZ archive or folder here to start reading.");
         subtitle.setFont(subtitle.getFont().deriveFont(15f));
         for (Component item : new Component[]{new JLabel(BrandAssets.welcomeIcon()),
                 Box.createVerticalStrut(24), title, Box.createVerticalStrut(16), slogan,
@@ -96,7 +96,7 @@ public final class ReaderSurface extends JPanel {
         button.putClientProperty("FlatLaf.style", "background: $Component.accentColor; foreground: #0D1017");
         button.setMaximumSize(new Dimension(190, 44));
         button.setPreferredSize(new Dimension(190, 44));
-        button.getAccessibleContext().setAccessibleName("Open an image, ZIP archive or folder");
+        button.getAccessibleContext().setAccessibleName("Open an image, ZIP/CBZ archive or folder");
         return button;
     }
 
@@ -160,7 +160,7 @@ public final class ReaderSurface extends JPanel {
     public void setLoading(boolean loading) {
         hideBoundaryHint();
         if (!reading) {
-            status.setText(loading ? "Opening your book…" : "JPG · PNG · GIF · ZIP");
+            status.setText(loading ? "Opening your book…" : "JPG · PNG · GIF · ZIP · CBZ");
         }
     }
 }

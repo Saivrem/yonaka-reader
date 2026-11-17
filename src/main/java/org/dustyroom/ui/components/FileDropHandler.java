@@ -52,7 +52,7 @@ public final class FileDropHandler extends TransferHandler {
         try {
             Object value = support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
             if (!(value instanceof List<?> files) || files.size() != 1 || !(files.getFirst() instanceof File file)) {
-                report("Drop one image, ZIP archive, or folder at a time.");
+                report("Drop one image, ZIP/CBZ archive, or folder at a time.");
                 return false;
             }
             open.accept(file);

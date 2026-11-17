@@ -37,7 +37,7 @@ class RecentGroupsTest {
         for (int i = 0; i < 7; i++) {
             books.add(book("series-" + i, "first.zip"));
         }
-        BookState olderChapter = book("series-5", "second.zip");
+        BookState olderChapter = book("series-5", "second.CBZ");
         books.add(olderChapter);
 
         List<List<BookState>> cards = RecentGroups.select(books, true);

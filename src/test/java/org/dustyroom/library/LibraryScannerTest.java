@@ -37,7 +37,7 @@ class LibraryScannerTest {
         Files.writeString(directory.resolve("cover.png"), "image decoding is deliberately deferred");
         Path nested = Files.createDirectory(directory.resolve("nested"));
         archive(nested.resolve("1.zip"), "p.gif");
-        archive(nested.resolve("10.zip"), "page.png");
+        archive(nested.resolve("10.CBZ"), "page.png");
         Files.writeString(nested.resolve("cover.jpg"), "image");
         Files.createDirectory(nested.resolve("deeper"));
         archive(nested.resolve("deeper/ignored.zip"), "page.png");
@@ -66,7 +66,7 @@ class LibraryScannerTest {
                 .filter(work -> nested.toString().equals(work.getRoot()))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(List.of("nested", "1.zip", "10.zip"), series.getSources()
+        assertEquals(List.of("nested", "1.zip", "10.CBZ"), series.getSources()
                 .stream()
                 .map(LibrarySource::getTitle)
                 .toList());

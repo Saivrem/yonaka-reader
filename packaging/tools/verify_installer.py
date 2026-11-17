@@ -33,7 +33,8 @@ else:
     java, = extracted.rglob('lib/runtime/bin/java')
     desktop_files = list(extracted.rglob('*.desktop'))
     assert desktop_files, 'Missing desktop launcher'
-    assert any('MimeType=' in p.read_text() for p in desktop_files), 'Missing file associations'
+    assert any('application/vnd.comicbook+zip' in line.split('=', 1)[1].split(';')
+               for p in desktop_files for line in p.read_text().splitlines() if line.startswith('MimeType=')), 'Missing CBZ association'
 jar, = extracted.rglob('yonaka-reader-*.jar')
 assert java.is_file() and jar.is_file()
 temp = output / 'extracted-smoke-temp'

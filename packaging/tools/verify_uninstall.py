@@ -51,6 +51,31 @@ def windows_registration():
     return matches
 
 
+def verify_cbz_handler(launcher):
+    import winreg
+    classes = winreg.HKEY_CLASSES_ROOT
+    choices = set()
+    with winreg.OpenKey(classes, '.cbz') as key:
+        try:
+            choices.add(winreg.QueryValueEx(key, '')[0])
+        except FileNotFoundError:
+            pass
+        try:
+            with winreg.OpenKey(key, 'OpenWithProgids') as handlers:
+                for index in range(winreg.QueryInfoKey(handlers)[1]):
+                    choices.add(winreg.EnumValue(handlers, index)[0])
+        except FileNotFoundError:
+            pass
+    for progid in choices:
+        try:
+            with winreg.OpenKey(classes, progid + r'\shell\open\command') as command:
+                if str(launcher).casefold() in winreg.QueryValueEx(command, '')[0].casefold():
+                    return
+        except FileNotFoundError:
+            continue
+    raise AssertionError('No CBZ handler points to the installed Yonaka Reader')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('platform', choices=['windows', 'linux'])
@@ -76,6 +101,7 @@ def main():
             try:
                 run(['msiexec.exe', '/i', installer, '/qn', '/norestart',
                      '/l*v', output / 'msi-install.log'], allowed=(0, 3010), properties={'INSTALLDIR': target})
+                verify_cbz_handler(target / 'Yonaka Reader.exe')
                 assert windows_registration(), 'Application not registered for Windows uninstall'
                 assert (target / 'Yonaka Reader.exe').is_file(), 'Installed launcher missing'
                 assert (target / 'runtime/bin/java.exe').is_file(), 'Installed runtime missing'
