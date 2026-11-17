@@ -189,3 +189,7 @@ Open **Options → Settings…** (Command+, on macOS, Ctrl+, elsewhere).
 ## Known limitations
 
 - Image rotation is not supported.
+
+## Interface language
+
+Choose English, Русский or 日本語 in **Options → Settings → Appearance → Language**. Apply changes the interface immediately and remembers your choice. See the [translation guide](translations.md) to add another language.

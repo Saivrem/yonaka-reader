@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.be.i18n.I18n;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -52,13 +53,13 @@ public final class FileDropHandler extends TransferHandler {
         try {
             Object value = support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
             if (!(value instanceof List<?> files) || files.size() != 1 || !(files.getFirst() instanceof File file)) {
-                report("Drop one image, ZIP/CBZ archive, or folder at a time.");
+                report(I18n.text("drop.oneSource"));
                 return false;
             }
             open.accept(file);
             return true;
         } catch (Exception exception) {
-            report("Unable to read the dropped files. Try opening the source with Open instead.");
+            report(I18n.text("drop.failed"));
             return false;
         }
     }

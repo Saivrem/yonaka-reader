@@ -1,5 +1,8 @@
 package org.dustyroom.ui.settings;
 
+import org.dustyroom.be.models.i18n.Language;
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
@@ -18,42 +21,44 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SettingsDialog extends JDialog {
     private final SettingsHost host;
+    private final JComboBox<Language> language = new JComboBox<>(I18n.languages().toArray(Language[]::new));
     private final JComboBox<ThemeMode> theme = new JComboBox<>(ThemeMode.values());
-    private final JComboBox<String> direction = new JComboBox<>(new String[]{"Manga · right to left", "Comics · left to right"});
-    private final JCheckBox spread = new JCheckBox("Two-page spreads");
-    private final JComboBox<String> scale = new JComboBox<>(new String[]{"Fit to window", "Fit width", "Fit height", "Original size · 100%"});
-    private final JRadioButton stop = new JRadioButton("Do nothing");
-    private final JRadioButton wrap = new JRadioButton("Wrap pages within the volume");
-    private final JRadioButton adjacent = new JRadioButton("Continue into the adjacent volume");
-    private final JCheckBox thumbnails = new JCheckBox("Show thumbnails");
+    private final JComboBox<String> direction = UiText.combo("ui.manga_right_to_left_label", "ui.comics_left_to_right_label");
+    private final JCheckBox spread = UiText.checkbox("ui.two_page_spreads");
+    private final JComboBox<String> scale = UiText.combo("ui.fit_to_window_label", "ui.fit_width_label", "ui.fit_height_label", "ui.original_size_100");
+    private final JRadioButton stop = UiText.radio("ui.do_nothing");
+    private final JRadioButton wrap = UiText.radio("ui.wrap_pages_within_the_volume");
+    private final JRadioButton adjacent = UiText.radio("ui.continue_into_the_adjacent_volume");
+    private final JCheckBox thumbnails = UiText.checkbox("ui.show_thumbnails");
     private final JTextField library = new JTextField();
-    private final JButton apply = new JButton("Apply");
-    private final JButton ok = new JButton("OK");
-    private final JButton cancel = new JButton("Cancel");
-    private final JButton changeData = new JButton("Change…");
-    private final JButton scan = new JButton("Scan / refresh…");
+    private final JButton apply = UiText.button("ui.apply");
+    private final JButton ok = UiText.button("ui.ok");
+    private final JButton cancel = UiText.button("ui.cancel");
+    private final JButton changeData = UiText.button("ui.change");
+    private final JButton scan = UiText.button("ui.scan_refresh");
     private final ShortcutPanel shortcuts;
     private boolean busy;
 
     public SettingsDialog(Window owner, SettingsHost host, KeyBindings bindings) {
-        super(owner, "Settings", ModalityType.APPLICATION_MODAL);
+        super(owner, I18n.text("ui.settings_label"), ModalityType.APPLICATION_MODAL);
+        UiText.bind(this, "title", target -> target.setTitle(I18n.text("ui.settings_label")));
         this.host = host;
         shortcuts = new ShortcutPanel(bindings, host.currentSettings().getShortcuts());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         JPanel content = new JPanel(new BorderLayout(16, 16));
         content.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
-        JList<String> categories = new JList<>(new String[]{"Appearance", "Reading", "Shortcuts", "Library", "Data"});
+        JList<String> categories = UiText.list("ui.appearance", "ui.reading", "ui.shortcuts", "ui.library", "ui.data");
         categories.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         categories.setFixedCellHeight(36);
-        categories.setPreferredSize(new Dimension(130, 250));
+        categories.setPreferredSize(new Dimension(175, 250));
         categories.setSelectedIndex(0);
         CardLayout layout = new CardLayout();
         JPanel pages = new JPanel(layout);
-        pages.add(appearance(), "Appearance");
-        pages.add(reading(), "Reading");
-        pages.add(shortcuts, "Shortcuts");
-        pages.add(library(), "Library");
-        pages.add(data(), "Data");
+        pages.add(appearance(), "ui.appearance");
+        pages.add(reading(), "ui.reading");
+        pages.add(shortcuts, "ui.shortcuts");
+        pages.add(library(), "ui.library");
+        pages.add(data(), "ui.data");
         categories.addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting() && categories.getSelectedValue() != null) {
                 layout.show(pages, categories.getSelectedValue());
@@ -84,7 +89,8 @@ public final class SettingsDialog extends JDialog {
     }
 
     private static JTextArea note(String text) {
-        JTextArea note = new JTextArea(text, 3, 36);
+        JTextArea note = new JTextArea(5, 36);
+        UiText.bind(note, "text", target -> target.setText(I18n.text(text)));
         note.setLineWrap(true);
         note.setWrapStyleWord(true);
         note.setEditable(false);
@@ -95,15 +101,18 @@ public final class SettingsDialog extends JDialog {
 
     private JPanel appearance() {
         SettingsForm panel = new SettingsForm();
-        panel.row(new JLabel("Theme"));
+        panel.row(UiText.label("ui.theme"));
         panel.row(theme);
-        panel.row(note("System follows your OS appearance using Ayu Light or Ayu Dark. If unavailable, the last detected theme is retained."));
+        UiText.bind(theme, "repaint", Component::repaint);
+        panel.row(UiText.label("ui.language"));
+        panel.row(language);
+        panel.row(note("settings.systemThemeHint"));
         return top(panel);
     }
 
     private JPanel reading() {
         SettingsForm panel = new SettingsForm();
-        panel.row(note("Defaults for newly opened books. Saved book direction and spread mode take priority."));
+        panel.row(note("settings.readingHint"));
         panel.row(direction);
         panel.row(spread);
         panel.row(scale);
@@ -112,7 +121,7 @@ public final class SettingsDialog extends JDialog {
         boundaries.add(stop);
         boundaries.add(wrap);
         boundaries.add(adjacent);
-        panel.row(new JLabel("At the first or last page"));
+        panel.row(UiText.label("ui.at_the_first_or_last_page"));
         panel.row(stop);
         panel.row(wrap);
         panel.row(adjacent);
@@ -121,11 +130,11 @@ public final class SettingsDialog extends JDialog {
 
     private JPanel library() {
         SettingsForm panel = new SettingsForm();
-        panel.row(new JLabel("Library folder"));
+        panel.row(UiText.label("ui.library_folder"));
         panel.row(library);
-        JButton browse = new JButton("Browse…");
+        JButton browse = UiText.button("ui.browse");
         browse.addActionListener(_ -> {
-            Path selected = chooseDirectory("Library folder");
+            Path selected = chooseDirectory(I18n.text("ui.library_folder"));
             if (selected != null) {
                 library.setText(selected.toString());
             }
@@ -133,35 +142,35 @@ public final class SettingsDialog extends JDialog {
         panel.row(browse);
         scan.addActionListener(_ -> {
             if (library.getText().isBlank()) {
-                error("Choose a library folder first.");
+                error(I18n.text("ui.choose_a_library_folder_first"));
                 return;
             }
             try {
                 Path root = Path.of(library.getText()).toAbsolutePath().normalize();
                 host.scanLibrary(root);
             } catch (RuntimeException exception) {
-                error("Invalid library path: " + exception.getMessage());
+                error(I18n.text("errors.libraryPath", exception.getMessage()));
             }
         });
         panel.row(scan);
-        panel.row(note("Scanning opens an import preview. Apply saves the folder preference; it does not import or remove books."));
+        panel.row(note("settings.scanHint"));
         return top(panel);
     }
 
     private JPanel data() {
         SettingsForm panel = new SettingsForm();
         Path directory = host.dataDirectory();
-        JTextField path = new JTextField(directory == null ? "Storage unavailable" : directory.toString());
+        JTextField path = new JTextField(directory == null ? I18n.text("ui.storage_unavailable") : directory.toString());
         path.setEditable(false);
-        panel.row(new JLabel("Current data folder"));
+        panel.row(UiText.label("ui.current_data_folder"));
         panel.row(path);
-        JButton open = new JButton("Open folder");
+        JButton open = UiText.button("ui.open_folder");
         open.setEnabled(directory != null && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN));
         open.addActionListener(_ -> CompletableFuture.runAsync(() -> {
             try {
                 Desktop.getDesktop().open(directory.toFile());
             } catch (IOException | RuntimeException exception) {
-                SwingUtilities.invokeLater(() -> error("Cannot open the data folder: " + exception.getMessage()));
+                SwingUtilities.invokeLater(() -> error(I18n.text("errors.openData", exception.getMessage())));
             }
         }));
         panel.row(open);
@@ -169,8 +178,8 @@ public final class SettingsDialog extends JDialog {
         changeData.addActionListener(_ -> chooseProfile());
         panel.row(changeData);
         panel.row(note(StorageUtils.isDirectoryOverridden()
-                ? "The data folder is fixed by the launch option yonaka.dataDir."
-                : "Changing profiles closes the reader. Empty folders receive the current data; existing profiles are opened separately. Books are never moved."));
+                ? "settings.fixedDataFolder"
+                : "settings.profileHint"));
         return top(panel);
     }
 
@@ -178,7 +187,7 @@ public final class SettingsDialog extends JDialog {
         if (busy) {
             return;
         }
-        Path selected = chooseDirectory("Choose data folder");
+        Path selected = chooseDirectory(I18n.text("ui.choose_data_folder"));
         if (selected == null) {
             return;
         }
@@ -186,20 +195,14 @@ public final class SettingsDialog extends JDialog {
         CompletableFuture.supplyAsync(() -> ProfileManager.containsProfile(selected)).whenComplete((existing, failure) -> SwingUtilities.invokeLater(() -> {
             setBusy(false);
             if (failure != null) {
-                error("Cannot inspect the selected folder.");
+                error(I18n.text("ui.cannot_inspect_the_selected_folder"));
                 return;
             }
             String question = existing
-                    ? """
-                      Open the profile in this folder on next launch?
-                      The current profile will stay in its current folder."""
-                    : "Move the current settings, history and library to this folder?";
-            String message = """
-                    %s
-
-                    Unapplied settings in this dialog will be discarded.
-                    Yonaka Reader will close. Your books will not be moved.""".formatted(question);
-            if (JOptionPane.showConfirmDialog(this, message, "Change data folder", JOptionPane.OK_CANCEL_OPTION,
+                    ? I18n.text("profile.open")
+                    : I18n.text("profile.moveQuestion");
+            String message = I18n.text("profile.confirm", question);
+            if (JOptionPane.showConfirmDialog(this, message, I18n.text("ui.change_data_folder"), JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
                 host.switchDataDirectory(selected, existing, this::dispose);
             }
@@ -207,6 +210,7 @@ public final class SettingsDialog extends JDialog {
     }
 
     private void load(ReaderSettings settings) {
+        language.setSelectedItem(I18n.language());
         theme.setSelectedItem(settings.getThemeMode());
         direction.setSelectedIndex(settings.getDefaultReadingMode() == ReadingMode.MANGA ? 0 : 1);
         spread.setSelected(settings.isDefaultTwoPageMode());
@@ -234,6 +238,7 @@ public final class SettingsDialog extends JDialog {
             boundary = VolumeBoundary.NEXT_VOLUME;
         }
         ReaderSettings selected = host.currentSettings().toBuilder()
+                .language(((Language) language.getSelectedItem()).getId())
                 .shortcuts(shortcuts.overrides())
                 .volumeBoundary(boundary)
                 .themeMode((ThemeMode) theme.getSelectedItem())
@@ -276,6 +281,6 @@ public final class SettingsDialog extends JDialog {
     }
 
     private void error(String message) {
-        JOptionPane.showMessageDialog(this, message, "Settings", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, I18n.text("ui.settings_label"), JOptionPane.ERROR_MESSAGE);
     }
 }

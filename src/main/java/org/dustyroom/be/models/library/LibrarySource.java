@@ -1,5 +1,6 @@
 package org.dustyroom.be.models.library;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -24,6 +25,6 @@ public final class LibrarySource {
 
     @Override
     public String toString() {
-        return title + (directory ? " (image folder)" : "");
+        return I18n.text("library.source", title, directory ? I18n.text("library.imageFolder") : "");
     }
 }

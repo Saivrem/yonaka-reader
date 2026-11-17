@@ -14,12 +14,5 @@ public class Constants {
             ARCHIVE_FORMATS.stream()
     ).toArray(String[]::new);
     public static final List<String> FILTERED_PATH_PARTS = List.of("__MACOSX", ".DS_Store");
-    public static final String ABOUT = """
-            Yonaka Reader ・ 夜中
-            もう少し読んでいましょう.
-
-            Version %s
-            Author: Denys Sheviakov
-            """;
 
 }

@@ -1,5 +1,6 @@
 package org.dustyroom.ui.library;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibraryImport;
 import org.dustyroom.be.models.library.LibrarySource;
 
@@ -43,9 +44,9 @@ final class LibraryImportTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         return switch (column) {
-            case 0 -> "Import";
-            case 1 -> "Book title";
-            default -> "Chapter";
+            case 0 -> I18n.text("ui.import");
+            case 1 -> I18n.text("ui.book_title");
+            default -> I18n.text("ui.chapter");
         };
     }
 

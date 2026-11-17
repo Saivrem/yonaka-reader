@@ -1,5 +1,6 @@
 package org.dustyroom.ui;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.persistence.ReaderStore;
@@ -29,7 +30,7 @@ public class ImageViewer extends JFrame {
     private final Timer resizeRenderTimer;
 
     public ImageViewer(ReaderStore store, ReaderSettings settings) {
-        setTitle("Yonaka Reader");
+        setTitle(I18n.text("brand.name"));
         setIconImages(BrandAssets.windowIcons());
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setPreferredSize(new Dimension(1100, 760));

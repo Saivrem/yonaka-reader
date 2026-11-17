@@ -1,5 +1,6 @@
 package org.dustyroom.ui.loading;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.iterators.ImageIterator;
 import org.dustyroom.be.iterators.ImageIteratorFactory;
 import org.dustyroom.be.models.animation.AnimatedPage;
@@ -150,9 +151,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                 store.reset();
             } catch (RuntimeException exception) {
                 closed.set(false);
-                uiExecutor.execute(() -> onFailure.accept("""
-                        Reset failed. The reader database could not be cleared. \
-                        Your books were not touched. Check that storage is available and try again."""));
+                uiExecutor.execute(() -> onFailure.accept(I18n.text("reset.failed")));
                 return;
             }
             tasks.close();
@@ -164,7 +163,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         });
         if (!queued) {
             closed.set(false);
-            uiExecutor.execute(() -> onFailure.accept("Unable to start the reset. Please restart the application and try again."));
+            uiExecutor.execute(() -> onFailure.accept(I18n.text("reset.startFailed")));
         }
     }
 
@@ -303,7 +302,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     public void saveSettings(ReaderSettings settings, Runnable success, Consumer<String> failure) {
         ReaderSettings snapshot = settings.toBuilder().build();
         if (closed.get()) {
-            failure.accept("The reader is closing.");
+            failure.accept(I18n.text("ui.the_reader_is_closing"));
             return;
         }
         tasks.execute(INTERACTIVE, () -> {
@@ -320,7 +319,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             } catch (RuntimeException exception) {
                 uiExecutor.execute(() -> {
                     if (!closed.get()) {
-                        failure.accept("Settings could not be saved: " + exception.getMessage());
+                        failure.accept(I18n.text("errors.saveSettings", exception.getMessage()));
                     }
                 });
             }
@@ -357,7 +356,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         persistenceWarningShown = true;
         uiExecutor.execute(() -> {
             if (!closed.get()) {
-                view.showPersistenceWarning("Reading can continue, but settings or progress could not be saved. Check the reader database location and available disk space.");
+                view.showPersistenceWarning(I18n.text("reading.saveFailed"));
             }
         });
     }
@@ -406,7 +405,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     public void goToPage(int pageNumber) {
         navigate(() -> {
             if (pageNumber < 1 || pageNumber > pages.size()) {
-                throw new IllegalArgumentException("Page must be between 1 and " + pages.size());
+                throw new IllegalArgumentException(I18n.text("errors.pageRange", pages.size()));
             }
             pageIndex = pageNumber - 1;
         });
@@ -543,11 +542,11 @@ public final class AsyncViewerSession implements AutoCloseable {
 
             List<PageRef> candidatePages = List.copyOf(candidate.pages());
             if (candidatePages.isEmpty()) {
-                throw new IllegalStateException("Image source contains no pages");
+                throw new IllegalStateException(I18n.text("ui.image_source_contains_no_pages"));
             }
             int candidateIndex = fromEnd ? candidatePages.size() - 1 : candidate.initialPageIndex();
             if (candidateIndex < 0 || candidateIndex >= candidatePages.size()) {
-                throw new IllegalStateException("Image source has an invalid initial page");
+                throw new IllegalStateException(I18n.text("ui.image_source_has_an_invalid_initial_page"));
             }
             Optional<BookState> saved = savedBook(candidatePages.getFirst().getKey().sourceId());
             // An explicitly selected image takes precedence over the saved position of its folder.
@@ -617,7 +616,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                     : source.switchToPreviousVolume();
             List<PageRef> switchedPages = List.copyOf(source.pages());
             if (selected == null || switchedPages.isEmpty()) {
-                throw new IllegalStateException("The selected volume contains no pages");
+                throw new IllegalStateException(I18n.text("ui.the_selected_volume_contains_no_pages"));
             }
 
             int selectedIndex = switchedPages.indexOf(selected);
@@ -883,7 +882,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private BufferedImage decodeImage(ImageIterator imageSource, PageRef page) {
         Picture loaded = imageSource.load(page);
         if (loaded == null || loaded.getImage() == null) {
-            throw new IllegalStateException("Image source returned an empty page");
+            throw new IllegalStateException(I18n.text("ui.image_source_returned_an_empty_page"));
         }
         return loaded.getImage();
     }
@@ -933,7 +932,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private void postBoundaryHint(long targetGeneration, long requestId, Direction direction) {
         uiExecutor.execute(() -> {
             if (isLatest(targetGeneration, requestId)) {
-                view.showBoundaryHint(direction == Direction.NEXT ? "Last page" : "First page");
+                view.showBoundaryHint(direction == Direction.NEXT ? I18n.text("ui.last_page_label") : I18n.text("ui.first_page_label"));
             }
         });
     }
@@ -969,7 +968,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private String errorMessage(RuntimeException error) {
         String message = error.getMessage();
         return message == null || message.isBlank()
-                ? "Unable to load the selected image"
+                ? I18n.text("ui.unable_to_load_the_selected_image")
                 : message;
     }
 

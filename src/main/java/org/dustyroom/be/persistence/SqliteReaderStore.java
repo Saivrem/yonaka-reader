@@ -1,5 +1,6 @@
 package org.dustyroom.be.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.utils.SqliteUtils;
 import org.dustyroom.be.persistence.schema.SqlitePragmas;
 import org.apache.commons.lang3.EnumUtils;
@@ -42,11 +43,11 @@ public final class SqliteReaderStore implements ReaderStore {
             }
             boolean transitional = version == 3 && LibrarySchema.transitionalSchema(connection);
             if (version > SCHEMA_VERSION && !transitional) {
-                throw new SQLException("Database schema is newer than this application; no changes were made");
+                throw new SQLException(I18n.text("database.newerSchema"));
             }
             int libraryVersion = LibrarySchema.version(connection);
             if (libraryVersion > LibrarySchema.VERSION || libraryVersion < 0) {
-                throw new SQLException("Library schema is newer than this application; no changes were made");
+                throw new SQLException(I18n.text("library.newerSchema"));
             }
             ReaderSchema.migrate(connection, version, libraryVersion, transitional);
             try (Statement sql = connection.createStatement()) {
@@ -60,12 +61,12 @@ public final class SqliteReaderStore implements ReaderStore {
                     exception.addSuppressed(closeError);
                 }
             }
-            throw new IllegalStateException("Cannot open reader database: " + database, exception);
+            throw new IllegalStateException(I18n.text("database.open", database), exception);
         }
     }
 
     private static IllegalStateException failure(SQLException exception) {
-        return new IllegalStateException("Cannot read or save reader state", exception);
+        return new IllegalStateException(I18n.text("database.state"), exception);
     }
 
     @Override

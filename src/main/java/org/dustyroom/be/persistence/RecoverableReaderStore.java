@@ -1,5 +1,6 @@
 package org.dustyroom.be.persistence;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.RequiredArgsConstructor;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.ReaderSettings;
@@ -26,7 +27,7 @@ public final class RecoverableReaderStore implements ReaderStore {
 
     @Override
     public void saveSettings(ReaderSettings settings) {
-        throw new IllegalStateException("The reader database is unavailable. Settings have not been saved.");
+        throw new IllegalStateException(I18n.text("database.settingsNotSaved"));
     }
 
     @Override

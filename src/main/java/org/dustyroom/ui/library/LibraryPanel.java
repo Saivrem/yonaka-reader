@@ -1,5 +1,7 @@
 package org.dustyroom.ui.library;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibrarySnapshot;
 import org.dustyroom.be.models.library.LibraryWork;
 import org.dustyroom.ui.components.BookCard;
@@ -20,9 +22,9 @@ public final class LibraryPanel extends JPanel {
     private final LibraryController controller;
     private final JPanel body = new JPanel(new BorderLayout());
     private final JTextField search = new JTextField(18);
-    private final JComboBox<String> filter = new JComboBox<>(new String[]{"All", "Unread", "Reading", "Finished", "Unavailable"});
-    private final JComboBox<String> sort = new JComboBox<>(new String[]{"Title", "Last read", "Date added"});
-    private final JLabel status = new JLabel("Add a folder to start your library. Your files stay where they are.");
+    private final JComboBox<String> filter = UiText.combo("ui.all", "ui.unread", "ui.reading", "ui.finished", "ui.unavailable");
+    private final JComboBox<String> sort = UiText.combo("ui.title", "ui.last_read", "ui.date_added");
+    private final JLabel status = UiText.label("library.emptyHint");
     private final JLabel workCount = new JLabel();
     private LibrarySnapshot snapshot = new LibrarySnapshot(List.of(), Set.of());
     private String selectedWork;
@@ -35,10 +37,10 @@ public final class LibraryPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         JPanel top = new JPanel(new BorderLayout(8, 8));
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        controls.add(button("Add folder…", controller::chooseFolder));
-        controls.add(button("Refresh", controller::refresh));
-        controls.add(new JLabel("Search"));
-        search.getAccessibleContext().setAccessibleName("Search library by title or path");
+        controls.add(button("ui.add_folder", controller::chooseFolder));
+        controls.add(button("ui.refresh", controller::refresh));
+        controls.add(UiText.label("ui.search"));
+        UiText.accessible(search, "ui.search_library_by_title_or_path");
         controls.add(search);
         controls.add(filter);
         controls.add(sort);
@@ -52,11 +54,11 @@ public final class LibraryPanel extends JPanel {
         search.getDocument().addDocumentListener(new DocumentChangeListener(this::changed));
         filter.addActionListener(_ -> changed());
         sort.addActionListener(_ -> changed());
-        render();
+        UiText.bind(this, "content", LibraryPanel::render);
     }
 
     private static JButton button(String title, Runnable action) {
-        JButton button = new JButton(title);
+        JButton button = UiText.button(title);
         button.addActionListener(_ -> action.run());
         return button;
     }
@@ -68,13 +70,17 @@ public final class LibraryPanel extends JPanel {
     }
 
     void status(String text) {
-        status.setText(text);
+        if (text.isEmpty()) {
+            UiText.bind(status, "text", target -> target.setText(""));
+        } else {
+            UiText.text(status, text);
+        }
     }
 
     void showSnapshot(LibrarySnapshot snapshot) {
         this.snapshot = snapshot;
         int count = snapshot.getWorks().size();
-        workCount.setText(count + (count == 1 ? " work" : " works"));
+        UiText.text(workCount, "library.workCount", count);
         status("");
         render();
     }
@@ -137,7 +143,7 @@ public final class LibraryPanel extends JPanel {
         }
 
         if (works.isEmpty()) {
-            body.add(new JLabel("No works found. Add a folder or change the filters.", SwingConstants.CENTER), BorderLayout.CENTER);
+            body.add(UiText.centeredLabel("library.noMatches"), BorderLayout.CENTER);
         } else {
             JPanel aligned = new JPanel(new BorderLayout());
             aligned.add(grid, BorderLayout.NORTH);
@@ -149,18 +155,18 @@ public final class LibraryPanel extends JPanel {
             body.add(scroll, BorderLayout.CENTER);
         }
         JPanel paging = new JPanel();
-        JButton previous = button("Previous", () -> {
+        JButton previous = button("ui.previous", () -> {
             page--;
             render();
         });
         previous.setEnabled(page > 0);
-        JButton next = button("Next", () -> {
+        JButton next = button("ui.next", () -> {
             page++;
             render();
         });
         next.setEnabled((page + 1) * PAGE_SIZE < works.size());
         paging.add(previous);
-        paging.add(new JLabel("Page " + (page + 1) + " / " + Math.max(1, (works.size() + PAGE_SIZE - 1) / PAGE_SIZE)));
+        paging.add(new JLabel(I18n.text("reading.progress", page + 1, Math.max(1, (works.size() + PAGE_SIZE - 1) / PAGE_SIZE))));
         paging.add(next);
         body.add(paging, BorderLayout.SOUTH);
     }
@@ -177,18 +183,18 @@ public final class LibraryPanel extends JPanel {
     private void details(LibraryWork work) {
         JPanel heading = new JPanel(new GridLayout(0, 1, 4, 4));
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEADING));
-        actions.add(button("← Library", () -> {
+        actions.add(button("ui.library_label", () -> {
             selectedWork = null;
             render();
         }));
-        actions.add(button("Rename…", () -> controller.rename(work)));
-        actions.add(button("Remove from library…", () -> controller.remove(work)));
+        actions.add(button("ui.rename", () -> controller.rename(work)));
+        actions.add(button("ui.remove_from_library", () -> controller.remove(work)));
         heading.add(actions);
         heading.add(new JLabel(work.getTitle()));
         JTextField path = new JTextField(work.getRoot());
         path.setEditable(false);
         heading.add(path);
-        heading.add(new JLabel("Unavailable sources retain their progress. Restore the original path and click Refresh."));
+        heading.add(UiText.label("library.unavailableHint"));
         body.add(heading, BorderLayout.NORTH);
         JTable chapters = new JTable(new LibraryChapterTableModel(work.getChapters(), snapshot.getAvailable()));
         chapters.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -220,8 +226,8 @@ public final class LibraryPanel extends JPanel {
         chapterScroll.setColumnHeaderView(chapters.getTableHeader());
         body.add(chapterScroll, BorderLayout.CENTER);
         JPanel actionsBottom = new JPanel();
-        actionsBottom.add(button("Open selected chapter", open));
-        actionsBottom.add(button("Toggle finished", () -> {
+        actionsBottom.add(button("ui.open_selected_chapter", open));
+        actionsBottom.add(button("ui.toggle_finished", () -> {
             int row = chapters.getSelectedRow();
             if (row >= 0) {
                 controller.finish(work.getChapters().get(row));

@@ -1,5 +1,7 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.utils.FileUtils;
@@ -17,13 +19,14 @@ final class RecentBookCard extends BookCard {
 
     RecentBookCard(String id, Consumer<String> open, Consumer<List<String>> remove) {
         super(id, () -> open.accept(id));
-        trash = trashButton("Remove from recent", () -> remove.accept(current.getChapters()
+        trash = trashButton(I18n.text("ui.remove_from_recent"), () -> remove.accept(current.getChapters()
                 .stream()
                 .map(BookState::getSourceId)
                 .toList()));
         chapters.putClientProperty("JButton.buttonType", "borderless");
         chapters.addActionListener(_ -> showChapters(open, remove));
         setFooter(chapters, trash);
+        UiText.bind(this, "content", RecentBookCard::refreshLanguage);
     }
 
     private static JButton trashButton(String label, Runnable remove) {
@@ -53,7 +56,7 @@ final class RecentBookCard extends BookCard {
             });
             JPanel row = new JPanel(new BorderLayout());
             row.add(entry, BorderLayout.CENTER);
-            row.add(trashButton("Clear reading history for " + name, () -> {
+            row.add(trashButton(I18n.text("recent.clearBook", name), () -> {
                 dialog.dispose();
                 remove.accept(List.of(id));
             }), BorderLayout.EAST);
@@ -69,6 +72,12 @@ final class RecentBookCard extends BookCard {
         dialog.setVisible(true);
     }
 
+    private void refreshLanguage() {
+        if (current != null) {
+            update(current);
+        }
+    }
+
     void update(RecentBook book) {
         current = book;
         boolean grouped = book.getChapters().size() > 1;
@@ -80,16 +89,16 @@ final class RecentBookCard extends BookCard {
             heading = detail;
             detail = file.getName();
         }
-        String scope = grouped ? "all " + book.getChapters().size() + " chapters" : book.getTitle();
-        String label = "Clear reading history for " + scope;
+        String scope = grouped ? I18n.text("recent.allChapters", book.getChapters().size()) : book.getTitle();
+        String label = I18n.text("recent.clearBook", scope);
         trash.setToolTipText(label);
         trash.getAccessibleContext().setAccessibleName(label);
         chapters.setVisible(grouped);
-        chapters.setText("Chapters (" + book.getChapters().size() + ") ▾");
-        chapters.setToolTipText("Show recently read chapters. Continue: " + file.getName());
-        setHeading(heading, detail, book.isAvailable(), "Continue " + heading + ", " + detail + ", " + book.getProgress());
+        chapters.setText(I18n.text("recent.chapters", book.getChapters().size()));
+        chapters.setToolTipText(I18n.text("recent.continueChapter", file.getName()));
+        setHeading(heading, detail, book.isAvailable(), I18n.text("recent.continue", heading, detail, book.getProgress()));
         setProgress(book.getProgress(), book.getState().getPageNumber(), book.getState().getPageCount());
-        setAvailability(book.isAvailable() ? "" : "Moved, missing or unavailable");
+        setAvailability(book.isAvailable() ? "" : I18n.text("ui.moved_missing_or_unavailable"));
         setCover(book.getCover());
     }
 }

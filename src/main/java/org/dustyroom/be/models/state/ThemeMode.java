@@ -1,16 +1,19 @@
 package org.dustyroom.be.models.state;
 
-import lombok.Getter;
+import org.dustyroom.be.i18n.I18n;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum ThemeMode {
-    SYSTEM("System"),
-    LIGHT("Ayu Light"),
-    DARK("Ayu Dark");
+    SYSTEM("ui.system"),
+    LIGHT("ui.ayu_light"),
+    DARK("ui.ayu_dark");
 
     private final String label;
+
+    public String getLabel() {
+        return I18n.text(label);
+    }
 
     public ViewerTheme resolve(ViewerTheme systemFallback) {
         return switch (this) {
@@ -22,6 +25,6 @@ public enum ThemeMode {
 
     @Override
     public String toString() {
-        return label;
+        return getLabel();
     }
 }

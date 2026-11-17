@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.ui.actions.ViewerActions;
 import org.dustyroom.ui.utils.PlatformUi;
 
@@ -87,7 +88,8 @@ public final class KeyBindings {
         actions.forEach((id, action) -> {
             List<KeyStroke> keys = keys(id, overrides);
             action.putValue(Action.ACCELERATOR_KEY, keys.isEmpty() ? null : keys.getFirst());
-            String hint = descriptions.get(id);
+            String hint = action.getValue("translation.description") instanceof String key
+                    ? I18n.text(key) : descriptions.get(id);
             if (!keys.isEmpty()) {
                 hint = hint + " (" + display(keys) + ")";
             }

@@ -1,5 +1,7 @@
 package org.dustyroom.ui.actions;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -42,64 +44,66 @@ public class DefaultViewerActions implements ViewerActions {
     private final Action exitFullscreen;
 
     public DefaultViewerActions(ViewerController controller) {
-        this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
-        this.toggleThumbnails = action("toggleThumbnails", "Thumbnails", "Show or hide page thumbnails",
+        this.openPageGrid = action("openPageGrid", "ui.grid", "ui.open_page_grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
+        this.toggleThumbnails = action("toggleThumbnails", "ui.thumbnails", "ui.show_or_hide_page_thumbnails",
                 key(KeyEvent.VK_T), controller::toggleThumbnails);
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
-        this.home = action("home", "Home", "Return to recently read books",
+        this.home = action("home", "ui.home", "ui.return_to_recently_read_books",
                 KeyStroke.getKeyStroke(KeyEvent.VK_H, homeShortcut.getModifiers() | InputEvent.SHIFT_DOWN_MASK), controller::showHome);
-        this.openFile = action("openFile", "Open…", "Open an image, ZIP/CBZ archive or folder",
+        this.openFile = action("openFile", "ui.open", "ui.open_an_image_zip_cbz_archive_or_folder",
                 menuShortcut(KeyEvent.VK_O), controller::chooseFile);
-        this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "Quit" : "Exit", "Close Yonaka Reader",
+        this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "ui.quit" : "ui.exit", "ui.close_yonaka_reader",
                 menuShortcut(KeyEvent.VK_Q), controller::exit);
-        this.fitHeight = action("fitHeight", "Fit Height", "Fit the page to the window height",
+        this.fitHeight = action("fitHeight", "ui.fit_height", "ui.fit_the_page_to_the_window_height",
                 key(KeyEvent.VK_H), controller::fitHeight);
-        this.fitWidth = action("fitWidth", "Fit Width", "Fit the page to the window width",
+        this.fitWidth = action("fitWidth", "ui.fit_width", "ui.fit_the_page_to_the_window_width",
                 key(KeyEvent.VK_W), controller::fitWidth);
-        this.fitScreen = action("fitScreen", "Fit to Window", "Fit the entire page inside the window",
+        this.fitScreen = action("fitScreen", "ui.fit_to_window", "ui.fit_the_entire_page_inside_the_window",
                 key(KeyEvent.VK_S), controller::fitScreen);
-        this.zoomIn = action("zoomIn", "Zoom In", "Increase the page scale",
+        this.zoomIn = action("zoomIn", "ui.zoom_in", "ui.increase_the_page_scale",
                 key(KeyEvent.VK_PLUS), controller::zoomIn);
-        this.zoomOut = action("zoomOut", "Zoom Out", "Decrease the page scale",
+        this.zoomOut = action("zoomOut", "ui.zoom_out", "ui.decrease_the_page_scale",
                 key(KeyEvent.VK_MINUS), controller::zoomOut);
-        this.nextImage = action("nextImage", "Next Page", "Show the next page",
+        this.nextImage = action("nextImage", "ui.next_page", "ui.show_the_next_page",
                 key(KeyEvent.VK_RIGHT), controller::showNextImage);
-        this.prevImage = action("previousImage", "Previous Page", "Show the previous page",
+        this.prevImage = action("previousImage", "ui.previous_page", "ui.show_the_previous_page",
                 key(KeyEvent.VK_LEFT), controller::showPreviousImage);
-        this.firstImage = action("firstImage", "First Page", "Jump to the first page",
+        this.firstImage = action("firstImage", "ui.first_page", "ui.jump_to_the_first_page",
                 key(KeyEvent.VK_HOME), controller::showFirstImage);
-        this.lastImage = action("lastImage", "Last Page", "Jump to the last page",
+        this.lastImage = action("lastImage", "ui.last_page", "ui.jump_to_the_last_page",
                 key(KeyEvent.VK_END), controller::showLastImage);
-        this.nextVolume = action("nextVolume", "Next Volume", "Open the next volume",
+        this.nextVolume = action("nextVolume", "ui.next_volume", "ui.open_the_next_volume",
                 key(KeyEvent.VK_DOWN), controller::showNextVolume);
-        this.prevVolume = action("previousVolume", "Previous Volume", "Open the previous volume",
+        this.prevVolume = action("previousVolume", "ui.previous_volume", "ui.open_the_previous_volume",
                 key(KeyEvent.VK_UP), controller::showPrevVolume);
-        this.toggleFullscreen = action("toggleFullscreen", "Full Screen", "Enter or leave full-screen mode",
+        this.toggleFullscreen = action("toggleFullscreen", "ui.full_screen", "ui.enter_or_leave_full_screen_mode",
                 key(KeyEvent.VK_F), controller::toggleFullscreen);
-        this.shiftPairing = action("shiftPairing", "Shift spread by one page", "Show the cover alone and pair pages from page two", null, controller::shiftPairing);
-        this.toggleTwoPageMode = action("toggleTwoPageMode", "Two-Page Spread", "Show compatible pages as a spread",
+        this.shiftPairing = action("shiftPairing", "ui.shift_spread_by_one_page", "reading.shiftHint", null, controller::shiftPairing);
+        this.toggleTwoPageMode = action("toggleTwoPageMode", "ui.two_page_spread", "ui.show_compatible_pages_as_a_spread",
                 key(KeyEvent.VK_P), controller::toggleTwoPageMode);
-        this.setComicsReadingMode = action("comicsReadingMode", "Comics (Left to Right)", "Use left-to-right spread order",
+        this.setComicsReadingMode = action("comicsReadingMode", "ui.comics_left_to_right", "ui.use_left_to_right_spread_order",
                 key(KeyEvent.VK_C), controller::setComicsReadingMode);
-        this.setMangaReadingMode = action("mangaReadingMode", "Manga (Right to Left)", "Use right-to-left spread order",
+        this.setMangaReadingMode = action("mangaReadingMode", "ui.manga_right_to_left", "ui.use_right_to_left_spread_order",
                 key(KeyEvent.VK_M), controller::setMangaReadingMode);
-        this.goToPage = action("goToPage", "Go to Page…", "Jump to a page",
+        this.goToPage = action("goToPage", "ui.go_to_page", "ui.jump_to_a_page",
                 key(KeyEvent.VK_G), controller::choosePage);
-        this.exitFullscreen = action("exitFullscreen", "Leave Grid or Full Screen", "Return from the page grid or leave full-screen mode",
+        this.exitFullscreen = action("exitFullscreen", "ui.leave_grid_or_full_screen", "reading.leaveViewHint",
                 key(KeyEvent.VK_ESCAPE), controller::exitFullscreen);
-        this.settings = action("settings", "Settings…", "Appearance, reading defaults, library and data",
+        this.settings = action("settings", "ui.settings", "ui.appearance_reading_defaults_library_and_data",
                 menuShortcut(KeyEvent.VK_COMMA), controller::showSettings);
-        this.resetComicDatabase = action("resetComicDatabase", "Reset comic database…",
-                "Reset settings, library and reading history", null, controller::resetComicDatabase);
-        this.showAbout = action("showAbout", "About Yonaka Reader", "Show application information",
+        this.resetComicDatabase = action("resetComicDatabase", "ui.reset_comic_database",
+                "ui.reset_settings_library_and_reading_history", null, controller::resetComicDatabase);
+        this.showAbout = action("showAbout", "ui.about_yonaka_reader", "ui.show_application_information",
                 null, controller::showAboutDialog);
     }
 
     static Action action(String id, String name, String description,
                          KeyStroke accelerator, Runnable runnable) {
-        Action action = new RunnableAction(name, runnable);
+        Action action = new RunnableAction(I18n.text(name), runnable);
+        UiText.bind(action, "name", target -> target.putValue(Action.NAME, I18n.text(name)));
+        action.putValue("translation.description", description);
         action.putValue(Action.ACTION_COMMAND_KEY, id);
-        action.putValue(Action.SHORT_DESCRIPTION, description);
+        action.putValue(Action.SHORT_DESCRIPTION, I18n.text(description));
         if (accelerator != null) {
             action.putValue(Action.ACCELERATOR_KEY, accelerator);
         }

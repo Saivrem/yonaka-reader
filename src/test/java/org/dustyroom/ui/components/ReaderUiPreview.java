@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.book.PageKey;
 import org.dustyroom.be.models.book.PageRef;
 import org.dustyroom.be.models.book.PictureMetadata;
@@ -10,7 +11,6 @@ import org.dustyroom.be.models.state.ViewerTheme;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.RecentBook;
 import org.dustyroom.be.models.view.ViewerFrame;
-import org.dustyroom.be.utils.Constants;
 import org.dustyroom.ui.actions.ViewerActionState;
 import org.dustyroom.ui.actions.ViewerActions;
 import org.dustyroom.ui.rendering.ThumbnailRenderer;
@@ -63,7 +63,7 @@ public final class ReaderUiPreview {
     }
 
     private static void renderAbout(File output, ViewerTheme theme) {
-        JOptionPane pane = new JOptionPane(Constants.ABOUT.formatted("0.15.0"),
+        JOptionPane pane = new JOptionPane(I18n.text("about.text", "0.16.0"),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 BrandAssets.aboutIcon());
         pane.setSize(520, 240);

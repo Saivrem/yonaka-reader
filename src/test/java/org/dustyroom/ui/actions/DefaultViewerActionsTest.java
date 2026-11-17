@@ -19,12 +19,12 @@ class DefaultViewerActionsTest {
         KeyStroke accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK);
 
         Action action = DefaultViewerActions.action(
-                "openFile", "Open…", "Open a file", accelerator,
+                "openFile", "ui.open", "ui.open_an_image_zip_cbz_archive_or_folder", accelerator,
                 () -> invoked.set(true));
 
         assertEquals("openFile", action.getValue(Action.ACTION_COMMAND_KEY));
         assertEquals("Open…", action.getValue(Action.NAME));
-        assertEquals("Open a file", action.getValue(Action.SHORT_DESCRIPTION));
+        assertEquals("Open an image, ZIP/CBZ archive or folder", action.getValue(Action.SHORT_DESCRIPTION));
         Assertions.assertNull(action.getValue(Action.MNEMONIC_KEY));
         assertEquals(accelerator, action.getValue(Action.ACCELERATOR_KEY));
 

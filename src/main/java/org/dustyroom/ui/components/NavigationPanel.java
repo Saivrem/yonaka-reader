@@ -1,5 +1,7 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.ui.actions.ViewerActions;
 
@@ -8,7 +10,8 @@ import java.awt.*;
 
 public class NavigationPanel extends JPanel {
     private final JButton position;
-    private String pageLabel = "No book open";
+    private String pageLabel;
+    private boolean loading;
 
     public NavigationPanel(ViewerActions actions) {
         setLayout(new BorderLayout(12, 0));
@@ -27,10 +30,10 @@ public class NavigationPanel extends JPanel {
         pages.add(button(actions.prevImage(), ReaderIconKind.PREVIOUS));
         position = new JButton(actions.goToPage());
         position.setRequestFocusEnabled(false);
-        position.setText(pageLabel);
+        refreshPosition();
         position.setPreferredSize(new Dimension(116, 36));
 
-        position.getAccessibleContext().setAccessibleName("Page position; activate to go to a page");
+        UiText.accessible(position, "ui.page_position_activate_to_go_to_a_page");
         pages.add(position);
         pages.add(button(actions.nextImage(), ReaderIconKind.NEXT));
         pages.add(button(actions.lastImage(), ReaderIconKind.LAST));
@@ -46,6 +49,7 @@ public class NavigationPanel extends JPanel {
         settings.add(toggle(actions.setComicsReadingMode(), ReaderIconKind.READ_LEFT_TO_RIGHT));
         settings.add(toggle(actions.toggleTwoPageMode(), ReaderIconKind.SPREAD));
         add(settings, BorderLayout.EAST);
+        UiText.bind(this, "position", NavigationPanel::refreshPosition);
     }
 
     private static JPanel group() {
@@ -87,10 +91,16 @@ public class NavigationPanel extends JPanel {
             pageLabel = (frame.getFirstPage() == frame.getLastPage() ? String.valueOf(frame.getFirstPage())
                     : frame.getFirstPage() + "–" + frame.getLastPage()) + " / " + frame.getPageCount();
         }
-        position.setText(pageLabel);
+        refreshPosition();
     }
 
     public void setLoading(boolean loading) {
-        position.setText(loading ? "Loading…" : pageLabel);
+        this.loading = loading;
+        refreshPosition();
+    }
+
+    private void refreshPosition() {
+        String label = pageLabel == null ? I18n.text("ui.no_book_open") : pageLabel;
+        position.setText(loading ? I18n.text("ui.loading") : label);
     }
 }

@@ -1,5 +1,7 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.RecentBook;
@@ -16,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class MenuBar extends JMenuBar {
-    private final JMenu recentMenu = menu("Open Recent", KeyEvent.VK_R);
+    private final JMenu recentMenu = menu("ui.open_recent", KeyEvent.VK_R);
     private final JMenuItem home;
     private final Map<ThemeMode, JRadioButtonMenuItem> themeItems = new EnumMap<>(ThemeMode.class);
     private ThemeMode selectedTheme;
@@ -28,12 +30,12 @@ public class MenuBar extends JMenuBar {
         selectedTheme = initialTheme;
         home = new JMenuItem(actions.home());
         home.setMnemonic(KeyEvent.VK_H);
-        JMenu fileMenu = menu("File", KeyEvent.VK_F);
-        JMenu viewMenu = menu("View", KeyEvent.VK_V);
-        JMenu navigationMenu = menu("Navigation", KeyEvent.VK_N);
-        JMenu optionsMenu = menu("Options", KeyEvent.VK_O);
-        JMenu helpMenu = menu("Help", KeyEvent.VK_H);
-        JMenu readingModeMenu = menu("Reading Mode", KeyEvent.VK_R);
+        JMenu fileMenu = menu("ui.file", KeyEvent.VK_F);
+        JMenu viewMenu = menu("ui.view", KeyEvent.VK_V);
+        JMenu navigationMenu = menu("ui.navigation", KeyEvent.VK_N);
+        JMenu optionsMenu = menu("ui.options", KeyEvent.VK_O);
+        JMenu helpMenu = menu("ui.help", KeyEvent.VK_H);
+        JMenu readingModeMenu = menu("ui.reading_mode", KeyEvent.VK_R);
 
         addActions(fileMenu, actions.openFile());
         fileMenu.add(recentMenu);
@@ -75,10 +77,17 @@ public class MenuBar extends JMenuBar {
         add(navigationMenu);
         add(optionsMenu);
         add(helpMenu);
+        UiText.bind(this, "recents", MenuBar::refreshLanguage);
+    }
+
+    private void refreshLanguage() {
+        recentMenu.removeAll();
+        showRecentBooks(recentBooks);
     }
 
     private static JMenu menu(String name, int mnemonic) {
-        JMenu menu = new JMenu(name);
+        JMenu menu = new JMenu();
+        UiText.text(menu, name);
         menu.setMnemonic(mnemonic);
         return menu;
     }
@@ -128,10 +137,11 @@ public class MenuBar extends JMenuBar {
     }
 
     private JMenu themeMenu(Predicate<ThemeMode> selectTheme) {
-        JMenu menu = menu("Theme", KeyEvent.VK_T);
+        JMenu menu = menu("ui.theme", KeyEvent.VK_T);
         ButtonGroup group = new ButtonGroup();
         for (ThemeMode theme : ThemeMode.values()) {
-            JRadioButtonMenuItem item = new JRadioButtonMenuItem(theme.getLabel());
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem();
+            UiText.bind(item, "text", target -> target.setText(theme.getLabel()));
             item.setSelected(theme == selectedTheme);
             item.addActionListener(_ -> SwingUtilities.invokeLater(() -> {
                 if (selectTheme.test(theme)) {
@@ -171,22 +181,22 @@ public class MenuBar extends JMenuBar {
         recentBooks = List.copyOf(books);
         recentMenu.removeAll();
         if (books.isEmpty()) {
-            JMenuItem empty = new JMenuItem("No recently read books");
+            JMenuItem empty = new JMenuItem(I18n.text("ui.no_recently_read_books"));
             empty.setEnabled(false);
             recentMenu.add(empty);
         }
         for (RecentBook book : books) {
             JMenuItem item = new JMenuItem();
             item.putClientProperty("html.disable", true);
-            item.setText(book.getTitle() + " — " + book.getProgress() + (book.isAvailable() ? "" : " (unavailable)"));
+            item.setText(I18n.text("recent.menuEntry", book.getTitle(), book.getProgress(), book.isAvailable() ? "" : I18n.text("recent.unavailable")));
             item.setToolTipText(book.getState().getSourceId());
             item.setEnabled(book.isAvailable());
             item.addActionListener(_ -> openRecent.accept(book.getState().getSourceId()));
             if (book.getChapters().size() > 1) {
                 JMenu group = new JMenu();
                 group.putClientProperty("html.disable", true);
-                group.setText(book.getTitle() + " (" + book.getChapters().size() + " chapters)");
-                item.setText("Continue — " + new File(book.getState().getSourceId()).getName());
+                group.setText(I18n.text("recent.menuGroup", book.getTitle(), book.getChapters().size()));
+                item.setText(I18n.text("recent.menuContinue", new File(book.getState().getSourceId()).getName()));
                 group.add(item);
                 group.addSeparator();
                 for (BookState chapter : book.menuChapters()) {

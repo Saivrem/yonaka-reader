@@ -1,5 +1,6 @@
 package org.dustyroom.be.models.view;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.dustyroom.be.models.state.BookState;
@@ -52,7 +53,7 @@ public final class RecentBook {
     }
 
     public String getProgress() {
-        return "Page " + state.getPageNumber() + " / " + state.getPageCount();
+        return I18n.text("reading.progress", state.getPageNumber(), state.getPageCount());
     }
 
     public RecentBook setChapters(List<BookState> chapters) {

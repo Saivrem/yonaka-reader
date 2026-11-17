@@ -1,5 +1,6 @@
 package org.dustyroom.be.models.library;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -28,9 +29,9 @@ public final class LibraryChapter {
 
     public String getProgress() {
         if (finished) {
-            return "Finished";
+            return I18n.text("ui.finished");
         }
 
-        return pageCount > 0 ? "Page " + page + " / " + pageCount : "Unread";
+        return pageCount > 0 ? I18n.text("reading.progress", page, pageCount) : I18n.text("ui.unread");
     }
 }

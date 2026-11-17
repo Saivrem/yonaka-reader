@@ -1,5 +1,6 @@
 package org.dustyroom.be.settings;
 
+import org.dustyroom.be.i18n.I18n;
 import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ class ProfileSwitchJournal {
     static void begin(Path standardDirectory, Path source, Path target) throws IOException {
         Files.createDirectories(standardDirectory);
         if (Files.exists(file(standardDirectory))) {
-            throw new IOException("An earlier profile switch must be recovered on startup first.");
+            throw new IOException(I18n.text("profile.recoveryRequired"));
         }
         Properties properties = new Properties();
         properties.setProperty("source", source.toAbsolutePath().normalize().toString());
@@ -52,14 +53,14 @@ class ProfileSwitchJournal {
         Path target = Path.of(properties.getProperty("target"));
         if (!source.isAbsolute() || !target.isAbsolute() || !"reader.sqlite3".equals(source.getFileName().toString())
                 || !"reader.sqlite3".equals(target.getFileName().toString())) {
-            throw new IOException("Invalid pending profile switch.");
+            throw new IOException(I18n.text("errors.invalid_pending_profile_switch"));
         }
         if (Files.isRegularFile(source)) {
             Files.delete(journal);
             return;
         }
         if (!Files.isRegularFile(target)) {
-            throw new IOException("The interrupted profile move cannot be recovered; no database was created.");
+            throw new IOException(I18n.text("profile.recoveryFailed"));
         }
         ProfileManager.writePointer(standardDirectory, target.getParent());
         Files.delete(journal);

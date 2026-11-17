@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.ui.i18n.UiText;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.view.RecentBook;
 
@@ -14,9 +15,9 @@ import java.util.function.Consumer;
  * Small, bounded shelf; cover updates preserve keyboard focus on existing cards.
  */
 public final class RecentBooksPanel extends JPanel {
-    private final JCheckBox groupByFolder = new JCheckBox("Group archives by folder", true);
+    private final JCheckBox groupByFolder = UiText.checkbox("ui.group_archives_by_folder", true);
     private final BookCardGrid cards = new BookCardGrid();
-    private final JLabel empty = new JLabel("Your recently read books will appear here.");
+    private final JLabel empty = UiText.label("ui.your_recently_read_books_will_appear_here");
     private final Map<String, RecentBookCard> entries = new LinkedHashMap<>();
     private Consumer<String> open = _ -> {
     };
@@ -25,7 +26,7 @@ public final class RecentBooksPanel extends JPanel {
 
     public RecentBooksPanel() {
         super(new BorderLayout(0, 14));
-        JLabel heading = new JLabel("Recently read");
+        JLabel heading = UiText.label("ui.recently_read");
         heading.setFont(heading.getFont().deriveFont(Font.BOLD, 20f));
         JPanel header = new JPanel(new BorderLayout());
         header.add(heading, BorderLayout.WEST);
