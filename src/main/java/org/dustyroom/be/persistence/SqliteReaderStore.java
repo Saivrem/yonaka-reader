@@ -123,7 +123,8 @@ public final class SqliteReaderStore implements ReaderStore {
     private static BookState readBook(ResultSet row, String sourceId) throws SQLException {
         ReadingMode mode = EnumUtils.getEnum(ReadingMode.class, row.getString("reading_mode"), ReadingMode.MANGA);
         return new BookState(sourceId, row.getString("page_id"), row.getInt("page_number"),
-                row.getInt("page_count"), row.getBoolean("two_page"), mode);
+                row.getInt("page_count"), row.getBoolean("two_page"), mode)
+                .setShiftedPairing(row.getBoolean("shifted_pairing"));
     }
 
     @Override
@@ -136,7 +137,7 @@ public final class SqliteReaderStore implements ReaderStore {
                     state.getPageCount(),
                     state.isTwoPageMode() ? 1 : 0,
                     state.getReadingMode().name(),
-                    System.currentTimeMillis());
+                    System.currentTimeMillis(), state.isShiftedPairing());
         } catch (SQLException exception) {
             throw failure(exception);
         }

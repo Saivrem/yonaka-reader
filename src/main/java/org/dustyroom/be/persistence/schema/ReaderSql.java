@@ -19,14 +19,17 @@ public class ReaderSql {
             """;
     public static final String ADD_RECENT_HIDDEN = "ALTER TABLE books ADD COLUMN recent_hidden INTEGER NOT NULL DEFAULT 0 CHECK(recent_hidden IN (0,1))";
     public static final String CREATE_RECENT_INDEX = "CREATE INDEX books_recent ON books(recent_hidden, updated_at DESC)";
+    public static final String HAS_SHIFTED_PAIRING = "SELECT 1 FROM pragma_table_info('books') WHERE name='shifted_pairing'";
+    public static final String ADD_SHIFTED_PAIRING = "ALTER TABLE books ADD COLUMN shifted_pairing INTEGER NOT NULL DEFAULT 0 CHECK(shifted_pairing IN (0,1))";
     public static final String SELECT_SETTINGS = "SELECT key,value FROM settings";
     public static final String SAVE_SETTING = "INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value";
     public static final String SELECT_BOOK = "SELECT * FROM books WHERE source_id=?";
     public static final String SAVE_BOOK = """
-            INSERT INTO books(source_id,page_id,page_number,page_count,two_page,reading_mode,updated_at)
-            VALUES(?,?,?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET
+            INSERT INTO books(source_id,page_id,page_number,page_count,two_page,reading_mode,updated_at,shifted_pairing)
+            VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET
             page_id=excluded.page_id,page_number=excluded.page_number,page_count=excluded.page_count,
-            two_page=excluded.two_page,reading_mode=excluded.reading_mode,updated_at=excluded.updated_at
+            two_page=excluded.two_page,reading_mode=excluded.reading_mode,updated_at=excluded.updated_at,
+            shifted_pairing=excluded.shifted_pairing
             """;
     public static final String SELECT_RECENTS = "SELECT * FROM books WHERE recent_hidden=0 ORDER BY updated_at DESC, source_id LIMIT ?";
     public static final String SHOW_RECENT = "UPDATE books SET recent_hidden=0 WHERE source_id=? AND recent_hidden=1";

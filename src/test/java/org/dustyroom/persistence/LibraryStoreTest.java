@@ -80,6 +80,7 @@ class LibraryStoreTest extends BasePersistenceTest {
             store.saveBook(saved);
             execute(HIDE_LEGACY_BOOK, saved.getSourceId());
         }
+        execute(DROP_SHIFTED_PAIRING);
         execute(DROP_COMPONENTS);
         execute(DROP_CHAPTERS);
         execute(DROP_WORKS);
@@ -103,6 +104,7 @@ class LibraryStoreTest extends BasePersistenceTest {
             id = store.libraryWorks().getFirst().getId();
             store.finishChapter(store.libraryWorks().getFirst().getChapters().getFirst().getId(), true);
         }
+        execute(DROP_SHIFTED_PAIRING);
         execute(DROP_COMPONENTS);
         setSchemaVersion(3);
         try (ReaderStore store = openStore()) {

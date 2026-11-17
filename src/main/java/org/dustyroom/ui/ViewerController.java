@@ -167,6 +167,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         if (thumbnailPanel != null) {
             thumbnailPanel.setVisible(false);
             actions.openPageGrid().setEnabled(false);
+            actions.shiftPairing().setEnabled(false);
         }
         frame.setTitle("Yonaka Reader");
         session.refreshRecentBooks();
@@ -328,6 +329,10 @@ public class ViewerController implements SettingsHost, ViewerView {
         imageComponent.zoomOut();
         saveSettings();
         refreshControls();
+    }
+
+    public void shiftPairing() {
+        session.shiftPairing();
     }
 
     public void toggleTwoPageMode() {

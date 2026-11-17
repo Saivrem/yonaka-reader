@@ -32,6 +32,7 @@ public class DefaultViewerActions implements ViewerActions {
     private final Action prevVolume;
     private final Action toggleFullscreen;
     private final Action toggleTwoPageMode;
+    private final Action shiftPairing;
     private final Action setComicsReadingMode;
     private final Action setMangaReadingMode;
     private final Action showAbout;
@@ -75,6 +76,7 @@ public class DefaultViewerActions implements ViewerActions {
                 key(KeyEvent.VK_UP), controller::showPrevVolume);
         this.toggleFullscreen = action("toggleFullscreen", "Full Screen", "Enter or leave full-screen mode",
                 key(KeyEvent.VK_F), controller::toggleFullscreen);
+        this.shiftPairing = action("shiftPairing", "Shift spread by one page", "Show the cover alone and pair pages from page two", null, controller::shiftPairing);
         this.toggleTwoPageMode = action("toggleTwoPageMode", "Two-Page Spread", "Show compatible pages as a spread",
                 key(KeyEvent.VK_P), controller::toggleTwoPageMode);
         this.setComicsReadingMode = action("comicsReadingMode", "Comics (Left to Right)", "Use left-to-right spread order",

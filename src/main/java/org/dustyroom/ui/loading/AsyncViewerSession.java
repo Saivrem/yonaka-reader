@@ -70,6 +70,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     private ReadingMode defaultReadingMode = MANGA;
     private FitMode defaultFitMode = FitMode.FIT_SCREEN;
     private boolean twoPageMode;
+    private boolean shiftedPairing;
     private ReadingMode readingMode = MANGA;
     private String lastSourceError;
     private String lastRememberedSource;
@@ -172,7 +173,8 @@ public final class AsyncViewerSession implements AutoCloseable {
             return;
         }
         BookState state = new BookState(frame.getPageKey().sourceId(), frame.getPageKey().pageId(),
-                frame.getFirstPage(), frame.getPageCount(), frame.isTwoPageMode(), frame.getReadingMode());
+                frame.getFirstPage(), frame.getPageCount(), frame.isTwoPageMode(), frame.getReadingMode())
+                .setShiftedPairing(frame.isShiftedPairing());
         tasks.execute(INTERACTIVE, () -> {
             if (state.getSourceId().equals(removedActiveSource)) {
                 return;
@@ -422,6 +424,13 @@ public final class AsyncViewerSession implements AutoCloseable {
         updatePresentation(() -> twoPageMode = !twoPageMode);
     }
 
+    public void shiftPairing() {
+        updatePresentation(() -> {
+            shiftedPairing = !shiftedPairing;
+            pageIndex = spreadAnchor(pageIndex);
+        });
+    }
+
     public void setComicsReadingMode() {
         updatePresentation(() -> readingMode = COMICS);
     }
@@ -557,6 +566,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             candidate = null;
             pages = candidatePages;
             pageIndex = candidateIndex;
+            shiftedPairing = saved.map(BookState::isShiftedPairing).orElse(false);
             twoPageMode = saved.map(BookState::isTwoPageMode).orElse(defaultTwoPageMode);
             readingMode = saved.map(BookState::getReadingMode).orElse(defaultReadingMode);
             if (saved.isEmpty()) {
@@ -613,8 +623,10 @@ public final class AsyncViewerSession implements AutoCloseable {
             int selectedIndex = switchedPages.indexOf(selected);
             pages = switchedPages;
             pageIndex = selectedIndex < 0 ? source.initialPageIndex() : selectedIndex;
+            shiftedPairing = false;
             savedBook(pages.getFirst().getKey().sourceId()).ifPresent(state -> {
                 pageIndex = restoredIndex(state, pages);
+                shiftedPairing = state.isShiftedPairing();
                 twoPageMode = state.isTwoPageMode();
                 readingMode = state.getReadingMode();
             });
@@ -716,6 +728,10 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private void movePrevious() {
+        if (twoPageMode && (shiftedPairing || pageIndex == 0)) {
+            pageIndex = spreadAnchor(Math.floorMod(pageIndex - 1, pages.size()));
+            return;
+        }
         int pageCount = pages.size();
         for (int distance = 1; distance <= Math.min(2, pageCount); distance++) {
             int candidate = Math.floorMod(pageIndex - distance, pageCount);
@@ -733,6 +749,13 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private void renderAndPublish(long targetGeneration, long requestId, BufferedImage initialImage) {
+        if (twoPageMode && shiftedPairing) {
+            int anchor = spreadAnchor(pageIndex);
+            if (anchor != pageIndex) {
+                pageIndex = anchor;
+                initialImage = null;
+            }
+        }
         if (!isLatest(targetGeneration, requestId)) {
             return;
         }
@@ -764,7 +787,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                 current.getMetadata().getDir(),
                 pageIndex + 1, pageIndex + (second == null ? 1 : 2), pages.size(),
                 twoPageMode, readingMode, current.getKey()
-        );
+        ).setShiftedPairing(shiftedPairing);
         postFrame(targetGeneration, requestId, frame);
         scheduleAnimations(targetGeneration, requestId, current, second, currentImage, secondImage, readingMode == MANGA);
         schedulePrefetch(targetGeneration, requestId, pageIndex, second != null);
@@ -817,8 +840,18 @@ public final class AsyncViewerSession implements AutoCloseable {
         });
     }
 
+    private int spreadAnchor(int index) {
+        if (index == 0 || spreadPlanner.startsPair(index, shiftedPairing)) {
+            return index;
+        }
+        return resolveSecondPage(index - 1) == null ? index : index - 1;
+    }
+
     private PageRef resolveSecondPage(int anchorIndex) {
         if (!twoPageMode || pages.size() < 2 || anchorIndex + 1 >= pages.size()) {
+            return null;
+        }
+        if (shiftedPairing && !spreadPlanner.startsPair(anchorIndex, true)) {
             return null;
         }
         PageRef current = pages.get(anchorIndex);

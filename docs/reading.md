@@ -22,6 +22,8 @@ the source. Memory for decoded pixels depends on canvas size, not animation leng
 Leaving the page cancels playback and closes its file/archive stream. Covers
 and sidebar thumbnails intentionally stay static.
 
+In two-page mode, select **View → Shift spread by one page** to show the cover alone and pair pages 2–3, 4–5, and so on. Landscape pages stay single. The reader remembers this choice for each book in either reading direction.
+
 ### Scrolling, zoom and panning
 
 The reader uses precise wheel/trackpad deltas, with a faster wheel step. Shift+wheel
