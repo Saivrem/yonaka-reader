@@ -87,6 +87,8 @@ public class NavigationPanel extends JPanel {
     }
 
     public void updateState(ViewerFrame frame) {
+        loading = false;
+        pageLabel = null;
         if (frame != null) {
             pageLabel = (frame.getFirstPage() == frame.getLastPage() ? String.valueOf(frame.getFirstPage())
                     : frame.getFirstPage() + "–" + frame.getLastPage()) + " / " + frame.getPageCount();

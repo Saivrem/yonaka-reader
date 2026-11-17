@@ -120,6 +120,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             saveSettings();
         });
         session.setGroupRecentByFolder(groupRecentByFolder);
+        navigationPanel.updateState(displayedFrame);
         refreshControls();
     }
 
@@ -609,7 +610,6 @@ public class ViewerController implements SettingsHost, ViewerView {
         ViewerActionState.apply(actions, displayedFrame, imageComponent.getFitMode(), fullscreen);
         actions.exitFullscreen().setEnabled(fullscreen || (thumbnailPanel != null && thumbnailPanel.isGridMode()));
         actions.openPageGrid().setEnabled(displayedFrame != null && thumbnailPanel != null && thumbnailPanel.isVisible());
-        navigationPanel.updateState(displayedFrame);
     }
 
     private void applyFrame(ViewerFrame viewerFrame) {
@@ -631,6 +631,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         frame.validate();
         imageComponent.setImageAndCenter(viewerFrame.getImage(), scrollPane);
         session.remember(viewerFrame);
+        navigationPanel.updateState(viewerFrame);
         refreshControls();
     }
 
@@ -695,6 +696,9 @@ public class ViewerController implements SettingsHost, ViewerView {
 
     @Override
     public void showError(String message) {
+        if (navigationPanel != null) {
+            navigationPanel.updateState(displayedFrame);
+        }
         imageComponent.setAnimationPaused(false);
         frame.setCursor(Cursor.getDefaultCursor());
         refreshControls();

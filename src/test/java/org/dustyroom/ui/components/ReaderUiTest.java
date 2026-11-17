@@ -1,5 +1,6 @@
 package org.dustyroom.ui.components;
 
+import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
@@ -7,7 +8,10 @@ import org.dustyroom.be.models.state.ViewerTheme;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.ui.actions.ViewerActionState;
 import org.dustyroom.ui.actions.ViewerActions;
+import org.dustyroom.ui.i18n.UiText;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +26,46 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReaderUiTest {
+    @ParameterizedTest
+    @CsvSource({"1, 1, 1 / 10", "2, 3, 2–3 / 10"})
+    void completedLoadingRestoresPagePositionAcrossLanguageChanges(int first, int last, String label) throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ViewerActions actions = actions();
+            NavigationPanel panel = new NavigationPanel(actions);
+            JButton position = children(panel)
+                    .filter(JButton.class::isInstance)
+                    .map(JButton.class::cast)
+                    .filter(button -> button.getAction() == actions.goToPage())
+                    .findFirst().orElseThrow();
+            ViewerFrame frame = ViewerFrame.builder()
+                    .firstPage(first)
+                    .lastPage(last)
+                    .pageCount(10)
+                    .build();
+
+            try {
+                for (String language : new String[]{"en-US", "ru-RU", "ja-JP"}) {
+                    I18n.select(language);
+                    panel.setLoading(true);
+                    UiText.refresh();
+                    assertEquals(I18n.text("ui.loading"), position.getText());
+
+                    panel.updateState(frame);
+                    UiText.refresh();
+                    assertEquals(label, position.getText());
+
+                    // A failed opening with no displayed frame restores the empty state.
+                    panel.setLoading(true);
+                    panel.updateState(null);
+                    assertEquals(I18n.text("ui.no_book_open"), position.getText());
+                }
+            } finally {
+                I18n.select("en-US");
+                UiText.refresh();
+            }
+        });
+    }
+
     private static Stream<Component> children(Container parent) {
         return Arrays
                 .stream(parent.getComponents())
