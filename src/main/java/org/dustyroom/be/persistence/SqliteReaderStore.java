@@ -90,7 +90,9 @@ public final class SqliteReaderStore implements ReaderStore {
     public void saveSettings(ReaderSettings settings) {
         try {
             connection.setAutoCommit(false);
-            try (PreparedStatement sql = connection.prepareStatement(ReaderSql.SAVE_SETTING)) {
+            try (Statement cleanup = connection.createStatement();
+                 PreparedStatement sql = connection.prepareStatement(ReaderSql.SAVE_SETTING)) {
+                cleanup.executeUpdate(ReaderSql.CLEAR_SHORTCUTS);
                 for (Map.Entry<String, String> entry : SettingsCodec.encode(settings).entrySet()) {
                     SqliteUtils.addBatch(sql, entry.getKey(), entry.getValue());
                 }

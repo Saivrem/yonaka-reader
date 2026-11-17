@@ -43,7 +43,7 @@ public class DefaultViewerActions implements ViewerActions {
 
     public DefaultViewerActions(ViewerController controller) {
         this.openPageGrid = action("openPageGrid", "Grid", "Open page grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
-        this.toggleThumbnails = action("toggleThumbnails", "Thumbnails", "Show or hide page thumbnails (T)",
+        this.toggleThumbnails = action("toggleThumbnails", "Thumbnails", "Show or hide page thumbnails",
                 key(KeyEvent.VK_T), controller::toggleThumbnails);
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
         this.home = action("home", "Home", "Return to recently read books",
@@ -83,9 +83,9 @@ public class DefaultViewerActions implements ViewerActions {
                 key(KeyEvent.VK_C), controller::setComicsReadingMode);
         this.setMangaReadingMode = action("mangaReadingMode", "Manga (Right to Left)", "Use right-to-left spread order",
                 key(KeyEvent.VK_M), controller::setMangaReadingMode);
-        this.goToPage = action("goToPage", "Go to Page…", "Jump to a page (G)",
+        this.goToPage = action("goToPage", "Go to Page…", "Jump to a page",
                 key(KeyEvent.VK_G), controller::choosePage);
-        this.exitFullscreen = action("exitFullscreen", "Leave Full Screen", "Leave full-screen mode",
+        this.exitFullscreen = action("exitFullscreen", "Leave Grid or Full Screen", "Return from the page grid or leave full-screen mode",
                 key(KeyEvent.VK_ESCAPE), controller::exitFullscreen);
         this.settings = action("settings", "Settings…", "Appearance, reading defaults, library and data",
                 menuShortcut(KeyEvent.VK_COMMA), controller::showSettings);

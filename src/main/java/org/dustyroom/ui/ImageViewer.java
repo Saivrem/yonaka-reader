@@ -50,20 +50,21 @@ public class ImageViewer extends JFrame {
         viewerController.attachPanels(menuBar, navigationPanel, readerSurface, viewerActions);
         PlatformUi.installApplicationHandlers(viewerController);
 
-        initializeUI(viewerActions);
+        initializeUI();
         new FileDropHandler(viewerController::openFile, message -> DialogUtils.showError(this, message))
                 .installOn(getRootPane());
         viewerController.configureViewerSurfaces();
         setVisible(true);
     }
 
-    private void initializeUI(ViewerActions viewerActions) {
+    private void initializeUI() {
         setLayout(new BorderLayout());
 
         // PlatformUi configures screen-menu integration before AWT starts.
         setJMenuBar(menuBar);
         setContentPane(new ReaderWorkspace(viewerController.createThumbnailPanel(), readerSurface,
                 navigationPanel, grid -> {
+            viewerController.refreshControls();
             imageComponent.setAnimationPaused(grid);
             if (!grid) {
                 requestFocusInWindow();
@@ -76,8 +77,6 @@ public class ImageViewer extends JFrame {
             }
         }));
         addWindowListener(new WindowCloseListener(viewerController::exit));
-
-        new KeyBindings().init(getRootPane(), viewerActions);
 
         pack();
         setLocationRelativeTo(null);

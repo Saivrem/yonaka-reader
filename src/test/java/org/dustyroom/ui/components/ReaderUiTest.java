@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import org.dustyroom.ui.actions.RunnableAction;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -33,10 +33,10 @@ class ReaderUiTest {
         Map<String, Action> actions = new HashMap<>();
         return (ViewerActions) Proxy.newProxyInstance(ViewerActions.class.getClassLoader(),
                 new Class<?>[]{ViewerActions.class}, (_, method, _) ->
-                        actions.computeIfAbsent(method.getName(), name -> new AbstractAction(name) {
-                            @Override
-                            public void actionPerformed(ActionEvent event) {
-                            }
+                        actions.computeIfAbsent(method.getName(), name -> {
+                            Action action = new RunnableAction(name, () -> {});
+                            action.putValue(Action.SHORT_DESCRIPTION, name);
+                            return action;
                         }));
     }
 

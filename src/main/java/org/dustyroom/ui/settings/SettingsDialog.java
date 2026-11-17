@@ -8,6 +8,8 @@ import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.settings.ProfileManager;
 import org.dustyroom.be.utils.StorageUtils;
 
+import org.dustyroom.ui.components.KeyBindings;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -30,15 +32,17 @@ public final class SettingsDialog extends JDialog {
     private final JButton cancel = new JButton("Cancel");
     private final JButton changeData = new JButton("Change…");
     private final JButton scan = new JButton("Scan / refresh…");
+    private final ShortcutPanel shortcuts;
     private boolean busy;
 
-    public SettingsDialog(Window owner, SettingsHost host) {
+    public SettingsDialog(Window owner, SettingsHost host, KeyBindings bindings) {
         super(owner, "Settings", ModalityType.APPLICATION_MODAL);
         this.host = host;
+        shortcuts = new ShortcutPanel(bindings, host.currentSettings().getShortcuts());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         JPanel content = new JPanel(new BorderLayout(16, 16));
         content.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
-        JList<String> categories = new JList<>(new String[]{"Appearance", "Reading", "Library", "Data"});
+        JList<String> categories = new JList<>(new String[]{"Appearance", "Reading", "Shortcuts", "Library", "Data"});
         categories.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         categories.setFixedCellHeight(36);
         categories.setPreferredSize(new Dimension(130, 250));
@@ -47,6 +51,7 @@ public final class SettingsDialog extends JDialog {
         JPanel pages = new JPanel(layout);
         pages.add(appearance(), "Appearance");
         pages.add(reading(), "Reading");
+        pages.add(shortcuts, "Shortcuts");
         pages.add(library(), "Library");
         pages.add(data(), "Data");
         categories.addListSelectionListener(event -> {
@@ -229,6 +234,7 @@ public final class SettingsDialog extends JDialog {
             boundary = VolumeBoundary.NEXT_VOLUME;
         }
         ReaderSettings selected = host.currentSettings().toBuilder()
+                .shortcuts(shortcuts.overrides())
                 .volumeBoundary(boundary)
                 .themeMode((ThemeMode) theme.getSelectedItem())
                 .defaultReadingMode(direction.getSelectedIndex() == 0 ? ReadingMode.MANGA : ReadingMode.COMICS)

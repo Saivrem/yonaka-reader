@@ -22,6 +22,7 @@ public class ReaderSql {
     public static final String HAS_SHIFTED_PAIRING = "SELECT 1 FROM pragma_table_info('books') WHERE name='shifted_pairing'";
     public static final String ADD_SHIFTED_PAIRING = "ALTER TABLE books ADD COLUMN shifted_pairing INTEGER NOT NULL DEFAULT 0 CHECK(shifted_pairing IN (0,1))";
     public static final String SELECT_SETTINGS = "SELECT key,value FROM settings";
+    public static final String CLEAR_SHORTCUTS = "DELETE FROM settings WHERE key GLOB 'shortcut.*'";
     public static final String SAVE_SETTING = "INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value";
     public static final String SELECT_BOOK = "SELECT * FROM books WHERE source_id=?";
     public static final String SAVE_BOOK = """

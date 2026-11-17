@@ -76,7 +76,6 @@ public final class ThumbnailPanel extends JPanel {
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.getViewport().addChangeListener(_ -> pump());
         scroll.getViewport().addComponentListener(new ComponentResizeListener(this::pump));
-        getActionMap().put("closeGrid", new RunnableAction("Return to reader", () -> setGridMode(false)));
         add(scroll, BorderLayout.CENTER);
         rail.setPreferredSize(new Dimension(16, 0));
         handle.setPreferredSize(new Dimension(16, 72));
@@ -110,12 +109,6 @@ public final class ThumbnailPanel extends JPanel {
             return;
         }
         this.gridMode = gridMode;
-        KeyStroke escape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-        if (gridMode) {
-            getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(escape, "closeGrid");
-        } else {
-            getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).remove(escape);
-        }
         if (gridMode) {
             setExpanded(true);
         }
@@ -127,7 +120,7 @@ public final class ThumbnailPanel extends JPanel {
         rail.setVisible(!gridMode);
         gridButton.setText(gridMode ? "Back to reader" : null);
         gridButton.setIcon(new ReaderIcon(gridMode ? ReaderIconKind.PREVIOUS : ReaderIconKind.PAGE_GRID, 16));
-        gridButton.setToolTipText(gridMode ? "Return to reader (Esc)" : "Expand page grid");
+        gridButton.setToolTipText(gridMode ? "Return to reader" : "Expand page grid");
         gridButton.getAccessibleContext().setAccessibleName(gridButton.getToolTipText());
         updateGridButton();
         gridChanged.accept(gridMode);
