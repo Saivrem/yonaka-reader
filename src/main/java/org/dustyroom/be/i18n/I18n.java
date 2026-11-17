@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class I18n {
     private static final Map<String, Language> LANGUAGES = load();
-    private static volatile Language current = LANGUAGES.get("en");
+    private static volatile Language current = LANGUAGES.get("en-US");
 
     public static List<Language> languages() {
         return List.copyOf(LANGUAGES.values());
@@ -35,7 +35,16 @@ public class I18n {
     }
 
     public static void select(String id) {
-        current = LANGUAGES.getOrDefault(id, LANGUAGES.get("en"));
+        String requested = id == null ? "en-US" : id.replace('_', '-');
+        String tag = Locale.forLanguageTag(requested).toLanguageTag();
+        // Preserve selections saved before regional language tags were introduced.
+        tag = switch (tag) {
+            case "en" -> "en-US";
+            case "ru" -> "ru-RU";
+            case "ja" -> "ja-JP";
+            default -> tag;
+        };
+        current = LANGUAGES.getOrDefault(tag, LANGUAGES.get("en-US"));
     }
 
     public static String text(String key, Object... arguments) {
@@ -43,7 +52,7 @@ public class I18n {
     }
 
     static String format(Language selected, String key, Object... arguments) {
-        String english = LANGUAGES.get("en").getMessages().get(key);
+        String english = LANGUAGES.get("en-US").getMessages().get(key);
         if (english == null) {
             throw new MissingResourceException("Unknown translation key", I18n.class.getName(), key);
         }
@@ -72,7 +81,7 @@ public class I18n {
         } catch (IOException exception) {
             throw new IllegalStateException("Cannot load language index", exception);
         }
-        if (!languages.containsKey("en")) {
+        if (!languages.containsKey("en-US")) {
             throw new IllegalStateException("English translation is required");
         }
         return languages;

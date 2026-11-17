@@ -12,19 +12,19 @@ class UiTextTest {
     void existingWidgetsChangeLanguageAndKeepTheirState() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             try {
-                I18n.select("en");
+                I18n.select("en-US");
                 JButton open = UiText.button("ui.open_a_book");
                 JCheckBox selected = UiText.checkbox("ui.show_thumbnails", true);
                 JLabel progress = UiText.label("reading.progress", 3, 10);
                 assertEquals("Open a book", open.getText());
 
-                I18n.select("ru");
+                I18n.select("ru-RU");
                 UiText.refresh();
                 assertEquals("Открыть книгу", open.getText());
                 assertEquals("Страница 3 / 10", progress.getText());
                 assertTrue(selected.isSelected());
 
-                I18n.select("ja");
+                I18n.select("ja-JP");
                 UiText.refresh();
                 assertEquals("本を開く", open.getText());
                 assertEquals("3 / 10 ページ", progress.getText());
@@ -32,12 +32,12 @@ class UiTextTest {
                 assertTrue(selected.isSelected());
 
                 UiText.text(progress, "reading.page", 5);
-                I18n.select("en");
+                I18n.select("en-US");
                 UiText.refresh();
                 assertEquals("Page 5", progress.getText());
                 assertEquals("Open a book", open.getText());
             } finally {
-                I18n.select("en");
+                I18n.select("en-US");
                 UiText.refresh();
             }
         });

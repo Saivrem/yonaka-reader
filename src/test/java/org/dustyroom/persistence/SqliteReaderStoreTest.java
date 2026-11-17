@@ -50,11 +50,11 @@ class SqliteReaderStoreTest extends BasePersistenceTest {
     void persistsClearedAndReassignedShortcutsUntilDefaultsAreRestored() {
         Map<String, String> shortcuts = Map.of("nextImage", "", "shiftPairing", "meta pressed J");
         try (ReaderStore store = openStore()) {
-            store.saveSettings(ReaderSettings.defaults().toBuilder().shortcuts(shortcuts).language("ja").build());
+            store.saveSettings(ReaderSettings.defaults().toBuilder().shortcuts(shortcuts).language("ja-JP").build());
         }
         try (ReaderStore store = openStore()) {
             assertEquals(shortcuts, store.settings().getShortcuts());
-            assertEquals("ja", store.settings().getLanguage());
+            assertEquals("ja-JP", store.settings().getLanguage());
             store.saveSettings(ReaderSettings.defaults());
         }
         try (ReaderStore store = openStore()) {

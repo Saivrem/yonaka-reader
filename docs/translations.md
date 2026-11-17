@@ -3,13 +3,13 @@
 Choose a language in **Options → Settings → Appearance → Language**, then click **Apply** or **OK**.
 Menus, controls, tooltips and library views update immediately. The choice is saved with your settings.
 
-English, Russian and Japanese are included. Missing messages fall back to English.
+The included catalogs are `en-US.json`, `ru-RU.json` and `ja-JP.json`. Filenames match their `id` using BCP 47 spelling, with a hyphen between language and region. Saved selections using the older `en`, `ru` and `ja` codes remain supported. Missing messages fall back to English.
 Book titles and filesystem paths retain their original spelling.
 
 ## Add a language
 
-1. Copy `src/main/resources/i18n/en.json` to a new file in the same directory, such as `de.json`.
-2. Set `id` to a unique language tag, such as `de` or `pt-BR`. Set `name` to the language's own display name, such as `Deutsch`.
+1. Copy `src/main/resources/i18n/en-US.json` to a new file in the same directory, such as `de-AT.json`.
+2. Set `id` to a unique regional language tag, such as `de-AT`, `en-GB` or `pt-BR`. Set `name` to the language's own display name, such as `Deutsch (Österreich)`.
 3. Translate the values inside `messages`. Keep the keys unchanged. Save the file as UTF-8 JSON.
 4. Run `./gradlew clean test fatJar`, launch the application and select the new language. Check both Ayu themes, menus, Settings, recent books, library cards and dialogs.
 5. Submit the JSON file in a pull request.
@@ -23,8 +23,8 @@ Messages use indexed Java format placeholders.
 
 ```json
 {
-  "id": "de",
-  "name": "Deutsch",
+  "id": "de-AT",
+  "name": "Deutsch (Österreich)",
   "messages": {
     "reading.progress": "Seite %1$d von %2$d"
   }
@@ -45,7 +45,7 @@ An invalid format falls back to the English message at runtime.
 
 ## Maintain translations
 
-New interface text needs a stable, descriptive key in `en.json` and matching entries in the Russian and Japanese catalogs.
+New interface text needs a stable, descriptive key in `en-US.json` and matching entries in the Russian and Japanese catalogs.
 Keep runtime values in indexed placeholders so translators can reorder them.
 
 Use `I18n.text(key, arguments)` for messages created when an operation runs.

@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StorageUtilsTest {
     @AfterEach
     void restoreLanguage() {
-        I18n.select("en");
+        I18n.select("en-US");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"en", "ru", "ja"})
+    @ValueSource(strings = {"en-US", "ru-RU", "ja-JP"})
     void resolvesPlatformDirectoriesWithoutAccessingThem(String language) {
         I18n.select(language);
         // Use host-native absolute paths so the same cases also run on Windows.

@@ -14,13 +14,13 @@ import java.nio.file.Path;
  */
 public final class PackagedStoreSmoke {
     static void main(String[] args) {
-        for (String id : new String[]{"en", "ru", "ja"}) {
+        for (String id : new String[]{"en-US", "ru-RU", "ja-JP"}) {
             I18n.select(id);
             if (!id.equals(I18n.language().getId()) || I18n.text("ui.open_a_book").isBlank()) {
                 throw new AssertionError("Packaged translation missing: " + id);
             }
         }
-        I18n.select("en");
+        I18n.select("en-US");
         Path database = Path.of("build", "packaged-smoke.sqlite3");
         ReaderSettings expected = new ReaderSettings(ViewerTheme.LIGHT, FitMode.FIT_WIDTH, 1);
         try (ReaderStore store = new SqliteReaderStore(database)) {

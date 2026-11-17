@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.StringReader;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ class I18nTest {
 
     @AfterEach
     void restoreEnglish() {
-        I18n.select("en");
+        I18n.select("en-US");
     }
 
     private static Stream<String> languages() {
@@ -34,13 +35,13 @@ class I18nTest {
     @ParameterizedTest
     @MethodSource("languages")
     void shippedLanguagesHaveCompleteCompatibleMessages(String id) {
-        I18n.select("en");
+        I18n.select("en-US");
         Map<String, String> english = I18n.language().getMessages();
         I18n.select(id);
         assertEquals(id, I18n.language().getId());
         Map<String, String> translated = I18n.language().getMessages();
         assertTrue(english.keySet().containsAll(translated.keySet()));
-        if (Set.of("en", "ru", "ja").contains(id)) {
+        if (Set.of("en-US", "ru-RU", "ja-JP").contains(id)) {
             assertEquals(english.keySet(), translated.keySet());
         }
         translated.forEach((key, translation) -> {
@@ -75,10 +76,17 @@ class I18nTest {
         assertEquals("Continue — chapter", I18n.format(language, "recent.menuContinue", "chapter"));
     }
 
+    @ParameterizedTest
+    @CsvSource({"en,en-US", "ru,ru-RU", "ja,ja-JP", "en_us,en-US", "RU_ru,ru-RU", "ja-JP,ja-JP"})
+    void resolvesLegacyCodesAndNormalizesRegionalTags(String stored, String expected) {
+        I18n.select(stored);
+        assertEquals(expected, I18n.language().getId());
+    }
+
     @Test
     void unknownLanguageFallsBackToEnglish() {
         I18n.select("missing");
-        assertEquals("en", I18n.language().getId());
+        assertEquals("en-US", I18n.language().getId());
         assertEquals("Open a book", I18n.text("ui.open_a_book"));
     }
 

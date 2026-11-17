@@ -41,7 +41,7 @@ public class SettingsCodec {
                 "true".equals(values.get("default_two_page")),
                 EnumUtils.getEnum(FitMode.class, values.get("default_fit_mode"), fit),
                 values.getOrDefault("library_directory", ""),
-                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()), shortcuts, values.getOrDefault("language", "en"));
+                EnumUtils.getEnum(VolumeBoundary.class, values.get("volume_boundary"), defaults.getVolumeBoundary()), shortcuts, values.getOrDefault("language", "en-US"));
     }
 
     public static Map<String, String> encode(ReaderSettings settings) {

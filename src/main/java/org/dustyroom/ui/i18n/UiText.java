@@ -26,7 +26,7 @@ public class UiText {
         Locale locale = Locale.forLanguageTag(I18n.language().getId());
         JComponent.setDefaultLocale(locale);
         for (String key : I18n.languages().stream()
-                              .filter(language -> language.getId().equals("en"))
+                              .filter(language -> language.getId().equals("en-US"))
                               .findFirst().orElseThrow().getMessages().keySet()) {
             if (key.startsWith("swing.")) {
                 UIManager.put(key.substring("swing.".length()), I18n.text(key));
