@@ -89,6 +89,64 @@ class AsyncViewerSessionTest {
     }
 
     @Test
+    void unloadFlushesProgressClosesSourceAndAllowsReopening() {
+        FakeImageIterator source = FakeImageIterator.portraits("source", "one", "two", "three");
+        FakeImageIterator reopened = FakeImageIterator.portraits("source", "one", "two", "three");
+        Queue<ImageIterator> sources = new ArrayDeque<>(List.of(source, reopened));
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        RecordingView view = new RecordingView();
+        MemoryStore store = new MemoryStore();
+        BoundedImageCache images = cache(12);
+        try (AsyncViewerSession session = new AsyncViewerSession(view, _ -> sources.remove(), tasks,
+                Runnable::run, images, new SpreadPlanner(), new SpreadRenderer(), store)) {
+            session.open(new File("source"));
+            tasks.runAll();
+            session.goToPage(2);
+            tasks.runAll();
+            session.remember(lastFrame(view));
+            int displayed = view.frames.size();
+
+            session.unload();
+            session.next();
+            tasks.runAll();
+            assertEquals(1, source.closeCount);
+            assertFalse(store.closed);
+            assertEquals(0, images.size());
+            assertEquals(2, store.books.get("source").getPageNumber());
+            assertEquals(displayed, view.frames.size());
+
+            session.open(new File("source"));
+            tasks.runAll();
+            assertEquals(2, lastFrame(view).getFirstPage());
+            assertEquals(0, reopened.closeCount);
+        }
+        tasks.runAll();
+        assertEquals(1, reopened.closeCount);
+    }
+
+    @Test
+    void unloadDiscardsPostedFramesAndQueuedNavigation() {
+        FakeImageIterator source = FakeImageIterator.portraits("source", "one", "two");
+        ManualTaskExecutor tasks = new ManualTaskExecutor();
+        QueuedExecutor ui = new QueuedExecutor();
+        RecordingView view = new RecordingView();
+        try (AsyncViewerSession session = session(source, tasks, ui, view, cache(12))) {
+            session.open(new File("source"));
+            tasks.runAll();
+            session.next();
+            session.unload();
+            tasks.runAll();
+            ui.runAll();
+            assertTrue(view.frames.isEmpty());
+            assertTrue(view.animations.isEmpty());
+            assertTrue(view.errors.isEmpty());
+            assertEquals(0, view.loadingCount);
+            assertEquals(1, source.closeCount);
+        }
+        tasks.runAll();
+    }
+
+    @Test
     void adjacentVolumeNavigationStopsAtBothEndsAndRespectsStopSetting(@TempDir Path directory) throws Exception {
         Path first = ImageTestFixtures.writeZip(directory.resolve("1.zip"), "1.png", "2.png");
         Path second = ImageTestFixtures.writeZip(directory.resolve("2.zip"), "1.png", "2.png");

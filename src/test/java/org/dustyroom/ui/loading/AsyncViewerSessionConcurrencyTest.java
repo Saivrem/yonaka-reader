@@ -34,6 +34,27 @@ class AsyncViewerSessionConcurrencyTest {
     }
 
     @Test
+    void unloadDuringDecodeSuppressesTheResultAndClosesTheCandidate() throws Exception {
+        BlockingIterator source = new BlockingIterator();
+        RecordingView view = new RecordingView();
+        CountDownLatch cleanup = new CountDownLatch(1);
+        try (AsyncViewerSession session = session(source, view)) {
+            try {
+                session.open(new File("source"));
+                assertTrue(source.loadStarted.await(2, TimeUnit.SECONDS));
+                session.unload();
+                session.libraryTask(_ -> true, _ -> cleanup.countDown(), _ -> cleanup.countDown());
+            } finally {
+                source.releaseLoad.countDown();
+            }
+            assertTrue(cleanup.await(2, TimeUnit.SECONDS));
+            assertEquals(1, source.closeCount.get());
+            assertEquals(0, view.frames.get());
+            assertEquals(0, view.errors.get());
+        }
+    }
+
+    @Test
     void closeWaitsForInFlightDecodeAndSuppressesItsCallback() throws Exception {
         BlockingIterator source = new BlockingIterator();
         RecordingView view = new RecordingView();

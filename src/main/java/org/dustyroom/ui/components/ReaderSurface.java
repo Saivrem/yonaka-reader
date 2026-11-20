@@ -151,6 +151,7 @@ public final class ReaderSurface extends JPanel {
     }
 
     public void showWelcome() {
+        home.setSelectedIndex(0);
         reading = false;
         setLoading(false);
         cards.show(this, "welcome");

@@ -139,6 +139,16 @@ public final class AsyncViewerSession implements AutoCloseable {
         tasks.execute(INTERACTIVE, () -> openOnWorker(file, targetGeneration, requestId, false));
     }
 
+    public void unload() {
+        if (closed.get()) {
+            return;
+        }
+        generation.incrementAndGet();
+        nextRequest();
+        // Saves already queued for displayed frames run before cleanup on the same worker.
+        tasks.execute(INTERACTIVE, this::unloadOnWorker);
+    }
+
     public void resetAndClose(Runnable afterReset, Consumer<String> onFailure) {
         if (!closed.compareAndSet(false, true)) {
             return;
@@ -474,7 +484,7 @@ public final class AsyncViewerSession implements AutoCloseable {
         }
     }
 
-    private void closeOnWorker() {
+    private void unloadOnWorker() {
         try {
             closeSource(source);
         } finally {
@@ -483,7 +493,17 @@ public final class AsyncViewerSession implements AutoCloseable {
             shapes.clear();
             cache.clear();
             pageIndex = -1;
+            displayedRequest = -1;
             lastSourceError = null;
+            lastRememberedSource = null;
+            removedActiveSource = null;
+        }
+    }
+
+    private void closeOnWorker() {
+        try {
+            unloadOnWorker();
+        } finally {
             try {
                 store.close();
             } finally {
