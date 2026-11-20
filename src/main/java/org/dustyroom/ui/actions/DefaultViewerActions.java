@@ -20,6 +20,7 @@ public class DefaultViewerActions implements ViewerActions {
     private final Action toggleThumbnails;
     private final Action openFile;
     private final Action home;
+    private final Action library;
     private final Action exit;
     private final Action fitHeight;
     private final Action fitWidth;
@@ -50,6 +51,8 @@ public class DefaultViewerActions implements ViewerActions {
         KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
         this.home = action("home", "ui.home", "ui.return_to_recently_read_books",
                 KeyStroke.getKeyStroke(KeyEvent.VK_H, homeShortcut.getModifiers() | InputEvent.SHIFT_DOWN_MASK), controller::showHome);
+        this.library = action("library", "ui.library", "ui.open_library",
+                menuShortcut(KeyEvent.VK_L), controller::showLibrary);
         this.openFile = action("openFile", "ui.open", "ui.open_an_image_zip_cbz_archive_or_folder",
                 menuShortcut(KeyEvent.VK_O), controller::chooseFile);
         this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "ui.quit" : "ui.exit", "ui.close_yonaka_reader",

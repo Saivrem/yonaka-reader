@@ -104,7 +104,7 @@ public class ViewerController implements SettingsHost, ViewerView {
         keyBindings = new KeyBindings(actions);
         keyBindings.apply(frame.getRootPane(), preferences.getShortcuts());
         libraryController = new LibraryController(session, this::openFile);
-        readerSurface.setLibrary(libraryController.panel(), libraryController::refresh);
+        readerSurface.setLibrary(libraryController.panel());
         ReaderGestures.install(imageComponent, scrollPane, this::swipePage, () -> {
             saveSettings();
             refreshControls();
@@ -164,6 +164,22 @@ public class ViewerController implements SettingsHost, ViewerView {
         if (resetting || profileSwitchPending) {
             return;
         }
+        leaveReader();
+        readerSurface.showWelcome();
+        session.refreshRecentBooks();
+    }
+
+    public void showLibrary() {
+        if (resetting || profileSwitchPending) {
+            return;
+        }
+        leaveReader();
+        readerSurface.showLibrary();
+        libraryController.panel().showCollection();
+        libraryController.refresh();
+    }
+
+    private void leaveReader() {
         session.unload();
         displayedFrame = null;
         if (fullscreen) {
@@ -172,12 +188,10 @@ public class ViewerController implements SettingsHost, ViewerView {
         thumbnailPanel.showPages(List.of());
         thumbnailPanel.setVisible(false);
         imageComponent.setImageAndCenter(null, scrollPane);
-        readerSurface.showWelcome();
         navigationPanel.updateState(null);
         refreshControls();
         frame.setCursor(Cursor.getDefaultCursor());
         frame.setTitle(I18n.text("brand.name"));
-        session.refreshRecentBooks();
     }
 
     public void openExternalFile(File file) {

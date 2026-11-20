@@ -5,6 +5,7 @@ import org.dustyroom.be.models.direction.ReadingMode;
 import org.dustyroom.be.models.state.FitMode;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ViewerTheme;
+import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.models.view.ViewerFrame;
 import org.dustyroom.ui.actions.ViewerActionState;
 import org.dustyroom.ui.actions.ViewerActions;
@@ -101,6 +102,7 @@ class ReaderUiTest {
             }
 
             Map<Action, ReaderIconKind> shortcuts = Map.of(
+                    actions.library(), ReaderIconKind.LIBRARY,
                     actions.openFile(), ReaderIconKind.OPEN,
                     actions.openPageGrid(), ReaderIconKind.PAGE_GRID,
                     actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN);
@@ -162,23 +164,35 @@ class ReaderUiTest {
     }
 
     @Test
+    void fileMenuExposesTheSharedLibraryAction() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ViewerActions actions = actions();
+            MenuBar menu = new MenuBar(actions, ThemeMode.DARK, _ -> true);
+            JMenu file = menu.getMenu(0);
+            assertTrue(Arrays.stream(file.getMenuComponents())
+                             .filter(JMenuItem.class::isInstance)
+                             .map(JMenuItem.class::cast)
+                             .anyMatch(item -> item.getAction() == actions.library()));
+        });
+    }
+
+    @Test
     void homeSelectsRecentAndClearsTheLoadingState() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ViewerActions actions = actions();
             JScrollPane reader = new JScrollPane();
             ReaderSurface surface = new ReaderSurface(reader, actions.openFile());
             JPanel library = new JPanel();
-            surface.setLibrary(library, () -> {});
-            JTabbedPane tabs = children(surface)
-                    .filter(JTabbedPane.class::isInstance)
-                    .map(JTabbedPane.class::cast)
-                    .findFirst().orElseThrow();
-            tabs.setSelectedComponent(library);
+            surface.setLibrary(library);
+            surface.showLibrary();
+            assertTrue(library.isVisible());
+            assertFalse(reader.isVisible());
+            assertFalse(children(surface).anyMatch(JTabbedPane.class::isInstance));
             surface.showReading();
             surface.setLoading(true);
 
             surface.showWelcome();
-            assertEquals(0, tabs.getSelectedIndex());
+            assertFalse(library.isVisible());
             assertFalse(reader.isVisible());
             assertTrue(children(surface).filter(JLabel.class::isInstance).map(JLabel.class::cast)
                     .anyMatch(label -> I18n.text("home.formats").equals(label.getText())));

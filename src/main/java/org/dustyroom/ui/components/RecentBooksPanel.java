@@ -26,7 +26,7 @@ public final class RecentBooksPanel extends JPanel {
 
     public RecentBooksPanel() {
         super(new BorderLayout(0, 14));
-        JLabel heading = UiText.label("ui.recently_read");
+        JLabel heading = UiText.label("ui.home");
         heading.setFont(heading.getFont().deriveFont(Font.BOLD, 20f));
         JPanel header = new JPanel(new BorderLayout());
         header.add(heading, BorderLayout.WEST);

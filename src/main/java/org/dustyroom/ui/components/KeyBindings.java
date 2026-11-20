@@ -21,7 +21,7 @@ public final class KeyBindings {
     private final List<KeyStroke> installed = new ArrayList<>();
 
     public KeyBindings(ViewerActions viewer) {
-        List<Action> commands = List.of(viewer.openFile(), viewer.home(), viewer.openPageGrid(), viewer.toggleThumbnails(),
+        List<Action> commands = List.of(viewer.openFile(), viewer.home(), viewer.library(), viewer.openPageGrid(), viewer.toggleThumbnails(),
                 viewer.nextImage(), viewer.prevImage(), viewer.firstImage(), viewer.lastImage(), viewer.nextVolume(), viewer.prevVolume(),
                 viewer.goToPage(), viewer.toggleTwoPageMode(), viewer.shiftPairing(), viewer.setMangaReadingMode(), viewer.setComicsReadingMode(),
                 viewer.fitScreen(), viewer.fitWidth(), viewer.fitHeight(), viewer.zoomIn(), viewer.zoomOut(), viewer.toggleFullscreen(),
