@@ -161,20 +161,21 @@ public class ViewerController implements SettingsHost, ViewerView {
     }
 
     public void showHome() {
-        if (resetting) {
+        if (resetting || profileSwitchPending) {
             return;
         }
-        thumbnailPanel.setGridMode(false);
+        session.unload();
+        displayedFrame = null;
         if (fullscreen) {
             exitFullscreen();
         }
+        thumbnailPanel.showPages(List.of());
+        thumbnailPanel.setVisible(false);
+        imageComponent.setImageAndCenter(null, scrollPane);
         readerSurface.showWelcome();
-        libraryController.refresh();
-        if (thumbnailPanel != null) {
-            thumbnailPanel.setVisible(false);
-            actions.openPageGrid().setEnabled(false);
-            actions.shiftPairing().setEnabled(false);
-        }
+        navigationPanel.updateState(null);
+        refreshControls();
+        frame.setCursor(Cursor.getDefaultCursor());
         frame.setTitle(I18n.text("brand.name"));
         session.refreshRecentBooks();
     }

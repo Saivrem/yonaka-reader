@@ -162,6 +162,30 @@ class ReaderUiTest {
     }
 
     @Test
+    void homeSelectsRecentAndClearsTheLoadingState() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ViewerActions actions = actions();
+            JScrollPane reader = new JScrollPane();
+            ReaderSurface surface = new ReaderSurface(reader, actions.openFile());
+            JPanel library = new JPanel();
+            surface.setLibrary(library, () -> {});
+            JTabbedPane tabs = children(surface)
+                    .filter(JTabbedPane.class::isInstance)
+                    .map(JTabbedPane.class::cast)
+                    .findFirst().orElseThrow();
+            tabs.setSelectedComponent(library);
+            surface.showReading();
+            surface.setLoading(true);
+
+            surface.showWelcome();
+            assertEquals(0, tabs.getSelectedIndex());
+            assertFalse(reader.isVisible());
+            assertTrue(children(surface).filter(JLabel.class::isInstance).map(JLabel.class::cast)
+                    .anyMatch(label -> I18n.text("home.formats").equals(label.getText())));
+        });
+    }
+
+    @Test
     void welcomeOpensWithTheSharedActionAndGivesWayToReader() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             ViewerActions actions = actions();
