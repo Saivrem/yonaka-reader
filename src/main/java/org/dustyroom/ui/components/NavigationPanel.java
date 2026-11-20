@@ -18,6 +18,7 @@ public class NavigationPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
         JPanel files = group();
         files.add(button(actions.home(), ReaderIconKind.HOME));
+        files.add(button(actions.library(), ReaderIconKind.LIBRARY));
         files.add(button(actions.openFile(), ReaderIconKind.OPEN));
         files.add(button(actions.openPageGrid(), ReaderIconKind.PAGE_GRID));
         files.add(toggle(actions.toggleFullscreen(), ReaderIconKind.FULLSCREEN));
@@ -53,7 +54,7 @@ public class NavigationPanel extends JPanel {
     }
 
     private static JPanel group() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 0));
         panel.setOpaque(false);
         return panel;
     }

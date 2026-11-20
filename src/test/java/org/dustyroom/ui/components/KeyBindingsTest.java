@@ -50,6 +50,22 @@ class KeyBindingsTest {
     }
 
     @Test
+    void libraryShortcutUpdatesTheMenuAndToolbarTogether() {
+        Map<String, Action> actions = actionsByMethod();
+        ViewerActions viewer = proxy(actions);
+        KeyBindings bindings = new KeyBindings(viewer);
+        JRootPane root = new JRootPane();
+        JMenuItem menu = new JMenuItem(viewer.library());
+        JButton button = new JButton(viewer.library());
+        KeyStroke shortcut = KeyStroke.getKeyStroke("ctrl pressed L");
+        bindings.apply(root, Map.of("library", shortcut.toString()));
+        assertEquals("library", root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).get(shortcut));
+        assertSame(viewer.library(), root.getActionMap().get("library"));
+        assertEquals(shortcut, menu.getAccelerator());
+        assertEquals("library (" + KeyBindings.display(List.of(shortcut)) + ")", button.getToolTipText());
+    }
+
+    @Test
     void bindsActionAcceleratorsAndSupportedAliases() {
         Map<String, Action> actionsByMethod = actionsByMethod();
         ViewerActions actions = proxy(actionsByMethod);

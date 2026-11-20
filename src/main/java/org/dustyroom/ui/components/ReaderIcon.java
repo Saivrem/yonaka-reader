@@ -90,6 +90,13 @@ public record ReaderIcon(ReaderIconKind kind, int size) implements Icon {
                     line(g, 3, 11, 12, 3, 21, 11);
                     line(g, 5, 10, 5, 21, 10, 21, 10, 15, 14, 15, 14, 21, 19, 21, 19, 10);
                 }
+                case LIBRARY -> {
+                    g.drawRect(3, 4, 5, 16);
+                    g.drawRect(10, 4, 5, 16);
+                    line(g, 17, 5, 20, 4, 23, 19, 20, 20, 17, 5);
+                    line(g, 3, 8, 8, 8);
+                    line(g, 10, 16, 15, 16);
+                }
                 case OPEN -> {
                     line(g, 3, 8, 3, 5, 9, 5, 12, 8, 21, 8, 21, 19, 3, 19, 3, 8);
                     line(g, 3, 11, 21, 11);

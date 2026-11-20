@@ -8,7 +8,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.17.2 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.18.0 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 1. Open [builds from the main branch](https://github.com/Saivrem/yonaka-reader/actions/workflows/ci.yml?query=branch%3Amain).
@@ -57,7 +57,7 @@ The bottom toolbar has three groups. Within each group, the buttons appear in th
 Click a card to resume the saved page, direction and spread mode. Volumes in the
 same folder can share a card.
 
-Use the **Library** tab to keep a series on your shelf. Choose **Add folder…**,
+Use **File → Library**, the Library toolbar button or **Cmd/Ctrl+L** to keep a series on your shelf. Choose **Add folder…**,
 review the chapters to import, then use **Continue reading** to reopen the last
 chapter. Your book files stay where you put them.
 

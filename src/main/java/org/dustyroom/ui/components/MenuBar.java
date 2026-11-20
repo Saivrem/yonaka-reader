@@ -40,6 +40,7 @@ public class MenuBar extends JMenuBar {
         addActions(fileMenu, actions.openFile());
         fileMenu.add(recentMenu);
         fileMenu.add(home);
+        addActions(fileMenu, actions.library());
         fileMenu.addSeparator();
         addActions(fileMenu, actions.exit());
         showRecentBooks(List.of());
@@ -114,7 +115,7 @@ public class MenuBar extends JMenuBar {
                 case "nextImage" -> KeyEvent.VK_N;
                 case "previousImage" -> KeyEvent.VK_P;
                 case "firstImage", "toggleFullscreen" -> KeyEvent.VK_F;
-                case "lastImage" -> KeyEvent.VK_L;
+                case "lastImage", "library" -> KeyEvent.VK_L;
                 case "nextVolume" -> KeyEvent.VK_X;
                 case "previousVolume" -> KeyEvent.VK_V;
                 case "toggleTwoPageMode", "toggleThumbnails" -> KeyEvent.VK_T;

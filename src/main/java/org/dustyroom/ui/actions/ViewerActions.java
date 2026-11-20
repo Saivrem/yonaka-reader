@@ -11,6 +11,8 @@ public interface ViewerActions {
 
     Action home();
 
+    Action library();
+
     Action exit();
 
     Action fitHeight();

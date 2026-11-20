@@ -36,6 +36,9 @@ public final class LibraryPanel extends JPanel {
         this.controller = controller;
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         JPanel top = new JPanel(new BorderLayout(8, 8));
+        JLabel heading = UiText.label("ui.library");
+        heading.setFont(heading.getFont().deriveFont(Font.BOLD, 20f));
+        top.add(heading, BorderLayout.NORTH);
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEADING));
         controls.add(button("ui.add_folder", controller::chooseFolder));
         controls.add(button("ui.refresh", controller::refresh));
@@ -44,7 +47,7 @@ public final class LibraryPanel extends JPanel {
         controls.add(search);
         controls.add(filter);
         controls.add(sort);
-        top.add(controls, BorderLayout.NORTH);
+        top.add(controls, BorderLayout.CENTER);
         JPanel summary = new JPanel(new BorderLayout(12, 0));
         summary.add(status, BorderLayout.CENTER);
         summary.add(workCount, BorderLayout.LINE_END);
@@ -61,6 +64,11 @@ public final class LibraryPanel extends JPanel {
         JButton button = UiText.button(title);
         button.addActionListener(_ -> action.run());
         return button;
+    }
+
+    public void showCollection() {
+        selectedChapter = null;
+        changed();
     }
 
     private void changed() {

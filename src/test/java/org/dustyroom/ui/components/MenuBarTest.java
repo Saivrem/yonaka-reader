@@ -111,6 +111,11 @@ class MenuBarTest {
             return action;
         }
 
+        @Override
+        public Action library() {
+            return action;
+        }
+
         public Action openFile() {
             return action;
         }

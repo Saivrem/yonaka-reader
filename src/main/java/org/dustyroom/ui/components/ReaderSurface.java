@@ -19,7 +19,6 @@ public final class ReaderSurface extends JPanel {
     private final RecentBooksPanel recent = new RecentBooksPanel();
     private final JPanel hero = new JPanel();
     private final JPanel compact = new JPanel(new BorderLayout(24, 0));
-    private final JTabbedPane home = new JTabbedPane();
     private final Timer hintTimer = new Timer(1000, _ -> hideBoundaryHint());
     private Popup boundaryHint;
     private boolean reading;
@@ -73,11 +72,10 @@ public final class ReaderSurface extends JPanel {
         JScrollPane welcomeScroll = new JScrollPane(welcome);
         welcomeScroll.setBorder(BorderFactory.createEmptyBorder());
         welcomeScroll.getVerticalScrollBar().setUnitIncrement(24);
-        home.addTab(I18n.text("ui.recently_read"), welcomeScroll);
-        add(home, "welcome");
+        add(welcomeScroll, "welcome");
         add(reader, "reader");
         cards.show(this, "welcome");
-        UiText.bind(this, "labels", ReaderSurface::refreshLanguage);
+        UiText.bind(this, "status", surface -> surface.setLoading(surface.loading));
     }
 
     @Override
@@ -104,13 +102,14 @@ public final class ReaderSurface extends JPanel {
         return button;
     }
 
-    public void setLibrary(JComponent library, Runnable refresh) {
-        home.addTab(I18n.text("ui.library"), library);
-        home.addChangeListener(_ -> {
-            if (home.getSelectedComponent() == library) {
-                refresh.run();
-            }
-        });
+    public void setLibrary(JComponent library) {
+        add(library, "library");
+    }
+
+    public void showLibrary() {
+        reading = false;
+        setLoading(false);
+        cards.show(this, "library");
     }
 
     public void setRecentGrouping(boolean grouped, Consumer<Boolean> change) {
@@ -151,24 +150,14 @@ public final class ReaderSurface extends JPanel {
     }
 
     public void showWelcome() {
-        home.setSelectedIndex(0);
         reading = false;
         setLoading(false);
         cards.show(this, "welcome");
-        UiText.bind(this, "labels", ReaderSurface::refreshLanguage);
     }
 
     public void showReading() {
         reading = true;
         cards.show(this, "reader");
-    }
-
-    private void refreshLanguage() {
-        home.setTitleAt(0, I18n.text("ui.recently_read"));
-        if (home.getTabCount() > 1) {
-            home.setTitleAt(1, I18n.text("ui.library"));
-        }
-        setLoading(loading);
     }
 
     public void setLoading(boolean loading) {
