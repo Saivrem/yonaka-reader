@@ -75,4 +75,8 @@ chapter. Your book files stay where you put them.
 Yonaka Reader is distributed under the [GNU General Public License v3](LICENSE).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for bundled components.
 
+Copyright (C) 2026 Denis Sheviakov
+
+## Translations
+
 To contribute a translation, see the [translation guide](docs/translations.md).
