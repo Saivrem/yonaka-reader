@@ -8,23 +8,21 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.18.2 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.18.3 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
-1. Open [builds from the main branch](https://github.com/Saivrem/yonaka-reader/actions/workflows/ci.yml?query=branch%3Amain).
-2. Choose a recent successful run. While signed in to GitHub, download the artifact
-   for your platform from the **Artifacts** section and extract the downloaded ZIP.
-3. Open the package inside.
+Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
+Native packages include Java; extract portable archives completely before launching.
 
-| Platform | Artifact | Installation |
+| Platform | Package | Installation |
 | --- | --- | --- |
-| macOS · Apple Silicon | `YonakaReader-macOS-arm64-dmg` | Open the DMG and drag **Yonaka Reader.app** into Applications. |
-| Windows · x64 | `YonakaReader-windows-x64` | Run the MSI, or extract the portable ZIP and launch **Yonaka Reader.exe**. |
-| Ubuntu · x64 | `YonakaReader-linux-x64` | Install the DEB with `sudo apt install ./yonaka-reader*.deb`, or extract the portable archive. |
+| macOS · Apple Silicon | DMG | Open the DMG and drag **Yonaka Reader.app** into Applications. |
+| Windows · x64 | MSI or ZIP | Run the MSI, or extract the portable ZIP and launch **Yonaka Reader.exe**. |
+| Ubuntu · x64 | DEB or TAR.GZ | Install the DEB with `sudo apt install ./YonakaReader-*-linux-x64.deb`, or extract the portable archive. |
 
-Build artifacts expire after 14 days. The macOS build is ad-hoc signed and the Windows
-build is unsigned. See the [packaging guide](docs/packaging.md) for platform details,
-local package builds and uninstall instructions.
+Each release also includes the standalone JAR and `SHA256SUMS`. The macOS build is
+ad-hoc signed and the Windows build is unsigned. See the [packaging guide](docs/packaging.md)
+for platform details, local builds and uninstall instructions.
 
 ## Open your first book
 
@@ -42,18 +40,20 @@ The bottom toolbar has three groups. Within each group, the buttons appear in th
 
 | Books and views | Page navigation | Zoom and reading mode |
 | --- | --- | --- |
-| <img src="docs/images/controls/home.png" width="24" height="24" alt=""> Return to the home shelf | <img src="docs/images/controls/first.png" width="24" height="24" alt=""> First page | <img src="docs/images/controls/fit-screen.png" width="24" height="24" alt=""> Fit the whole page |
-| <img src="docs/images/controls/open.png" width="24" height="24" alt=""> Open a book | <img src="docs/images/controls/previous.png" width="24" height="24" alt=""> Previous page or spread | <img src="docs/images/controls/fit-width.png" width="24" height="24" alt=""> Fit page width |
-| <img src="docs/images/controls/page-grid.png" width="24" height="24" alt=""> Browse the page grid | **24 / 180** · Jump to a page | <img src="docs/images/controls/fit-height.png" width="24" height="24" alt=""> Fit page height |
-| <img src="docs/images/controls/fullscreen.png" width="24" height="24" alt=""> Toggle fullscreen | <img src="docs/images/controls/next.png" width="24" height="24" alt=""> Next page or spread | <img src="docs/images/controls/zoom-out.png" width="24" height="24" alt=""> Zoom out |
-| <img src="docs/images/controls/previous-volume.png" width="24" height="24" alt=""> Previous volume | <img src="docs/images/controls/last.png" width="24" height="24" alt=""> Last page | <img src="docs/images/controls/zoom-in.png" width="24" height="24" alt=""> Zoom in |
-| <img src="docs/images/controls/next-volume.png" width="24" height="24" alt=""> Next volume |  | <img src="docs/images/controls/read-right-to-left.png" width="24" height="24" alt=""> Read right to left |
-|  |  | <img src="docs/images/controls/read-left-to-right.png" width="24" height="24" alt=""> Read left to right |
+| <img src="docs/images/controls/home.png" width="24" height="24" alt=""> Home · recent books (`Cmd/Ctrl+Shift+H`) | <img src="docs/images/controls/first.png" width="24" height="24" alt=""> First page | <img src="docs/images/controls/fit-screen.png" width="24" height="24" alt=""> Fit the whole page or spread |
+| <img src="docs/images/controls/library.png" width="24" height="24" alt=""> Library (`Cmd/Ctrl+Shift+L`) | <img src="docs/images/controls/previous.png" width="24" height="24" alt=""> Previous page or spread | <img src="docs/images/controls/fit-width.png" width="24" height="24" alt=""> Fit page width |
+| <img src="docs/images/controls/open.png" width="24" height="24" alt=""> Open a book | **24 / 180** · Jump to a page | <img src="docs/images/controls/fit-height.png" width="24" height="24" alt=""> Fit page height |
+| <img src="docs/images/controls/page-grid.png" width="24" height="24" alt=""> Browse the page grid | <img src="docs/images/controls/next.png" width="24" height="24" alt=""> Next page or spread | <img src="docs/images/controls/zoom-out.png" width="24" height="24" alt=""> Zoom out |
+| <img src="docs/images/controls/fullscreen.png" width="24" height="24" alt=""> Toggle fullscreen | <img src="docs/images/controls/last.png" width="24" height="24" alt=""> Last page | <img src="docs/images/controls/zoom-in.png" width="24" height="24" alt=""> Zoom in |
+| <img src="docs/images/controls/previous-volume.png" width="24" height="24" alt=""> Previous volume |  | <img src="docs/images/controls/read-right-to-left.png" width="24" height="24" alt=""> Read right to left |
+| <img src="docs/images/controls/next-volume.png" width="24" height="24" alt=""> Next volume |  | <img src="docs/images/controls/read-left-to-right.png" width="24" height="24" alt=""> Read left to right |
 |  |  | <img src="docs/images/controls/spread.png" width="24" height="24" alt=""> Toggle two-page spreads |
+
+Shortcuts shown here are defaults; change them in **Settings → Shortcuts**.
 
 ## Pick up where you left off
 
-**Recently read** keeps your six most recent books or series on the home screen.
+**Home** keeps your six most recent books or series.
 Click a card to resume the saved page, direction and spread mode. Volumes in the
 same folder can share a card.
 
