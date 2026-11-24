@@ -205,6 +205,8 @@ class AsyncViewerSessionTest {
     @Test
     void animatedPagesFollowSpreadOrderAndStaleResultsAreDiscarded() {
         FakeImageIterator source = FakeImageIterator.portraits("book", "one.gif", "two.gif", "three.png");
+        source.images.put("one.gif", image(6, 10));
+        source.images.put("two.gif", image(4, 5));
         source.animation = new AnimationClip(() -> {
             throw new IOException("Not opened by session");
         });
@@ -220,14 +222,18 @@ class AsyncViewerSessionTest {
         ui.runAll();
         List<AnimatedPage> manga = view.animations.getLast();
         assertEquals(2, manga.size());
-        assertEquals(4, manga.getFirst().getX());
+        assertEquals(8, manga.getFirst().getX());
+        assertEquals(10, manga.getFirst().getHeight());
+        assertEquals(10, manga.getLast().getHeight());
+        assertEquals(8, manga.getLast().getWidth());
+        assertEquals(0, manga.getLast().getY());
         assertEquals(0, manga.get(1).getX());
         session.setComicsReadingMode();
         tasks.runAll();
         ui.runAll();
         List<AnimatedPage> comics = view.animations.getLast();
         assertEquals(0, comics.getFirst().getX());
-        assertEquals(4, comics.get(1).getX());
+        assertEquals(6, comics.get(1).getX());
         session.first();
         tasks.runAll(); // Animation callback queued, not delivered yet.
         int published = view.animations.size();

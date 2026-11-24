@@ -244,7 +244,7 @@ public class ImageComponent extends JComponent {
         int y = (getHeight() - imgH) / 2;
 
         // Do not rescale a full static image only to cover it with the animated frame.
-        // In spreads retain the still page and the black margins around each page.
+        // In spreads retain the still page while replacing only animated page bounds.
         Area stillArea = new Area(new Rectangle(x, y, imgW, imgH));
         for (int i = 0; i < players.size(); i++) {
             if (players.get(i).currentFrame() != null) {
@@ -271,7 +271,7 @@ public class ImageComponent extends JComponent {
             AnimatedPage page = animations.get(i);
             Rectangle bounds = animationBounds(page, x, y);
             int px = bounds.x, py = bounds.y, width = bounds.width, height = bounds.height;
-            g2d.setColor(page.isSpread() ? Color.BLACK : getBackground());
+            g2d.setColor(getBackground());
             g2d.fillRect(px, py, width, height);
             g2d.drawImage(frame.getImage(), px, py, width, height, this);
         }

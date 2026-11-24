@@ -25,6 +25,7 @@ import org.dustyroom.ui.rendering.ThumbnailRenderer;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -826,9 +827,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             if (!isLatest(targetGeneration, requestId)) {
                 return;
             }
-            int firstX = manga && second != null ? secondImage.getWidth() : 0;
-            int secondX = manga ? 0 : firstImage.getWidth();
-            int height = second == null ? firstImage.getHeight() : Math.max(firstImage.getHeight(), secondImage.getHeight());
+            List<Rectangle> bounds = spreadRenderer.layout(firstImage, secondImage, manga);
 
             List<AnimatedPage> animated = new ArrayList<>();
             for (int index = 0; index < refs.size(); index++) {
@@ -844,9 +843,9 @@ public final class AsyncViewerSession implements AutoCloseable {
                     if (clip == null) {
                         continue;
                     }
-                    BufferedImage image = index == 0 ? firstImage : secondImage;
-                    int x = index == 0 ? firstX : secondX;
-                    animated.add(new AnimatedPage(clip, x, (height - image.getHeight()) / 2, image.getWidth(), image.getHeight(), second != null));
+                    Rectangle placement = bounds.get(index);
+                    animated.add(new AnimatedPage(clip, placement.x, placement.y,
+                            placement.width, placement.height, second != null));
                 } catch (RuntimeException exception) {
                     postError(targetGeneration, requestId, exception);
                 }
