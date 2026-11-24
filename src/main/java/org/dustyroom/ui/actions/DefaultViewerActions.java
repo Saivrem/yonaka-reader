@@ -48,11 +48,10 @@ public class DefaultViewerActions implements ViewerActions {
         this.openPageGrid = action("openPageGrid", "ui.grid", "ui.open_page_grid", KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK), controller::openPageGrid);
         this.toggleThumbnails = action("toggleThumbnails", "ui.thumbnails", "ui.show_or_hide_page_thumbnails",
                 key(KeyEvent.VK_T), controller::toggleThumbnails);
-        KeyStroke homeShortcut = menuShortcut(KeyEvent.VK_H);
         this.home = action("home", "ui.home", "ui.return_to_recently_read_books",
-                KeyStroke.getKeyStroke(KeyEvent.VK_H, homeShortcut.getModifiers() | InputEvent.SHIFT_DOWN_MASK), controller::showHome);
+                shiftedMenuShortcut(KeyEvent.VK_H), controller::showHome);
         this.library = action("library", "ui.library", "ui.open_library",
-                menuShortcut(KeyEvent.VK_L), controller::showLibrary);
+                shiftedMenuShortcut(KeyEvent.VK_L), controller::showLibrary);
         this.openFile = action("openFile", "ui.open", "ui.open_an_image_zip_cbz_archive_or_folder",
                 menuShortcut(KeyEvent.VK_O), controller::chooseFile);
         this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "ui.quit" : "ui.exit", "ui.close_yonaka_reader",
@@ -121,6 +120,11 @@ public class DefaultViewerActions implements ViewerActions {
             modifiers = InputEvent.CTRL_DOWN_MASK;
         }
         return KeyStroke.getKeyStroke(keyCode, modifiers);
+    }
+
+    private static KeyStroke shiftedMenuShortcut(int keyCode) {
+        KeyStroke shortcut = menuShortcut(keyCode);
+        return KeyStroke.getKeyStroke(keyCode, shortcut.getModifiers() | InputEvent.SHIFT_DOWN_MASK);
     }
 
     private static KeyStroke key(int keyCode) {

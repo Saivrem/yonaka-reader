@@ -4,8 +4,8 @@
 
 ## Home and Library
 
-**Home** shows recently read books. **File → Library**, the books icon beside Home
-on the toolbar, or **Cmd/Ctrl+L** opens the library at its first collection page.
+**Home** (**Cmd/Ctrl+Shift+H**) shows recently read books. **File → Library**, the books icon beside Home
+on the toolbar, or **Cmd/Ctrl+Shift+L** opens the library at its first collection page.
 Both screens have a visible heading and replace the former tabs. Leaving the reader
 saves your progress and unloads the book. The Library shortcut can be changed in
 Settings alongside the other controls.
