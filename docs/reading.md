@@ -30,6 +30,10 @@ the source. Memory for decoded pixels depends on canvas size, not animation leng
 Leaving the page cancels playback and closes its file/archive stream. Covers
 and sidebar thumbnails intentionally stay static.
 
+Paired pages are displayed at a common height while preserving each page's aspect
+ratio, even when their source resolutions differ. **Fit to window** fits the complete
+spread and adjusts its scale when the window or thumbnail sidebar changes size.
+
 In two-page mode, select **View → Shift spread by one page** to show the cover alone and pair pages 2–3, 4–5, and so on. Landscape pages stay single. The reader remembers this choice for each book in either reading direction.
 
 ### Scrolling, zoom and panning

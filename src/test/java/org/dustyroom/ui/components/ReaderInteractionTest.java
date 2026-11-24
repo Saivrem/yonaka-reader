@@ -1,6 +1,7 @@
 package org.dustyroom.ui.components;
 
 import org.dustyroom.be.models.state.FitMode;
+import org.dustyroom.ui.rendering.SpreadRenderer;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
@@ -17,6 +18,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class ReaderInteractionTest {
+    @Test
+    void mixedSizeSpreadRefitsAfterRepeatedViewportResizes() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            BufferedImage first = new BufferedImage(600, 1000, BufferedImage.TYPE_INT_RGB);
+            BufferedImage second = new BufferedImage(400, 500, BufferedImage.TYPE_INT_RGB);
+            BufferedImage spread = new SpreadRenderer().compose(first, second, true);
+            ImageComponent image = new ImageComponent();
+            JScrollPane scroll = new JScrollPane(image);
+            image.setImageAndCenter(spread, scroll);
+            for (Dimension size : new Dimension[]{new Dimension(1600, 900), new Dimension(600, 900),
+                    new Dimension(2200, 1200), new Dimension(600, 400)}) {
+                scroll.getViewport().setSize(size);
+                image.setFitMode(FitMode.FIT_SCREEN);
+                double expected = Math.min(size.getWidth() / 1400, size.getHeight() / 1000);
+                assertEquals(expected, image.getScale(), 0.000001);
+                assertEquals((int) (1400 * expected), image.getPreferredSize().width);
+                assertEquals((int) (1000 * expected), image.getPreferredSize().height);
+            }
+            image.restoreView(FitMode.ORIGINAL, 1.5);
+            scroll.getViewport().setSize(500, 300);
+            image.updateScale();
+            assertEquals(1.5, image.getScale());
+        });
+    }
+
     @Test
     void horizontalWheelGestureTurnsOncePerBurstOnFittedPages() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
