@@ -101,6 +101,50 @@ class ReaderInteractionTest {
         });
     }
 
+    private static void wheel(JScrollPane scroll, int modifiers, double rotation) {
+        scroll.dispatchEvent(new MouseWheelEvent(scroll, MouseEvent.MOUSE_WHEEL, 1000, modifiers,
+                100, 100, 100, 100, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3,
+                (int) rotation, rotation));
+    }
+
+    @Test
+    void changesAxisImmediatelyAndKeepsCenterDuringZoom() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ImageComponent image = new ImageComponent();
+            JScrollPane scroll = new JScrollPane(image);
+            scroll.setSize(600, 400);
+            image.restoreView(FitMode.ORIGINAL, 1);
+            image.setImageAndCenter(new BufferedImage(1400, 1200, BufferedImage.TYPE_INT_RGB), scroll);
+            scroll.getViewport().setViewPosition(new Point(100, 100));
+            ReaderGestures.install(image, scroll, _ -> fail("Unexpected page turn"), () -> {});
+
+            wheel(scroll, 0, 1);
+            wheel(scroll, 0, 1);
+            wheel(scroll, InputEvent.SHIFT_DOWN_MASK, 1);
+            assertEquals(new Point(148, 196), scroll.getViewport().getViewPosition());
+            Dimension extent = scroll.getViewport().getExtentSize();
+            Point expected = new Point(296 + extent.width / 2, 392 + extent.height / 2);
+            image.zoomAtCenter(2, scroll);
+            assertEquals(expected, scroll.getViewport().getViewPosition());
+        });
+    }
+
+    @Test
+    void horizontalInputOnTallPageDoesNotTurnEvenAtBottom() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            ImageComponent image = new ImageComponent();
+            JScrollPane scroll = new JScrollPane(image);
+            scroll.setSize(600, 400);
+            image.setFitMode(FitMode.FIT_WIDTH);
+            image.setImageAndCenter(new BufferedImage(400, 1200, BufferedImage.TYPE_INT_RGB), scroll);
+            ReaderGestures.install(image, scroll, _ -> fail("Unexpected page turn"), () -> {});
+            scroll.getVerticalScrollBar().setValue(scroll.getVerticalScrollBar().getMaximum());
+            Point bottom = scroll.getViewport().getViewPosition();
+            wheel(scroll, InputEvent.SHIFT_DOWN_MASK, 2);
+            assertEquals(bottom, scroll.getViewport().getViewPosition());
+        });
+    }
+
     @Test
     void preciseWheelScrollAndDraggingMoveTheViewport() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
@@ -114,7 +158,7 @@ class ReaderInteractionTest {
             MouseWheelEvent wheel = new MouseWheelEvent(scroll, MouseEvent.MOUSE_WHEEL, 0, 0, 100, 100,
                     100, 100, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, 1, 0.25);
             scroll.dispatchEvent(wheel);
-            assertEquals(36, scroll.getViewport().getViewPosition().y);
+            assertEquals(12, scroll.getViewport().getViewPosition().y);
             Point before = scroll.getViewport().getViewPosition();
             image.dispatchEvent(new MouseEvent(image, MouseEvent.MOUSE_PRESSED, 0, InputEvent.BUTTON1_DOWN_MASK,
                     100, 100, 1, false, MouseEvent.BUTTON1));

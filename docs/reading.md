@@ -38,12 +38,15 @@ In two-page mode, press **Shift+P** or select **View → Shift spread by one pag
 
 ### Scrolling, zoom and panning
 
-The reader uses precise wheel/trackpad deltas, with a faster wheel step. Shift+wheel
-scrolls horizontally when the page is wider than the viewport. When the page fits
-horizontally, a horizontal swipe or left-button drag turns one page. Swipe right to
-advance in manga mode and left in comics mode. Drag wide images to pan.
-Ctrl+wheel (or Command+wheel on macOS) zooms around the pointer. Native macOS pinch
-zooms around the viewport center; Windows/Linux use Ctrl+wheel, including trackpads
+Scroll vertically with the wheel or horizontally with Shift+wheel. At the usual three-unit setting,
+one wheel notch moves 48 logical pixels. Fractional trackpad movements accumulate on each axis.
+While either dimension extends outside the viewport, scrolling and dragging pan the current page,
+including at its edges. When the entire page fits, a horizontal swipe or left-button drag turns one page.
+Swipe right to advance in manga mode and left in comics mode.
+
+Toolbar and keyboard zoom keep the viewport center stable. Ctrl+wheel (or Command+wheel on macOS)
+zooms around the pointer. Native macOS pinch uses the pointer inside the viewport and otherwise
+uses its center. Windows/Linux use Ctrl+wheel, including trackpads
 that emit that gesture. Manual zoom ranges from 5% to 2000%. Turning the page restores the last fit mode.
 
 The packaged macOS app and executable JAR enable Java's macOS magnification API.

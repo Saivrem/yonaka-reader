@@ -20,8 +20,8 @@ public class ReaderGestures {
 
     public static void install(ImageComponent image, JScrollPane scroll, Consumer<Boolean> swipe, Runnable changed) {
         scroll.setWheelScrollingEnabled(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(48);
-        scroll.getHorizontalScrollBar().setUnitIncrement(48);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getHorizontalScrollBar().setUnitIncrement(16);
         Timer save = new Timer(200, _ -> changed.run());
         save.setRepeats(false);
         MouseAdapter mouse = new ReaderMouseGestures(image, scroll, save, swipe);
@@ -29,8 +29,12 @@ public class ReaderGestures {
         image.addMouseListener(mouse);
         image.addMouseMotionListener(mouse);
         installMacMagnification(image, factor -> {
-            Point anchor = new Point(scroll.getViewport().getWidth() / 2, scroll.getViewport().getHeight() / 2);
-            image.zoomAt(factor, anchor, scroll);
+            Point anchor = scroll.getViewport().getMousePosition(true);
+            if (anchor == null) {
+                image.zoomAtCenter(factor, scroll);
+            } else {
+                image.zoomAt(factor, anchor, scroll);
+            }
             save.restart();
         });
     }

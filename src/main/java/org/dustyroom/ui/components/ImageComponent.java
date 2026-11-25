@@ -210,18 +210,9 @@ public class ImageComponent extends JComponent {
         repaint();
     }
 
-    public void zoomIn() {
-        fitMode = FitMode.ORIGINAL;
-        scale = Math.clamp(scale * 1.1, 0.05, 20);
-        revalidate();
-        repaint();
-    }
-
-    public void zoomOut() {
-        fitMode = FitMode.ORIGINAL;
-        scale = Math.clamp(scale / 1.1, 0.05, 20);
-        revalidate();
-        repaint();
+    public void zoomAtCenter(double factor, JScrollPane scroll) {
+        Dimension extent = scroll.getViewport().getExtentSize();
+        zoomAt(factor, new Point(extent.width / 2, extent.height / 2), scroll);
     }
 
     @Override
