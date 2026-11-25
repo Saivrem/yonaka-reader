@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.dustyroom.be.iterators.ImageTestFixtures.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +46,21 @@ class ZipIteratorTest {
             assertName("page1.png", iterator.first());
             assertName("page10.PNG", iterator.last());
         }
+    }
+
+    @Test
+    void detachedReadUsesOriginalVolumeAndReleasesItsArchive() throws Exception {
+        Path original = writeZip(tempDir.resolve("first.zip"), "first.png");
+        Path replacement = writeZip(tempDir.resolve("second.zip"), "second.png");
+        Supplier<Picture> read;
+        try (ZipIterator iterator = new ZipIterator(original.toFile())) {
+            read = iterator.detachedLoad(iterator.pages().getFirst());
+            iterator.setFile(replacement.toFile());
+            iterator.init();
+        }
+
+        assertName("first.png", read.get());
+        Files.delete(original);
     }
 
     @Test

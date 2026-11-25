@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.function.Supplier;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -153,6 +154,11 @@ class AsyncViewerSessionConcurrencyTest {
         @Override
         public int initialPageIndex() {
             return 0;
+        }
+
+        @Override
+        public Supplier<Picture> detachedLoad(PageRef page) {
+            return () -> load(page);
         }
 
         @Override

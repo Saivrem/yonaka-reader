@@ -78,10 +78,9 @@ page. **Back to reader** or **Esc** returns without changing the page. Keyboard
 navigation returns to the reader, and existing Fullscreen mode is preserved.
 The grid reuses the sidebar cache and loads only the visible area plus its margin.
 
-Thumbnails load on the background image worker below reading priority, visible pages
-first. A sliding in-memory cache keeps the visible range plus 10 pages before and
+Thumbnails load on two dedicated background workers, visible pages first. A sliding in-memory cache keeps the visible range plus 10 pages before and
 10 after it (usually about 25–30 previews, 144 × 192 logical pixels each, backed by up to 432 × 576 pixels for HiDPI screens). Scrolling
-evicts previews outside this window and loads the newly needed pages one at a time.
+evicts previews outside this window and requests previews for the new viewport.
 Changing books clears the preview cache. Unreadable previews retain their page number
 so the remaining pages can still be browsed.
 

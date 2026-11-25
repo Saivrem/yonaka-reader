@@ -29,8 +29,12 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -48,6 +52,8 @@ public final class AsyncViewerSession implements AutoCloseable {
     private final Function<File, ImageIterator> sourceFactory;
     private final ViewerTaskExecutor tasks;
     private final Executor uiExecutor;
+    private final ExecutorService thumbnailWorkers = Executors.newFixedThreadPool(2,
+            Thread.ofPlatform().daemon().name("reader-thumbnail-", 0).factory());
     private final BoundedImageCache cache;
     private final SpreadPlanner spreadPlanner;
     private final SpreadRenderer spreadRenderer;
@@ -373,27 +379,38 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     /**
-     * Uses the source only on its owning worker, below reading and prefetch priority.
+     * Snapshots the source on its owning worker and decodes previews independently of navigation.
      */
-    public void thumbnail(int index, PageRef expected, Consumer<BufferedImage> result) {
+    public void thumbnail(int index, PageRef expected, BooleanSupplier wanted, Consumer<BufferedImage> result) {
         long targetGeneration = generation.get();
         boolean queued = !closed.get() && tasks.execute(TaskPriority.THUMBNAIL, () -> {
-            BufferedImage thumbnail = null;
-            if (isActive(targetGeneration) && index >= 0 && index < pages.size()
-                    && pages.get(index).equals(expected)) {
-                try {
-                    BufferedImage image = cache.get(expected.getKey());
-                    if (image == null) {
-                        image = decodeImage(source, expected);
-                    }
-                    thumbnail = ThumbnailRenderer.render(image);
-                } catch (RuntimeException ignored) { /* An unreadable preview must not interrupt reading. */ }
+            if (!wanted.getAsBoolean() || !isActive(targetGeneration) || index < 0 || index >= pages.size() || !pages.get(index).equals(expected)) {
+                uiExecutor.execute(() -> result.accept(null));
+                return;
             }
-            BufferedImage completed = thumbnail;
-            uiExecutor.execute(() -> result.accept(isActive(targetGeneration) ? completed : null));
+            BufferedImage cached = cache.get(expected.getKey());
+            Supplier<Picture> read = source.detachedLoad(expected);
+            thumbnailWorkers.execute(() -> {
+                BufferedImage image = renderThumbnail(cached, read, wanted, targetGeneration);
+                uiExecutor.execute(() -> result.accept(isActive(targetGeneration) ? image : null));
+            });
         });
         if (!queued) {
             uiExecutor.execute(() -> result.accept(null));
+        }
+    }
+
+    private BufferedImage renderThumbnail(BufferedImage cached, Supplier<Picture> read,
+                                          BooleanSupplier wanted, long targetGeneration) {
+        if (!wanted.getAsBoolean() || !isActive(targetGeneration)) {
+            return null;
+        }
+        try {
+            BufferedImage image = cached == null ? read.get().getImage() : cached;
+            return wanted.getAsBoolean() ? ThumbnailRenderer.render(image) : null;
+        } catch (RuntimeException ignored) {
+            // An unreadable preview must not interrupt reading.
+            return null;
         }
     }
 
@@ -502,6 +519,7 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private void closeOnWorker() {
+        thumbnailWorkers.close();
         try {
             unloadOnWorker();
         } finally {
