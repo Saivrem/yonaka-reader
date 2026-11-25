@@ -79,6 +79,7 @@ thumbnail grid, including while in Fullscreen. Click a page or select it with th
 arrow keys and press Enter: the grid returns to the vertical sidebar and opens that
 page. **Back to reader** or **Esc** returns without changing the page. Keyboard
 navigation returns to the reader, and existing Fullscreen mode is preserved.
+The grid scrolls in small increments (48 logical pixels per three-unit wheel notch), including fractional trackpad movement.
 The grid reuses the sidebar cache and loads only the visible area plus its margin.
 
 Thumbnails load on two dedicated background workers, visible pages first. A sliding in-memory cache keeps the visible range plus 10 pages before and

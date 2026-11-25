@@ -17,11 +17,12 @@ import java.util.logging.Logger;
  */
 @UtilityClass
 public class ReaderGestures {
+    static final int SCROLL_UNIT = 16;
 
     public static void install(ImageComponent image, JScrollPane scroll, Consumer<Boolean> swipe, Runnable changed) {
         scroll.setWheelScrollingEnabled(false);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getHorizontalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_UNIT);
+        scroll.getHorizontalScrollBar().setUnitIncrement(SCROLL_UNIT);
         Timer save = new Timer(200, _ -> changed.run());
         save.setRepeats(false);
         MouseAdapter mouse = new ReaderMouseGestures(image, scroll, save, swipe);

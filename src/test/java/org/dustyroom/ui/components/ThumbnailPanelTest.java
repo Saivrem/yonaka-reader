@@ -224,6 +224,10 @@ class ThumbnailPanelTest {
                 layout(workspace);
                 JList<?> list = (JList<?>) ((JScrollPane) ((BorderLayout) panel.getLayout()).getLayoutComponent(BorderLayout.CENTER)).getViewport().getView();
                 drain(replies);
+                Rectangle viewport = list.getVisibleRect();
+                assertEquals(16, list.getScrollableUnitIncrement(viewport, SwingConstants.VERTICAL, 1));
+                viewport.translate(0, 12);
+                assertEquals(16, list.getScrollableUnitIncrement(viewport, SwingConstants.VERTICAL, -1));
                 int visibleEnd = list.getLastVisibleIndex();
                 assertTrue(visibleEnd > 2);
                 assertEquals(indices(0, visibleEnd + 10), requested);
