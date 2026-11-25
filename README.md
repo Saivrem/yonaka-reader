@@ -8,7 +8,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.18.3 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.19.0 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
@@ -30,7 +30,7 @@ for platform details, local builds and uninstall instructions.
 - Read **ZIP and CBZ** archives directly. Loose pages can be **JPEG, PNG or GIF**.
   Pages are sorted naturally, so page 2 comes before page 10.
 - Press **Right** for the next page. Press **P** for a two-page spread and choose
-  manga (right to left) or comics (left to right) on the toolbar.
+  manga (right to left) or comics (left to right) on the toolbar. Press **Shift+P** to shift the pairing by one page.
 - Use **F** for fullscreen, **G** to jump to a page number, or **Shift+G** to pick
   a page from the thumbnail grid.
 

@@ -58,7 +58,18 @@ public final class KeyBindings {
     }
 
     public List<KeyStroke> keys(String id, Map<String, String> overrides) {
-        String value = overrides.getOrDefault(id, defaults.get(id));
+        if (overrides.containsKey(id)) {
+            return parseKeys(overrides.get(id));
+        }
+
+        List<KeyStroke> keys = parseKeys(defaults.get(id));
+        for (String assigned : overrides.values()) {
+            keys.removeAll(parseKeys(assigned));
+        }
+        return keys;
+    }
+
+    private static List<KeyStroke> parseKeys(String value) {
         List<KeyStroke> keys = new ArrayList<>();
         for (String token : value.split(",")) {
             KeyStroke stroke = KeyStroke.getKeyStroke(token);
