@@ -21,7 +21,8 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SettingsDialog extends JDialog {
     private final SettingsHost host;
-    private final JComboBox<Language> language = new JComboBox<>(I18n.languages().toArray(Language[]::new));
+    private final DefaultComboBoxModel<Language> languages = new DefaultComboBoxModel<>(I18n.languages().toArray(Language[]::new));
+    private final JComboBox<Language> language = new JComboBox<>(languages);
     private final JComboBox<ThemeMode> theme = new JComboBox<>(ThemeMode.values());
     private final JComboBox<String> direction = UiText.combo("ui.manga_right_to_left_label", "ui.comics_left_to_right_label");
     private final JCheckBox spread = UiText.checkbox("ui.two_page_spreads");
@@ -47,7 +48,7 @@ public final class SettingsDialog extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         JPanel content = new JPanel(new BorderLayout(16, 16));
         content.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
-        JList<String> categories = UiText.list("ui.appearance", "ui.reading", "ui.shortcuts", "ui.library", "ui.data");
+        JList<String> categories = UiText.list("ui.appearance", "ui.reading", "ui.shortcuts", "translations.title", "ui.library", "ui.data");
         categories.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         categories.setFixedCellHeight(36);
         categories.setPreferredSize(new Dimension(175, 250));
@@ -57,6 +58,7 @@ public final class SettingsDialog extends JDialog {
         pages.add(appearance(), "ui.appearance");
         pages.add(reading(), "ui.reading");
         pages.add(shortcuts, "ui.shortcuts");
+        pages.add(new TranslationPanel(host.dataDirectory(), languages), "translations.title");
         pages.add(library(), "ui.library");
         pages.add(data(), "ui.data");
         categories.addListSelectionListener(event -> {

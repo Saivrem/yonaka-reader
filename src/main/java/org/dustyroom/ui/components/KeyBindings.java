@@ -2,6 +2,7 @@ package org.dustyroom.ui.components;
 
 import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.ui.actions.ViewerActions;
+import org.dustyroom.ui.i18n.UiText;
 import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
@@ -99,12 +100,13 @@ public final class KeyBindings {
         actions.forEach((id, action) -> {
             List<KeyStroke> keys = keys(id, overrides);
             action.putValue(Action.ACCELERATOR_KEY, keys.isEmpty() ? null : keys.getFirst());
-            String hint = action.getValue("translation.description") instanceof String key
-                    ? I18n.text(key) : descriptions.get(id);
-            if (!keys.isEmpty()) {
-                hint = hint + " (" + display(keys) + ")";
+            String suffix = keys.isEmpty() ? "" : " (" + display(keys) + ")";
+            if (action.getValue("translation.description") instanceof String key) {
+                UiText.bind(action, "shortcutHint", target ->
+                        target.putValue(Action.SHORT_DESCRIPTION, I18n.text(key) + suffix));
+            } else {
+                action.putValue(Action.SHORT_DESCRIPTION, descriptions.get(id) + suffix);
             }
-            action.putValue(Action.SHORT_DESCRIPTION, hint);
             root.getActionMap().put(id, action);
             for (KeyStroke key : keys) {
                 inputs.put(key, id);
