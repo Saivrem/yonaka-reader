@@ -10,7 +10,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.22.0 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.22.1 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
@@ -33,7 +33,7 @@ for platform details, local builds and uninstall instructions.
   Pages are sorted naturally, so page 2 comes before page 10.
 - Press **Right** for the next page. Press **P** for a two-page spread and choose
   manga (right to left) or comics (left to right) on the toolbar. Press **Shift+P** to shift the pairing by one page.
-- Use **F** for fullscreen, **G** to jump to a page number, or **Shift+G** to pick
+- Use **G** to jump to a page number or **Shift+G** to pick
   a page from the thumbnail grid.
 
 ## Toolbar controls
@@ -51,7 +51,9 @@ The bottom toolbar has three groups. Within each group, the buttons appear in th
 | <img src="docs/images/controls/next-volume.png" width="24" height="24" alt=""> Next volume |  | <img src="docs/images/controls/read-left-to-right.png" width="24" height="24" alt=""> Read left to right |
 |  |  | <img src="docs/images/controls/spread.png" width="24" height="24" alt=""> Toggle two-page spreads |
 
-Shortcuts shown here are defaults; change them in **Settings → Shortcuts**.
+Open a book with `Cmd+O` on macOS or `Ctrl+O` on Windows and Linux. Toggle fullscreen with `Ctrl+Cmd+F` on macOS or `F11` elsewhere.
+While reading, use `←` / `→` or `Page Up` / `Page Down` to turn pages and `W` / `H` / `S` to fit width, height or the whole page.
+Text fields keep their typing and editing keys. See [Keyboard shortcuts](docs/reading.md#keyboard-shortcuts) for the full list or change them in **Settings → Shortcuts**.
 
 ## Pick up where you left off
 

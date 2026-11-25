@@ -61,7 +61,7 @@ See the [illustrated toolbar guide](../README.md#toolbar-controls) for each butt
 - The toolbar has dedicated buttons for fit, zoom and reading direction. Hover over a button for its action and shortcut.
 - Scale, two-page spread, reading direction and fullscreen states stay synchronized between toolbar, menus and shortcuts.
 - Reading controls become available after a book opens. By default, Next on the last page or Previous on the first page keeps the current page and briefly shows “Last page” or “First page”. In Settings → Reading, choose Do nothing, wrap within the volume, or continue into the adjacent volume. At the ends of a series the reader stays on the page.
-- Escape leaves fullscreen without closing the application; Q and Cmd/Ctrl+Q still quit.
+- Press **Escape** to leave fullscreen and continue reading in the window.
 
 ## Page thumbnails
 
@@ -89,11 +89,13 @@ so the remaining pages can still be browsed.
 
 Open **Settings → Shortcuts** to see the current keys for every reader action. Select a row and choose **Assign…**, then press the new combination. If another action uses that key, confirm the move or cancel to keep both assignments. **Clear** removes all keys for the selected action. **Restore defaults** resets the whole list. Choose **Apply** or **OK** to save your changes and update the menus and toolbar hints.
 
+Page navigation, zoom and reading-mode shortcuts are active while reading a book. Focusing a text field suspends them, including custom bindings, so you can type, move the caret and select text. Standard application chords such as `Cmd/Ctrl+O` remain available in the main window. Custom application shortcuts resume when focus leaves the field.
+
 Default bindings:
 
 | Key | Action |
 | --- | --- |
-| `O`, `Cmd/Ctrl+O` | Open a file |
+| `Cmd/Ctrl+O` | Open a file |
 | `Right`, `Page Down` | Next page |
 | `Left`, `Page Up` | Previous page |
 | `Shift+G` | Open the page grid |
@@ -105,10 +107,10 @@ Default bindings:
 | `P` | Toggle two-page mode |
 | `Shift+P` | Shift the two-page pairing by one page |
 | `M`, `C` | Manga or comics reading mode |
-| `F` (also `F11` on Windows/Linux) | Toggle fullscreen |
+| `Ctrl+Cmd+F` (macOS), `F11` (Windows/Linux) | Toggle fullscreen |
 | `Escape` | Leave fullscreen |
 | `G` | Go to page |
-| `Q`, `Cmd/Ctrl+Q` | Exit |
+| `Cmd+Q` (macOS), `Ctrl+Q` (Linux), `Alt+F4` (Windows) | Exit |
 
 ## Recently read
 

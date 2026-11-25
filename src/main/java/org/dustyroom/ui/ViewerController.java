@@ -33,6 +33,7 @@ import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.text.JTextComponent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
@@ -102,7 +103,6 @@ public class ViewerController implements SettingsHost, ViewerView {
         this.readerSurface = readerSurface;
         this.actions = actions;
         keyBindings = new KeyBindings(actions);
-        keyBindings.apply(frame.getRootPane(), preferences.getShortcuts());
         libraryController = new LibraryController(session, this::openFile);
         readerSurface.setLibrary(libraryController.panel());
         ReaderGestures.install(imageComponent, scrollPane, this::swipePage, () -> {
@@ -554,7 +554,7 @@ public class ViewerController implements SettingsHost, ViewerView {
                 I18n.select(saved.getLanguage());
                 UiText.refresh();
             }
-            keyBindings.apply(frame.getRootPane(), saved.getShortcuts());
+            refreshShortcuts();
             thumbnailsVisible = saved.isThumbnailsVisible();
             thumbnailPanel.setExpanded(thumbnailsVisible);
             actions.toggleThumbnails().putValue(Action.SELECTED_KEY, thumbnailsVisible);
@@ -618,10 +618,24 @@ public class ViewerController implements SettingsHost, ViewerView {
         }));
     }
 
+    void refreshShortcuts() {
+        Component focus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner();
+        KeyBindings.Context context;
+        if (focus instanceof JTextComponent) {
+            context = KeyBindings.Context.EDITING;
+        } else if (displayedFrame != null) {
+            context = KeyBindings.Context.READING;
+        } else {
+            context = KeyBindings.Context.BROWSING;
+        }
+        keyBindings.apply(frame.getRootPane(), preferences.getShortcuts(), context);
+    }
+
     void refreshControls() {
         if (actions == null) {
             return;
         }
+        refreshShortcuts();
         ViewerActionState.apply(actions, displayedFrame, imageComponent.getFitMode(), fullscreen);
         actions.exitFullscreen().setEnabled(fullscreen || (thumbnailPanel != null && thumbnailPanel.isGridMode()));
         actions.openPageGrid().setEnabled(displayedFrame != null && thumbnailPanel != null && thumbnailPanel.isVisible());

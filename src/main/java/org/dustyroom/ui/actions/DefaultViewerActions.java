@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import org.dustyroom.ui.ViewerController;
+import org.dustyroom.be.utils.OSUtils;
 import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
@@ -55,7 +56,8 @@ public class DefaultViewerActions implements ViewerActions {
         this.openFile = action("openFile", "ui.open", "ui.open_an_image_zip_cbz_archive_or_folder",
                 menuShortcut(KeyEvent.VK_O), controller::chooseFile);
         this.exit = action("exit", PlatformUi.usesScreenMenuBar() ? "ui.quit" : "ui.exit", "ui.close_yonaka_reader",
-                menuShortcut(KeyEvent.VK_Q), controller::exit);
+                OSUtils.isWindows(OSUtils.currentName()) ? KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_DOWN_MASK)
+                        : menuShortcut(KeyEvent.VK_Q), controller::exit);
         this.fitHeight = action("fitHeight", "ui.fit_height", "ui.fit_the_page_to_the_window_height",
                 key(KeyEvent.VK_H), controller::fitHeight);
         this.fitWidth = action("fitWidth", "ui.fit_width", "ui.fit_the_page_to_the_window_width",
@@ -79,7 +81,8 @@ public class DefaultViewerActions implements ViewerActions {
         this.prevVolume = action("previousVolume", "ui.previous_volume", "ui.open_the_previous_volume",
                 key(KeyEvent.VK_UP), controller::showPrevVolume);
         this.toggleFullscreen = action("toggleFullscreen", "ui.full_screen", "ui.enter_or_leave_full_screen_mode",
-                key(KeyEvent.VK_F), controller::toggleFullscreen);
+                PlatformUi.usesScreenMenuBar() ? KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK | InputEvent.META_DOWN_MASK)
+                        : key(KeyEvent.VK_F11), controller::toggleFullscreen);
         this.shiftPairing = action("shiftPairing", "ui.shift_spread_by_one_page", "reading.shiftHint",
                 KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK), controller::shiftPairing);
         this.toggleTwoPageMode = action("toggleTwoPageMode", "ui.two_page_spread", "ui.show_compatible_pages_as_a_spread",

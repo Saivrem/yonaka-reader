@@ -17,6 +17,7 @@ import org.dustyroom.ui.utils.PlatformUi;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.beans.PropertyChangeListener;
 
 public class ImageViewer extends JFrame {
     private static final int RESIZE_RENDER_DELAY_MS = 80;
@@ -28,6 +29,8 @@ public class ImageViewer extends JFrame {
     private final JScrollPane scrollPane;
     private final ReaderSurface readerSurface;
     private final Timer resizeRenderTimer;
+
+    private final PropertyChangeListener focusChanged;
 
     public ImageViewer(ReaderStore store, ReaderSettings settings) {
         setTitle(I18n.text("brand.name"));
@@ -41,6 +44,7 @@ public class ImageViewer extends JFrame {
         imageComponent.restoreView(settings.getFitMode(), settings.getZoom());
         scrollPane = new JScrollPane(imageComponent);
         viewerController = new ViewerController(this, graphicsDevice, imageComponent, scrollPane, store, settings);
+        focusChanged = _ -> viewerController.refreshShortcuts();
         ViewerActions viewerActions = new DefaultViewerActions(viewerController);
         resizeRenderTimer = new Timer(RESIZE_RENDER_DELAY_MS, _ -> applyResizeRender());
         resizeRenderTimer.setRepeats(false);
@@ -56,6 +60,21 @@ public class ImageViewer extends JFrame {
                 .installOn(getRootPane());
         viewerController.configureViewerSurfaces();
         setVisible(true);
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addPropertyChangeListener("permanentFocusOwner", focusChanged);
+        viewerController.refreshShortcuts();
+    }
+
+    @Override
+    public void removeNotify() {
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .removePropertyChangeListener("permanentFocusOwner", focusChanged);
+        super.removeNotify();
     }
 
     private void initializeUI() {

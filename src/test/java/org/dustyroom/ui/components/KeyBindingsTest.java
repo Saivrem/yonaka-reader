@@ -1,7 +1,6 @@
 package org.dustyroom.ui.components;
 
 import org.dustyroom.ui.actions.ViewerActions;
-import org.dustyroom.ui.utils.PlatformUi;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
@@ -58,7 +57,7 @@ class KeyBindingsTest {
         JMenuItem menu = new JMenuItem(viewer.library());
         JButton button = new JButton(viewer.library());
         KeyStroke shortcut = KeyStroke.getKeyStroke("ctrl pressed L");
-        bindings.apply(root, Map.of("library", shortcut.toString()));
+        bindings.apply(root, Map.of("library", shortcut.toString()), KeyBindings.Context.READING);
         assertEquals("library", root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).get(shortcut));
         assertSame(viewer.library(), root.getActionMap().get("library"));
         assertEquals(shortcut, menu.getAccelerator());
@@ -75,13 +74,42 @@ class KeyBindingsTest {
         JMenuItem menu = new JMenuItem(actions.get("shiftPairing"));
         InputMap inputs = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        bindings.apply(root, Map.of("openFile", shiftP.toString()));
+        bindings.apply(root, Map.of("openFile", shiftP.toString()), KeyBindings.Context.READING);
         assertEquals("openFile", inputs.get(shiftP));
         assertNull(menu.getAccelerator());
 
-        bindings.apply(root, Map.of());
+        bindings.apply(root, Map.of(), KeyBindings.Context.READING);
         assertEquals("shiftPairing", inputs.get(shiftP));
         assertEquals(shiftP, menu.getAccelerator());
+    }
+
+    @Test
+    void editingSuspendsMenuAndWindowShortcutsAndReadingRestoresThem() {
+        ViewerActions viewer = proxy(actionsByMethod());
+        KeyBindings bindings = new KeyBindings(viewer);
+        JRootPane root = new JRootPane();
+        JMenuItem next = new JMenuItem(viewer.nextImage());
+        JMenuItem quit = new JMenuItem(viewer.exit());
+        InputMap inputs = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        KeyStroke selectWord = KeyStroke.getKeyStroke("ctrl shift pressed LEFT");
+        KeyStroke quitKey = KeyStroke.getKeyStroke("pressed Q");
+        Map<String, String> overrides = Map.of("nextImage", selectWord.toString(), "exit", quitKey.toString());
+
+        bindings.apply(root, overrides, KeyBindings.Context.READING);
+        assertEquals(selectWord, next.getAccelerator());
+        bindings.apply(root, overrides, KeyBindings.Context.EDITING);
+        assertNull(next.getAccelerator());
+        assertNull(inputs.get(selectWord));
+        assertNull(quit.getAccelerator());
+        assertNull(inputs.get(quitKey));
+        assertEquals("openFile", inputs.get(KeyStroke.getKeyStroke("ctrl pressed O")));
+
+        bindings.apply(root, overrides, KeyBindings.Context.BROWSING);
+        assertNull(next.getAccelerator());
+        assertEquals(quitKey, quit.getAccelerator());
+        bindings.apply(root, overrides, KeyBindings.Context.READING);
+        assertEquals(selectWord, next.getAccelerator());
+        assertEquals("nextImage", inputs.get(selectWord));
     }
 
     @Test
@@ -91,31 +119,28 @@ class KeyBindingsTest {
         JRootPane rootPane = new JRootPane();
 
         KeyBindings bindings = new KeyBindings(actions);
-        bindings.apply(rootPane, Map.of());
+        bindings.apply(rootPane, Map.of(), KeyBindings.Context.READING);
 
         InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         KeyStroke openShortcut = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK);
         assertEquals("openFile", inputMap.get(openShortcut));
         assertSame(actionsByMethod.get("openFile"), rootPane.getActionMap().get("openFile"));
 
-        assertEquals("openFile", inputMap.get(KeyStroke.getKeyStroke(KeyEvent.VK_O, 0)));
-        assertSame(actionsByMethod.get("openFile"), rootPane.getActionMap().get("openFile"));
+        assertNull(inputMap.get(KeyStroke.getKeyStroke(KeyEvent.VK_O, 0)));
+        assertNull(inputMap.get(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0)));
         assertEquals("nextImage", inputMap.get(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0)));
-        if (!PlatformUi.usesScreenMenuBar()) {
-            assertEquals("toggleFullscreen", inputMap.get(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0)));
-        }
 
         JMenuItem menu = new JMenuItem(actions.shiftPairing());
         JButton button = new JButton(actions.shiftPairing());
         KeyStroke custom = KeyStroke.getKeyStroke("shift pressed J");
-        bindings.apply(rootPane, Map.of("nextImage", "", "shiftPairing", custom.toString()));
+        bindings.apply(rootPane, Map.of("nextImage", "", "shiftPairing", custom.toString()), KeyBindings.Context.READING);
         assertEquals("shiftPairing", inputMap.get(custom));
         assertEquals(custom, menu.getAccelerator());
         assertEquals("shiftPairing (" + KeyBindings.display(List.of(custom)) + ")", button.getToolTipText());
         assertNull(inputMap.get(KeyStroke.getKeyStroke("RIGHT")));
         assertNull(inputMap.get(KeyStroke.getKeyStroke("PAGE_DOWN")));
 
-        bindings.apply(rootPane, Map.of());
+        bindings.apply(rootPane, Map.of(), KeyBindings.Context.READING);
         assertNull(inputMap.get(custom));
         assertNull(menu.getAccelerator());
         assertEquals("shiftPairing", button.getToolTipText());

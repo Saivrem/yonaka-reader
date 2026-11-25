@@ -3,7 +3,6 @@ package org.dustyroom.ui.components;
 import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.ui.actions.ViewerActions;
 import org.dustyroom.ui.i18n.UiText;
-import org.dustyroom.ui.utils.PlatformUi;
 
 import javax.swing.*;
 import java.awt.event.InputEvent;
@@ -13,15 +12,23 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class KeyBindings {
+    public enum Context { READING, BROWSING, EDITING }
+
+    private final Set<Action> applicationActions;
+    private Context context;
+    private Map<String, String> appliedOverrides;
     private final Map<String, Action> actions = new LinkedHashMap<>();
     private final Map<String, String> defaults = new HashMap<>();
     private final Map<String, String> descriptions = new HashMap<>();
     private final List<KeyStroke> installed = new ArrayList<>();
 
     public KeyBindings(ViewerActions viewer) {
+        applicationActions = Set.of(viewer.openFile(), viewer.exit(), viewer.home(), viewer.library(),
+                viewer.settings(), viewer.showAbout(), viewer.resetComicDatabase(), viewer.toggleFullscreen(), viewer.exitFullscreen());
         List<Action> commands = List.of(viewer.openFile(), viewer.home(), viewer.library(), viewer.openPageGrid(), viewer.toggleThumbnails(),
                 viewer.nextImage(), viewer.prevImage(), viewer.firstImage(), viewer.lastImage(), viewer.nextVolume(), viewer.prevVolume(),
                 viewer.goToPage(), viewer.toggleTwoPageMode(), viewer.shiftPairing(), viewer.setMangaReadingMode(), viewer.setComicsReadingMode(),
@@ -34,14 +41,9 @@ public final class KeyBindings {
             KeyStroke primary = (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
             defaults.put(id, primary == null ? "" : primary.toString());
         }
-        alias(viewer.openFile(), KeyEvent.VK_O);
-        alias(viewer.exit(), KeyEvent.VK_Q);
         alias(viewer.nextImage(), KeyEvent.VK_PAGE_DOWN);
         alias(viewer.prevImage(), KeyEvent.VK_PAGE_UP);
         alias(viewer.zoomIn(), KeyEvent.VK_EQUALS);
-        if (!PlatformUi.usesScreenMenuBar()) {
-            alias(viewer.toggleFullscreen(), KeyEvent.VK_F11);
-        }
     }
 
     private void alias(Action action, int keyCode) {
@@ -93,13 +95,28 @@ public final class KeyBindings {
         return modifiers.isEmpty() ? name : modifiers + "+" + name;
     }
 
-    public void apply(JRootPane root, Map<String, String> overrides) {
+    public void apply(JRootPane root, Map<String, String> overrides, Context nextContext) {
+        if (context == nextContext && overrides.equals(appliedOverrides)) {
+            return;
+        }
+        context = nextContext;
+        appliedOverrides = Map.copyOf(overrides);
+
         InputMap inputs = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         installed.forEach(inputs::remove);
         installed.clear();
         actions.forEach((id, action) -> {
             List<KeyStroke> keys = keys(id, overrides);
-            action.putValue(Action.ACCELERATOR_KEY, keys.isEmpty() ? null : keys.getFirst());
+            List<KeyStroke> activeKeys = keys;
+            if (context != Context.READING && !applicationActions.contains(action)) {
+                activeKeys = List.of();
+            } else if (context == Context.EDITING) {
+                // Only the standard application chords remain available while typing.
+                activeKeys = keys.stream()
+                                 .filter(key -> key.getModifiers() != 0 && defaults.get(id).equals(key.toString()))
+                                 .toList();
+            }
+            action.putValue(Action.ACCELERATOR_KEY, activeKeys.isEmpty() ? null : activeKeys.getFirst());
             String suffix = keys.isEmpty() ? "" : " (" + display(keys) + ")";
             if (action.getValue("translation.description") instanceof String key) {
                 UiText.bind(action, "shortcutHint", target ->
@@ -108,7 +125,7 @@ public final class KeyBindings {
                 action.putValue(Action.SHORT_DESCRIPTION, descriptions.get(id) + suffix);
             }
             root.getActionMap().put(id, action);
-            for (KeyStroke key : keys) {
+            for (KeyStroke key : activeKeys) {
                 inputs.put(key, id);
                 installed.add(key);
             }
