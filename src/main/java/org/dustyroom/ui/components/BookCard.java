@@ -58,6 +58,15 @@ public abstract class BookCard extends JPanel {
         body.add(details, BorderLayout.CENTER);
     }
 
+    protected static JButton trashButton(String label, Runnable remove) {
+        JButton button = new JButton(new ReaderIcon(ReaderIconKind.TRASH, 16));
+        button.putClientProperty("JButton.buttonType", "toolBarButton");
+        button.setToolTipText(label);
+        button.getAccessibleContext().setAccessibleName(label);
+        button.addActionListener(_ -> remove.run());
+        return button;
+    }
+
     protected final void setFooter(JComponent leading, JComponent trailing) {
         footer.add(leading, BorderLayout.WEST);
         footer.add(trailing, BorderLayout.EAST);

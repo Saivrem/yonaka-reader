@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.util.function.Consumer;
 
 final class LibraryBookCard extends BookCard {
-    LibraryBookCard(LibraryWork work, LibrarySnapshot snapshot, Runnable details, Consumer<LibraryChapter> open) {
+    LibraryBookCard(LibraryWork work, LibrarySnapshot snapshot, Runnable details, Consumer<LibraryChapter> open, Runnable remove) {
         super(work.getRoot(), details);
         LibraryChapter resume = work.getResumeChapter();
         setHeading(work.getTitle(), resume.getSource().getTitle(), true, I18n.text("library.viewChapters", work.getTitle()));
@@ -30,6 +30,9 @@ final class LibraryBookCard extends BookCard {
         JButton read = new JButton(resume.getLastRead() > 0 ? I18n.text("ui.continue_reading") : I18n.text("ui.start_reading"));
         read.setEnabled(snapshot.getAvailable().contains(resume.getId()));
         read.addActionListener(_ -> open.accept(resume));
-        setFooter(chapters, read);
+        Box actions = Box.createHorizontalBox();
+        actions.add(read);
+        actions.add(trashButton(I18n.text("ui.remove_from_library"), remove));
+        setFooter(chapters, actions);
     }
 }
