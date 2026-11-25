@@ -27,10 +27,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.function.Supplier;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -248,7 +251,7 @@ class AsyncViewerSessionTest {
     }
 
     @Test
-    void thumbnailsYieldToNavigationAndDoNotChangeTheDisplayedPage() {
+    void thumbnailsYieldToNavigationAndDoNotChangeTheDisplayedPage() throws Exception {
         FakeImageIterator source = FakeImageIterator.portraits("source", "one", "two", "three", "four");
         ManualTaskExecutor tasks = new ManualTaskExecutor();
         RecordingView view = new RecordingView();
@@ -256,21 +259,28 @@ class AsyncViewerSessionTest {
                 cache(12), new SpreadPlanner(), new SpreadRenderer());
         session.open(new File("source"));
         tasks.runAll();
-        List<BufferedImage> previews = new ArrayList<>();
-        session.thumbnail(3, source.ref("four"), previews::add);
-        session.next();
-        assertEquals(TaskPriority.INTERACTIVE, tasks.runNext());
-        assertEquals(2, lastFrame(view).getFirstPage());
-        assertTrue(previews.isEmpty());
+        BlockingQueue<Optional<BufferedImage>> previews = new LinkedBlockingQueue<>();
+        source.blockOn("four");
+        session.thumbnail(3, source.ref("four"), () -> true, image -> previews.add(Optional.ofNullable(image)));
         tasks.runAll();
-        assertNotNull(previews.getFirst());
+        assertTrue(source.awaitBlockedLoad());
+        try {
+            session.next();
+            assertEquals(TaskPriority.INTERACTIVE, tasks.runNext());
+            assertEquals(2, lastFrame(view).getFirstPage());
+            assertTrue(previews.isEmpty());
+        } finally {
+            source.releaseBlockedLoad();
+        }
+        tasks.runAll();
+        assertTrue(previews.poll(5, TimeUnit.SECONDS).isPresent());
         assertEquals(2, lastFrame(view).getFirstPage());
         session.close();
         tasks.runAll();
     }
 
     @Test
-    void obsoleteAndFailedThumbnailsDoNotReportReadingErrors() {
+    void obsoleteAndFailedThumbnailsDoNotReportReadingErrors() throws Exception {
         FakeImageIterator old = FakeImageIterator.portraits("old", "one", "two", "bad");
         FakeImageIterator replacement = FakeImageIterator.portraits("new", "one");
         old.failOn("bad");
@@ -281,14 +291,14 @@ class AsyncViewerSessionTest {
                 cache(12), new SpreadPlanner(), new SpreadRenderer());
         session.open(new File("old"));
         tasks.runAll();
-        List<BufferedImage> previews = new ArrayList<>();
-        session.thumbnail(2, old.ref("bad"), previews::add);
+        BlockingQueue<Optional<BufferedImage>> previews = new LinkedBlockingQueue<>();
+        session.thumbnail(2, old.ref("bad"), () -> true, image -> previews.add(Optional.ofNullable(image)));
         tasks.runAll();
-        assertNull(previews.getFirst());
-        session.thumbnail(2, old.ref("bad"), previews::add);
+        assertEquals(Optional.empty(), previews.poll(5, TimeUnit.SECONDS));
+        session.thumbnail(2, old.ref("bad"), () -> true, image -> previews.add(Optional.ofNullable(image)));
         session.open(new File("new"));
         tasks.runAll();
-        assertNull(previews.get(1));
+        assertEquals(Optional.empty(), previews.poll(5, TimeUnit.SECONDS));
         assertEquals(1, old.loads("bad"));
         assertTrue(view.errors.isEmpty());
         session.close();
@@ -1263,6 +1273,11 @@ class AsyncViewerSessionTest {
         @Override
         public int initialPageIndex() {
             return 0;
+        }
+
+        @Override
+        public Supplier<Picture> detachedLoad(PageRef page) {
+            return () -> load(page);
         }
 
         @Override

@@ -10,6 +10,7 @@ import org.dustyroom.be.utils.FileUtils;
 import java.io.File;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static org.dustyroom.be.utils.FileUtils.getSortedFilesFromParent;
 
@@ -37,6 +38,9 @@ public interface ImageIterator extends AutoCloseable {
     int initialPageIndex();
 
     Picture load(PageRef page);
+
+    /** Captures a read that owns its resources and may run after the iterator changes volume or closes. */
+    Supplier<Picture> detachedLoad(PageRef page);
 
     default AnimationClip animation(PageRef page) {
         return null;

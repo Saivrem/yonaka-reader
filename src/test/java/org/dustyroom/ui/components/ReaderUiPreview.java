@@ -111,7 +111,7 @@ public final class ReaderUiPreview {
 
         NavigationPanel navigation = new NavigationPanel(actions);
         navigation.updateState(frame);
-        ThumbnailPanel thumbnails = new ThumbnailPanel((_, _, result) ->
+        ThumbnailPanel thumbnails = new ThumbnailPanel((_, _, _, result) ->
                 result.accept(ThumbnailRenderer.render(samplePage())), _ -> {
         }, () -> {
         });

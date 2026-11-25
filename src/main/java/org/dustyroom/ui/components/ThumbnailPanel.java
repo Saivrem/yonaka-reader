@@ -17,13 +17,15 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
- * EDT-owned, virtualized list. Only one thumbnail request is outstanding at a time.
+ * EDT-owned, virtualized list. Tracks up to two outstanding thumbnail requests.
  */
 public final class ThumbnailPanel extends JPanel {
+    private static final int MAX_PENDING = 2;
     private static final int PREFETCH_MARGIN = 10;
     private final JList<PageRef> list = new ThumbnailList();
     private final ThumbnailLoader loader;
@@ -42,7 +44,7 @@ public final class ThumbnailPanel extends JPanel {
     private boolean expanded;
     private List<PageRef> pages = List.of();
     private int windowStart, windowEnd = -1;
-    private boolean pending;
+    private final Map<Integer, AtomicBoolean> pending = new HashMap<>();
     private int first = -1, last = -1;
 
     public ThumbnailPanel(ThumbnailLoader loader, IntConsumer navigate, Runnable hide) {
@@ -155,6 +157,7 @@ public final class ThumbnailPanel extends JPanel {
 
     public void setExpanded(boolean expanded) {
         if (!expanded) {
+            pending.values().forEach(wanted -> wanted.set(false));
             setGridMode(false);
         }
         if (this.expanded == expanded) {
@@ -180,6 +183,7 @@ public final class ThumbnailPanel extends JPanel {
             return;
         }
         setGridMode(false);
+        pending.values().forEach(wanted -> wanted.set(false));
         pages = newPages;
         gridButton.setEnabled(!newPages.isEmpty());
         cache.clear();
@@ -222,40 +226,39 @@ public final class ThumbnailPanel extends JPanel {
         windowStart = Math.max(0, start - PREFETCH_MARGIN);
         windowEnd = Math.min(pages.size() - 1, end + PREFETCH_MARGIN);
         cache.keySet().removeIf(index -> index < windowStart || index > windowEnd);
-        if (pending) {
-            return;
-        }
+        pending.forEach((index, wanted) -> {
+            if (index < windowStart || index > windowEnd) {
+                wanted.set(false);
+            }
+        });
         // Visible pages first, then alternate forward/backward by distance from the viewport.
-        for (int index = start; index <= end; index++) {
-            if (request(index)) {
-                return;
-            }
+        for (int index = start; index <= end && pending.size() < MAX_PENDING; index++) {
+            request(index);
         }
-        for (int distance = 1; distance <= PREFETCH_MARGIN; distance++) {
-            if (end + distance <= windowEnd && request(end + distance)) {
-                return;
+        for (int distance = 1; distance <= PREFETCH_MARGIN && pending.size() < MAX_PENDING; distance++) {
+            if (end + distance <= windowEnd) {
+                request(end + distance);
             }
-            if (start - distance >= windowStart && request(start - distance)) {
-                return;
+            if (start - distance >= windowStart && pending.size() < MAX_PENDING) {
+                request(start - distance);
             }
         }
     }
 
-    private boolean request(int index) {
-        if (cache.containsKey(index)) {
-            return false;
+    private void request(int index) {
+        if (cache.containsKey(index) || pending.containsKey(index)) {
+            return;
         }
-        List<PageRef> captured = pages;
-        pending = true;
-        loader.load(index, pages.get(index), image -> {
-            pending = false;
-            if (pages == captured && index >= windowStart && index <= windowEnd) {
+        AtomicBoolean wanted = new AtomicBoolean(true);
+        pending.put(index, wanted);
+        loader.load(index, pages.get(index), wanted::get, image -> {
+            pending.remove(index);
+            if (expanded && isShowing() && wanted.get() && index >= windowStart && index <= windowEnd) {
                 // Empty icon marks an unreadable page; retry only if it leaves and re-enters the window.
                 cache.put(index, image == null ? new ImageIcon() : new ThumbnailIcon(image));
                 list.repaint(list.getCellBounds(index, index));
             }
             pump();
         });
-        return true;
     }
 }

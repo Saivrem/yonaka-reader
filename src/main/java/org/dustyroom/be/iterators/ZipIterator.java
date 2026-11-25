@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -168,11 +169,32 @@ public class ZipIterator implements ImageIterator {
 
     @Override
     public Picture load(PageRef page) {
+        validatePage(page);
+        return readImage(zipFile, zipFilePath, page);
+    }
+
+    @Override
+    public Supplier<Picture> detachedLoad(PageRef page) {
+        validatePage(page);
+        File archive = zipFilePath;
+        return () -> {
+            try (ZipFile zip = new ZipFile(archive)) {
+                return readImage(zip, archive, page);
+            } catch (IOException e) {
+                throw new ImageIteratorException(I18n.text("zip.open", archive.getName()), archive, e);
+            }
+        };
+    }
+
+    private void validatePage(PageRef page) {
         ensureOpen();
         String currentSourceId = normalizedPath(zipFilePath);
         if (!page.getKey().sourceId().equals(currentSourceId)) {
             throw new ImageIteratorException(I18n.text("zip.foreignPage"), zipFilePath);
         }
+    }
+
+    private static Picture readImage(ZipFile zipFile, File zipFilePath, PageRef page) {
         ZipEntry entry = zipFile.getEntry(page.getKey().pageId());
         if (entry == null || entry.isDirectory()) {
             throw new ImageIteratorException(I18n.text("zip.missing", page.getKey().pageId()), zipFilePath);

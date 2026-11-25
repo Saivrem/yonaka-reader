@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.dustyroom.be.models.direction.Direction.NEXT;
 import static org.dustyroom.be.models.direction.Direction.PREV;
@@ -118,11 +119,20 @@ public class FileImageIterator implements ImageIterator {
 
     @Override
     public Picture load(PageRef page) {
+        return detachedLoad(page).get();
+    }
+
+    @Override
+    public Supplier<Picture> detachedLoad(PageRef page) {
         File imageFile = new File(page.getKey().pageId());
         String expectedSource = normalizedPath(getVolumeRoot());
         if (!page.getKey().sourceId().equals(expectedSource)) {
             throw new ImageIteratorException(I18n.text("image.foreignPage"), imageFile);
         }
+        return () -> readImage(imageFile, page);
+    }
+
+    private static Picture readImage(File imageFile, PageRef page) {
         try (FileImageInputStream input = new FileImageInputStream(imageFile)) {
             BufferedImage read = ImageDecoder.read(input);
             if (read == null) {
