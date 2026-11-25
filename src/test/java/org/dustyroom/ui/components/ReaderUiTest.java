@@ -224,13 +224,13 @@ class ReaderUiTest {
             scroll.getViewport().setSize(800, 600);
             component.setFitMode(FitMode.FIT_WIDTH);
             component.setImageAndCenter(new BufferedImage(4, 8, BufferedImage.TYPE_INT_RGB), scroll);
-            component.zoomIn();
+            component.zoomAtCenter(1.1, scroll);
             assertEquals(FitMode.ORIGINAL, component.getFitMode());
             component.restorePageFit();
             component.setImageAndCenter(new BufferedImage(8, 16, BufferedImage.TYPE_INT_RGB), scroll);
             assertEquals(FitMode.FIT_WIDTH, component.getFitMode());
             component.setFitMode(FitMode.FIT_SCREEN);
-            component.zoomOut();
+            component.zoomAtCenter(1 / 1.1, scroll);
             assertTrue(component.getScale() <= 20);
             assertDoesNotThrow(() -> new ReaderSettings(
                     ViewerTheme.DARK, component.getFitMode(), component.getScale()));

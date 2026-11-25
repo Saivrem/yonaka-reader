@@ -341,13 +341,13 @@ public class ViewerController implements SettingsHost, ViewerView {
     }
 
     public void zoomIn() {
-        imageComponent.zoomIn();
+        imageComponent.zoomAtCenter(1.1, scrollPane);
         saveSettings();
         refreshControls();
     }
 
     public void zoomOut() {
-        imageComponent.zoomOut();
+        imageComponent.zoomAtCenter(1 / 1.1, scrollPane);
         saveSettings();
         refreshControls();
     }

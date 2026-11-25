@@ -33,15 +33,19 @@ final class ReaderMouseGestures extends MouseAdapter {
         } else {
             boolean horizontal = event.isShiftDown();
             JScrollBar bar = horizontal ? scroll.getHorizontalScrollBar() : scroll.getVerticalScrollBar();
-            double delta = event.getPreciseWheelRotation() * (event.getScrollType() == MouseWheelEvent.WHEEL_BLOCK_SCROLL
-                    ? bar.getBlockIncrement() : 48 * Math.max(1, event.getScrollAmount()));
-            if (horizontal && !scroll.getHorizontalScrollBar().isVisible()) {
+            boolean block = event.getScrollType() == MouseWheelEvent.WHEEL_BLOCK_SCROLL;
+            double units = event.getPreciseWheelRotation();
+            if (!block) {
+                units *= Math.max(1, event.getScrollAmount());
+            }
+            if (horizontal && pageFits()) {
                 if (event.getWhen() - lastWheel > 300) {
                     swipeDistance = 0;
                     wheelTurned = false;
                 }
                 lastWheel = event.getWhen();
-                swipeDistance += delta;
+                // Swipe sensitivity is independent of the wheel's panning speed.
+                swipeDistance += units * (block ? bar.getBlockIncrement() : 48);
                 if (!wheelTurned && Math.abs(swipeDistance) >= SWIPE_DISTANCE) {
                     wheelTurned = true;
                     swipe.accept(swipeDistance > 0);
@@ -49,6 +53,7 @@ final class ReaderMouseGestures extends MouseAdapter {
                 event.consume();
                 return;
             }
+            double delta = units * (block ? bar.getBlockIncrement() : bar.getUnitIncrement());
             double total = delta + (horizontal ? horizontalRemainder : verticalRemainder);
             int pixels = (int) total;
             if (horizontal) {
@@ -61,12 +66,19 @@ final class ReaderMouseGestures extends MouseAdapter {
         event.consume();
     }
 
+    private boolean pageFits() {
+        JViewport viewport = scroll.getViewport();
+        Dimension view = viewport.getViewSize();
+        Dimension extent = viewport.getExtentSize();
+        return view.width <= extent.width && view.height <= extent.height;
+    }
+
     @Override
     public void mousePressed(MouseEvent event) {
         if (!SwingUtilities.isLeftMouseButton(event) && !SwingUtilities.isMiddleMouseButton(event)) {
             return;
         }
-        dragCanTurn = SwingUtilities.isLeftMouseButton(event) && !scroll.getHorizontalScrollBar().isVisible();
+        dragCanTurn = SwingUtilities.isLeftMouseButton(event) && pageFits();
         pressed = SwingUtilities.convertPoint(image, event.getPoint(), scroll.getViewport());
         origin = scroll.getViewport().getViewPosition();
         image.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
@@ -86,7 +98,7 @@ final class ReaderMouseGestures extends MouseAdapter {
 
     @Override
     public void mouseReleased(MouseEvent event) {
-        if (pressed != null && dragCanTurn) {
+        if (pressed != null && dragCanTurn && pageFits()) {
             Point end = SwingUtilities.convertPoint(image, event.getPoint(), scroll.getViewport());
             int dx = end.x - pressed.x;
             int dy = end.y - pressed.y;

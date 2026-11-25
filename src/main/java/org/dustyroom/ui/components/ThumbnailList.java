@@ -3,11 +3,20 @@ package org.dustyroom.ui.components;
 import org.dustyroom.be.models.book.PageRef;
 
 import javax.swing.*;
+import java.awt.Rectangle;
 
 /**
  * Keeps wrap geometry current before scrolling and scheduling visible thumbnail requests.
  */
 final class ThumbnailList extends JList<PageRef> {
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        if (getLayoutOrientation() == HORIZONTAL_WRAP && orientation == SwingConstants.VERTICAL) {
+            return ReaderGestures.SCROLL_UNIT;
+        }
+        return super.getScrollableUnitIncrement(visibleRect, orientation, direction);
+    }
+
     @Override
     public void setBounds(int x, int y, int width, int height) {
         boolean widthChanged = width != getWidth();

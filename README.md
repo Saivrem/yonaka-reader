@@ -10,7 +10,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.22.2 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.22.3 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
@@ -53,6 +53,7 @@ The bottom toolbar has three groups. Within each group, the buttons appear in th
 
 Open a book with `Cmd+O` on macOS or `Ctrl+O` on Windows and Linux. Toggle fullscreen with `Ctrl+Cmd+F` on macOS or `F11` elsewhere.
 While reading, use `←` / `→` or `Page Up` / `Page Down` to turn pages and `W` / `H` / `S` to fit width, height or the whole page.
+Use the wheel or trackpad to pan a magnified page. Toolbar zoom keeps the center in view, and Ctrl/Command+wheel zooms around the pointer.
 Text fields keep their typing and editing keys. See [Keyboard shortcuts](docs/reading.md#keyboard-shortcuts) for the full list or change them in **Settings → Shortcuts**.
 
 ## Pick up where you left off

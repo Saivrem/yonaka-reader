@@ -38,12 +38,15 @@ In two-page mode, press **Shift+P** or select **View → Shift spread by one pag
 
 ### Scrolling, zoom and panning
 
-The reader uses precise wheel/trackpad deltas, with a faster wheel step. Shift+wheel
-scrolls horizontally when the page is wider than the viewport. When the page fits
-horizontally, a horizontal swipe or left-button drag turns one page. Swipe right to
-advance in manga mode and left in comics mode. Drag wide images to pan.
-Ctrl+wheel (or Command+wheel on macOS) zooms around the pointer. Native macOS pinch
-zooms around the viewport center; Windows/Linux use Ctrl+wheel, including trackpads
+Scroll vertically with the wheel or horizontally with Shift+wheel. At the usual three-unit setting,
+one wheel notch moves 48 logical pixels. Fractional trackpad movements accumulate on each axis.
+While either dimension extends outside the viewport, scrolling and dragging pan the current page,
+including at its edges. When the entire page fits, a horizontal swipe or left-button drag turns one page.
+Swipe right to advance in manga mode and left in comics mode.
+
+Toolbar and keyboard zoom keep the viewport center stable. Ctrl+wheel (or Command+wheel on macOS)
+zooms around the pointer. Native macOS pinch uses the pointer inside the viewport and otherwise
+uses its center. Windows/Linux use Ctrl+wheel, including trackpads
 that emit that gesture. Manual zoom ranges from 5% to 2000%. Turning the page restores the last fit mode.
 
 The packaged macOS app and executable JAR enable Java's macOS magnification API.
@@ -76,6 +79,7 @@ thumbnail grid, including while in Fullscreen. Click a page or select it with th
 arrow keys and press Enter: the grid returns to the vertical sidebar and opens that
 page. **Back to reader** or **Esc** returns without changing the page. Keyboard
 navigation returns to the reader, and existing Fullscreen mode is preserved.
+The grid scrolls in small increments (48 logical pixels per three-unit wheel notch), including fractional trackpad movement.
 The grid reuses the sidebar cache and loads only the visible area plus its margin.
 
 Thumbnails load on two dedicated background workers, visible pages first. A sliding in-memory cache keeps the visible range plus 10 pages before and
