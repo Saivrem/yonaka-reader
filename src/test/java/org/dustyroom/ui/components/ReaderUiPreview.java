@@ -15,6 +15,7 @@ import org.dustyroom.ui.actions.ViewerActionState;
 import org.dustyroom.ui.actions.ViewerActions;
 import org.dustyroom.ui.rendering.ThumbnailRenderer;
 import org.dustyroom.ui.utils.BrandAssets;
+import org.dustyroom.ui.utils.DialogUtils;
 import org.dustyroom.ui.utils.UiUtils;
 
 import javax.imageio.ImageIO;
@@ -63,7 +64,7 @@ public final class ReaderUiPreview {
     }
 
     private static void renderAbout(File output, ViewerTheme theme) {
-        JOptionPane pane = new JOptionPane(I18n.text("about.text", "0.20.0"),
+        JOptionPane pane = new JOptionPane(DialogUtils.aboutText(),
                 JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 BrandAssets.aboutIcon());
         pane.setSize(520, 240);
