@@ -90,6 +90,10 @@ public final class LibraryController {
         pumpCover();
     }
 
+    void cancelCover(LibraryChapter chapter) {
+        covers.removeIf(request -> request.chapter().equals(chapter));
+    }
+
     private void pumpCover() {
         if (coverPending || covers.isEmpty()) {
             return;
