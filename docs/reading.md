@@ -34,7 +34,7 @@ Paired pages are displayed at a common height while preserving each page's aspec
 ratio, even when their source resolutions differ. **Fit to window** fits the complete
 spread and adjusts its scale when the window or thumbnail sidebar changes size.
 
-In two-page mode, select **View → Shift spread by one page** to show the cover alone and pair pages 2–3, 4–5, and so on. Landscape pages stay single. The reader remembers this choice for each book in either reading direction.
+In two-page mode, press **Shift+P** or select **View → Shift spread by one page** to show the cover alone and pair pages 2–3, 4–5, and so on. Landscape pages stay single. The reader remembers this choice for each book in either reading direction.
 
 ### Scrolling, zoom and panning
 
@@ -103,6 +103,7 @@ Default bindings:
 | `H`, `W`, `S` | Fit height, width, or screen |
 | `+`, `-` | Zoom in or out |
 | `P` | Toggle two-page mode |
+| `Shift+P` | Shift the two-page pairing by one page |
 | `M`, `C` | Manga or comics reading mode |
 | `F` (also `F11` on Windows/Linux) | Toggle fullscreen |
 | `Escape` | Leave fullscreen |

@@ -29,7 +29,7 @@ Storage locations:
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.18.3.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.19.0.jar
 ```
 
 ### Reset and compatibility

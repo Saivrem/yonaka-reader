@@ -80,7 +80,8 @@ public class DefaultViewerActions implements ViewerActions {
                 key(KeyEvent.VK_UP), controller::showPrevVolume);
         this.toggleFullscreen = action("toggleFullscreen", "ui.full_screen", "ui.enter_or_leave_full_screen_mode",
                 key(KeyEvent.VK_F), controller::toggleFullscreen);
-        this.shiftPairing = action("shiftPairing", "ui.shift_spread_by_one_page", "reading.shiftHint", null, controller::shiftPairing);
+        this.shiftPairing = action("shiftPairing", "ui.shift_spread_by_one_page", "reading.shiftHint",
+                KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK), controller::shiftPairing);
         this.toggleTwoPageMode = action("toggleTwoPageMode", "ui.two_page_spread", "ui.show_compatible_pages_as_a_spread",
                 key(KeyEvent.VK_P), controller::toggleTwoPageMode);
         this.setComicsReadingMode = action("comicsReadingMode", "ui.comics_left_to_right", "ui.use_left_to_right_spread_order",

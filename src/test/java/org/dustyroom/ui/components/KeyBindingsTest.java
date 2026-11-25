@@ -66,6 +66,25 @@ class KeyBindingsTest {
     }
 
     @Test
+    void savedShortcutTakesPrecedenceOverANewDefault() {
+        Map<String, Action> actions = actionsByMethod();
+        KeyStroke shiftP = KeyStroke.getKeyStroke("shift pressed P");
+        actions.get("shiftPairing").putValue(Action.ACCELERATOR_KEY, shiftP);
+        KeyBindings bindings = new KeyBindings(proxy(actions));
+        JRootPane root = new JRootPane();
+        JMenuItem menu = new JMenuItem(actions.get("shiftPairing"));
+        InputMap inputs = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+        bindings.apply(root, Map.of("openFile", shiftP.toString()));
+        assertEquals("openFile", inputs.get(shiftP));
+        assertNull(menu.getAccelerator());
+
+        bindings.apply(root, Map.of());
+        assertEquals("shiftPairing", inputs.get(shiftP));
+        assertEquals(shiftP, menu.getAccelerator());
+    }
+
+    @Test
     void bindsActionAcceleratorsAndSupportedAliases() {
         Map<String, Action> actionsByMethod = actionsByMethod();
         ViewerActions actions = proxy(actionsByMethod);

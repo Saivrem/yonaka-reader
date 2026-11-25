@@ -12,7 +12,7 @@ tasks.withType(JavaExec).configureEach {
 }
 
 group = 'org.dustyroom'
-version = '0.18.3'
+version = '0.19.0'
 
 tasks.register('printVersion') {
     description = 'Print the release version for automation.'
