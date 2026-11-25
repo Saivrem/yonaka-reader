@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 public abstract class BookCard extends JPanel {
+    public static final int HEIGHT_BELOW_COVER = 108;
     private final JLabel cover = new JLabel();
     private final JButton title = new JButton();
     private final JLabel progress = new JLabel();
@@ -91,9 +92,9 @@ public abstract class BookCard extends JPanel {
         availability.setToolTipText(title.getToolTipText());
     }
 
-    final void setCoverSize(Dimension size) {
+    public final void setCoverSize(Dimension size) {
         cover.setPreferredSize(size);
-        setPreferredSize(new Dimension(350, size.height + 108));
+        setPreferredSize(new Dimension(350, size.height + HEIGHT_BELOW_COVER));
         setCover(image);
     }
 

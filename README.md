@@ -8,7 +8,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.21.0 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.22.0 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
@@ -59,10 +59,13 @@ same folder can share a card.
 
 Use **File → Library**, the Library toolbar button or **Cmd/Ctrl+Shift+L** to keep a series on your shelf. Choose **Add folder…**,
 review the chapters to import, then use **Continue reading** to reopen the last
-chapter. To remove a work from the library, click the trash button in the lower-right
+chapter. Scroll through the cards to browse the collection. Opening Library again
+returns to the top of the shelf.
+
+To remove a work from the library, click the trash button in the lower-right
 corner of its card and confirm. Your book files stay where you put them.
 
-![Yonaka Reader library showing sample works, chapter progress and reading actions](docs/images/library.png)
+![Yonaka Reader library showing sample works, chapter progress and reading actions](docs/images/library-shelf.png)
 
 ![Library card with chapter, reading and removal buttons](docs/images/library-card.png)
 

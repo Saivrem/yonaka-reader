@@ -19,7 +19,7 @@ Run the full verification and build an executable fat JAR:
 The resulting application is written to:
 
 ```text
-build/libs/yonaka-reader-0.21.0.jar
+build/libs/yonaka-reader-0.22.0.jar
 ```
 
 ## Run
@@ -27,7 +27,7 @@ build/libs/yonaka-reader-0.21.0.jar
 Open the application without an initial file:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.21.0.jar
+java -jar build/libs/yonaka-reader-0.22.0.jar
 ```
 
 For development, use `./gradlew run` or the shared **Yonaka Reader** run configuration
@@ -39,9 +39,9 @@ in its VM options; executable JAR and native-package launches already enable it.
 Open an image, a directory of images, or a ZIP/CBZ archive immediately:
 
 ```bash
-java -jar build/libs/yonaka-reader-0.21.0.jar /path/to/page.jpg
-java -jar build/libs/yonaka-reader-0.21.0.jar /path/to/chapter
-java -jar build/libs/yonaka-reader-0.21.0.jar /path/to/volume.zip
+java -jar build/libs/yonaka-reader-0.22.0.jar /path/to/page.jpg
+java -jar build/libs/yonaka-reader-0.22.0.jar /path/to/chapter
+java -jar build/libs/yonaka-reader-0.22.0.jar /path/to/volume.zip
 ```
 
 ## Project structure

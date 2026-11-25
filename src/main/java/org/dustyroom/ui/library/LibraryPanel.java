@@ -5,8 +5,6 @@ import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.library.LibrarySnapshot;
 import org.dustyroom.be.models.library.LibraryWork;
 import org.dustyroom.ui.components.BookCard;
-import org.dustyroom.ui.components.BookCardGrid;
-import org.dustyroom.ui.listeners.ComponentResizeListener;
 import org.dustyroom.ui.listeners.DocumentChangeListener;
 import org.dustyroom.ui.listeners.MouseClickListener;
 
@@ -18,7 +16,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public final class LibraryPanel extends JPanel {
-    private static final int PAGE_SIZE = 12;
+    private final JScrollPane collection = new JScrollPane();
+    private final LibraryShelf shelf;
     private final LibraryController controller;
     private final JPanel body = new JPanel(new BorderLayout());
     private final JTextField search = new JTextField(18);
@@ -29,11 +28,15 @@ public final class LibraryPanel extends JPanel {
     private LibrarySnapshot snapshot = new LibrarySnapshot(List.of(), Set.of());
     private String selectedWork;
     private String selectedChapter;
-    private int page;
 
     LibraryPanel(LibraryController controller) {
         super(new BorderLayout(12, 12));
         this.controller = controller;
+        shelf = new LibraryShelf(collection.getViewport(), this::card, work ->
+                controller.cancelCover(work.getChapters().getFirst()));
+        collection.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        collection.setViewportView(shelf);
+        collection.getVerticalScrollBar().setUnitIncrement(24);
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         JPanel top = new JPanel(new BorderLayout(8, 8));
         JLabel heading = UiText.label("ui.library");
@@ -73,7 +76,7 @@ public final class LibraryPanel extends JPanel {
 
     private void changed() {
         selectedWork = null;
-        page = 0;
+        collection.getViewport().setViewPosition(new Point());
         render();
     }
 
@@ -121,6 +124,7 @@ public final class LibraryPanel extends JPanel {
                 .findFirst()
                 .orElse(null);
         if (selected != null) {
+            shelf.showWorks(List.of());
             details(selected);
         } else {
             shelf();
@@ -142,41 +146,12 @@ public final class LibraryPanel extends JPanel {
                 .filter(work -> matches(work, query, filterIndex))
                 .sorted(order)
                 .toList();
-        page = Math.clamp((works.size() - 1) / PAGE_SIZE, 0, page);
-        BookCardGrid grid = new BookCardGrid();
-        int start = page * PAGE_SIZE;
-        int end = Math.min(start + PAGE_SIZE, works.size());
-        for (LibraryWork work : works.subList(start, end)) {
-            grid.addCard(card(work));
-        }
-
+        shelf.showWorks(works);
         if (works.isEmpty()) {
             body.add(UiText.centeredLabel("library.noMatches"), BorderLayout.CENTER);
         } else {
-            JPanel aligned = new JPanel(new BorderLayout());
-            aligned.add(grid, BorderLayout.NORTH);
-            JScrollPane scroll = new JScrollPane(aligned);
-            JViewport viewport = scroll.getViewport();
-            viewport.addComponentListener(new ComponentResizeListener(() ->
-                    grid.fit(viewport.getWidth(), viewport.getHeight(), 6)));
-            scroll.getVerticalScrollBar().setUnitIncrement(24);
-            body.add(scroll, BorderLayout.CENTER);
+            body.add(collection, BorderLayout.CENTER);
         }
-        JPanel paging = new JPanel();
-        JButton previous = button("ui.previous", () -> {
-            page--;
-            render();
-        });
-        previous.setEnabled(page > 0);
-        JButton next = button("ui.next", () -> {
-            page++;
-            render();
-        });
-        next.setEnabled((page + 1) * PAGE_SIZE < works.size());
-        paging.add(previous);
-        paging.add(new JLabel(I18n.text("reading.progress", page + 1, Math.max(1, (works.size() + PAGE_SIZE - 1) / PAGE_SIZE))));
-        paging.add(next);
-        body.add(paging, BorderLayout.SOUTH);
     }
 
     private BookCard card(LibraryWork work) {
