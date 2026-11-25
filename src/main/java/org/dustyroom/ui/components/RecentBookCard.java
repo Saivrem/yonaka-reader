@@ -29,15 +29,6 @@ final class RecentBookCard extends BookCard {
         UiText.bind(this, "content", RecentBookCard::refreshLanguage);
     }
 
-    private static JButton trashButton(String label, Runnable remove) {
-        JButton button = new JButton(new ReaderIcon(ReaderIconKind.TRASH, 16));
-        button.putClientProperty("JButton.buttonType", "toolBarButton");
-        button.setToolTipText(label);
-        button.getAccessibleContext().setAccessibleName(label);
-        button.addActionListener(_ -> remove.run());
-        return button;
-    }
-
     private void showChapters(Consumer<String> open, Consumer<List<String>> remove) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), current.getTitle(),
                 Dialog.ModalityType.APPLICATION_MODAL);

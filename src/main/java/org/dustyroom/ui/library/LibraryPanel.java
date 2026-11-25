@@ -183,7 +183,7 @@ public final class LibraryPanel extends JPanel {
         LibraryBookCard card = new LibraryBookCard(work, snapshot, () -> {
             selectedWork = work.getId();
             render();
-        }, controller::open);
+        }, controller::open, () -> controller.remove(work));
         controller.cover(work.getChapters().getFirst(), card::setCover);
         return card;
     }
