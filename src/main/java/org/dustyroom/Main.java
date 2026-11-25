@@ -1,6 +1,7 @@
 package org.dustyroom;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.i18n.TranslationFiles;
 import org.dustyroom.be.models.state.ReaderSettings;
 import org.dustyroom.be.models.state.ThemeMode;
 import org.dustyroom.be.persistence.ReaderStore;
@@ -17,6 +18,7 @@ import org.dustyroom.ui.utils.UiUtils;
 import javax.swing.*;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Main {
 
@@ -42,7 +44,7 @@ public class Main {
                     : I18n.text("startup.resetHint");
             error = I18n.text("startup.database", exception.getMessage(), recovery);
         }
-        I18n.select(loaded.getLanguage());
+        I18n.loadProfile(database == null ? List.of() : new TranslationFiles(database.getParent()).load(), loaded.getLanguage());
         if (loaded.getThemeMode() == ThemeMode.SYSTEM) {
             loaded.setTheme(new SystemThemeDetector().detect().orElse(loaded.getTheme()));
         }

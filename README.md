@@ -8,7 +8,7 @@ the book, Yonaka picks up where you left off.
 
 ## Install
 
-The native packages for Yonaka Reader 0.19.0 include Java. Building from source requires JDK 25.
+The native packages for Yonaka Reader 0.20.0 include Java. Building from source requires JDK 25.
 The standalone JAR runs on Java 25.
 
 Download the installer or portable package from the [latest release](https://github.com/Saivrem/yonaka-reader/releases/latest).
@@ -78,4 +78,4 @@ See [third-party notices](THIRD_PARTY_NOTICES.md) for bundled components.
 Copyright (C) 2026 Denis Sheviakov
 
 ## Translation
-To contribute a translation, see the [translation guide](docs/translations.md).
+Open **Settings → Translations** to add or edit a language, import a JSON file, or export a translation to share. See the [translation guide](docs/translations.md).

@@ -26,10 +26,12 @@ Storage locations:
 - Windows: `%APPDATA%/YonakaReader/reader.sqlite3` (fallback: `~/AppData/Roaming/YonakaReader/reader.sqlite3`)
 - Linux: `$XDG_DATA_HOME/yonaka-reader/reader.sqlite3` (fallback: `~/.local/share/yonaka-reader/reader.sqlite3`)
 
+Custom translation files live in the active data folder under `translations/`. When switching data folders, use translation export and import to bring a catalog to the new folder.
+
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.19.0.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.20.0.jar
 ```
 
 ### Reset and compatibility

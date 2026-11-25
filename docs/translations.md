@@ -6,7 +6,15 @@ Menus, controls, tooltips and library views update immediately. The choice is sa
 The included catalogs are `en-US.json`, `ru-RU.json` and `ja-JP.json`. Filenames match their `id` using BCP 47 spelling, with a hyphen between language and region. Saved selections using the older `en`, `ru` and `ja` codes remain supported. Missing messages fall back to English.
 Book titles and filesystem paths retain their original spelling.
 
-## Add a language
+## Create, edit and share a translation
+
+Open **Settings → Translations**. **Add translation…** accepts a filename of your choice, such as `Вася-перевод`, and creates a catalog filled with the original English messages. Select an English label in the editor and enter its translation. **Save translation** writes the file. Choose **Apply** or **OK** in Settings to switch the interface to the selected language.
+
+**Edit translation…** also works with built-in languages. On the first save, the reader writes a local copy under `translations/` in the active data folder. Editing the active language updates the interface immediately. The local catalog takes precedence on subsequent launches. Cancelling the editor discards its edits.
+
+**Export JSON…** saves the selected catalog for sharing. **Import JSON…** installs a catalog in the active data folder. Its filename identifies it. A file named `ru-RU.json` overrides bundled Russian. If the name already belongs to a local translation, choose another name to keep both. You can also place JSON catalogs directly in the translations folder before starting the reader.
+
+## Contribute a bundled language
 
 1. Copy `src/main/resources/i18n/en-US.json` to a new file in the same directory, such as `de-AT.json`.
 2. Set `id` to a unique regional language tag, such as `de-AT`, `en-GB` or `pt-BR`. Set `name` to the language's own display name, such as `Deutsch (Österreich)`.

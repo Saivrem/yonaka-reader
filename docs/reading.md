@@ -205,4 +205,4 @@ Open **Options → Settings…** (Command+, on macOS, Ctrl+, elsewhere).
 
 ## Interface language
 
-Choose English, Русский or 日本語 in **Options → Settings → Appearance → Language**. Apply changes the interface immediately and remembers your choice. See the [translation guide](translations.md) to add another language.
+Choose a bundled or locally installed translation in **Options → Settings → Appearance → Language**. Apply changes the interface immediately and remembers your choice. Use **Settings → Translations** to create, edit, import or export a catalog. See the [translation guide](translations.md).
