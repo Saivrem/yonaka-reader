@@ -4,7 +4,9 @@ A desktop reader for manga, comics and folders of images on macOS, Windows and U
 Drop a volume into the window, read a few pages and close it. The next time you open
 the book, Yonaka picks up where you left off.
 
-![Two-page manga spread in Yonaka Reader with the thumbnail sidebar open](docs/images/two-page-spread.png)
+<p align="center">
+  <img src="docs/images/two-page-spread.png" width="900" alt="Two-page manga spread with the thumbnail sidebar open">
+</p>
 
 ## Install
 
@@ -62,12 +64,16 @@ review the chapters to import, then use **Continue reading** to reopen the last
 chapter. Scroll through the cards to browse the collection. Opening Library again
 returns to the top of the shelf.
 
+<p align="center">
+  <img src="docs/images/library-shelf.png" width="900" alt="Library shelf showing After the Rain as a folder and a CBZ archive">
+</p>
+
 To remove a work from the library, click the trash button in the lower-right
 corner of its card and confirm. Your book files stay where you put them.
 
-![Yonaka Reader library showing sample works, chapter progress and reading actions](docs/images/library-shelf.png)
-
-![Library card with chapter, reading and removal buttons](docs/images/library-card.png)
+<p align="center">
+  <img src="docs/images/library-card.png" width="450" alt="After the Rain card with chapter count, Start reading and the trash button">
+</p>
 
 ## Guides
 
