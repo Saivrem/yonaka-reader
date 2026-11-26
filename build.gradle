@@ -34,6 +34,7 @@ dependencies {
 
     implementation 'org.apache.pdfbox:pdfbox:3.0.8'
     runtimeOnly 'org.apache.pdfbox:jbig2-imageio:3.0.5'
+    runtimeOnly 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'
     implementation 'com.formdev:flatlaf:3.8'
     implementation 'com.google.code.gson:gson:2.15.0'
     implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
@@ -61,15 +62,46 @@ jar {
     }
 }
 
+def imageReaderService = 'META-INF/services/javax.imageio.spi.ImageReaderSpi'
+def mergeImageReaders = tasks.register('mergeImageReaders') {
+    inputs.files(configurations.runtimeClasspath)
+    def descriptor = layout.buildDirectory.file("generated/image-readers/${imageReaderService}")
+    outputs.file(descriptor)
+    doLast {
+        def providers = new LinkedHashSet<String>()
+        configurations.runtimeClasspath.each { dependency ->
+            def tree = dependency.isDirectory() ? fileTree(dependency) : zipTree(dependency)
+            tree.matching { include imageReaderService }.each { file ->
+                file.readLines('UTF-8').each { line ->
+                    def provider = line.replaceFirst(/#.*/, '').trim()
+                    if (provider) providers.add(provider)
+                }
+            }
+        }
+        descriptor.get().asFile.text = providers.join('\n') + '\n'
+    }
+}
+
 tasks.register('fatJar', Jar) {
+    from(mergeImageReaders) { into 'META-INF/services' }
     manifest.from jar.manifest
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     } {
+        exclude imageReaderService
         exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
+    }
+    ['jai-imageio-jpeg2000', 'jai-imageio-core'].each { module ->
+        from({
+            configurations.runtimeClasspath.findAll { it.name.startsWith(module + '-') }.collect { zipTree(it) }
+        }) {
+            include 'META-INF/LICENSE', 'META-INF/NOTICE'
+            eachFile { file -> file.path = "META-INF/licenses/${module}/${file.name}" }
+            includeEmptyDirs = false
+        }
     }
     with jar
 }

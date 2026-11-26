@@ -1,7 +1,11 @@
 package org.dustyroom.be.iterators;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
@@ -13,7 +17,9 @@ import org.dustyroom.ui.loading.BookCoverLoader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -27,6 +33,31 @@ import static org.junit.jupiter.api.Assertions.*;
 class PdfIteratorTest {
     @TempDir
     Path directory;
+
+    @Test
+    void displaysTheJpeg2000ScanOverTheUnderlyingPageContent() throws Exception {
+        Path file = directory.resolve("scan.pdf");
+        try (PDDocument document = new PDDocument();
+             InputStream encoded = getClass().getResourceAsStream("/pdf/scan.jp2")) {
+            PDPage page = new PDPage(new PDRectangle(64, 64));
+            document.addPage(page);
+            try (PDPageContentStream content = new PDPageContentStream(document, page)) {
+                content.setNonStrokingColor(Color.RED);
+                content.addRect(0, 0, 64, 64);
+                content.fill();
+                PDImageXObject image = new PDImageXObject(document, encoded,
+                        COSName.JPX_DECODE, 64, 64, 8, PDDeviceRGB.INSTANCE);
+                content.drawImage(image, 0, 0);
+            }
+            document.save(file.toFile());
+        }
+
+        try (ImageIterator reader = ImageIteratorFactory.create(file.toFile())) {
+            BufferedImage rendered = reader.load(reader.pages().getFirst(), 64, 64).getImage();
+            assertEquals(Color.BLACK.getRGB(), rendered.getRGB(8, 32));
+            assertEquals(Color.WHITE.getRGB(), rendered.getRGB(56, 32));
+        }
+    }
 
     @Test
     void turnsPagesAndKeepsDetachedPreviewUsableAfterSwitchAndClose() throws Exception {
