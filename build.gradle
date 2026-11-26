@@ -12,7 +12,7 @@ tasks.withType(JavaExec).configureEach {
 }
 
 group = 'org.dustyroom'
-version = '0.23.0'
+version = '0.23.1'
 
 tasks.register('printVersion') {
     description = 'Print the release version for automation.'
@@ -34,7 +34,7 @@ dependencies {
 
     implementation 'org.apache.pdfbox:pdfbox:3.0.8'
     runtimeOnly 'org.apache.pdfbox:jbig2-imageio:3.0.5'
-    runtimeOnly 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'
+    runtimeOnly 'com.github.pcorless:jpx-imageio:0.1.0'
     implementation 'com.formdev:flatlaf:3.8'
     implementation 'com.google.code.gson:gson:2.15.0'
     implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
@@ -86,20 +86,14 @@ tasks.register('fatJar', Jar) {
     from(mergeImageReaders) { into 'META-INF/services' }
     manifest.from jar.manifest
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude imageReaderService
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    ['jai-imageio-jpeg2000', 'jai-imageio-core'].each { module ->
-        from({
-            configurations.runtimeClasspath.findAll { it.name.startsWith(module + '-') }.collect { zipTree(it) }
-        }) {
-            include 'META-INF/LICENSE', 'META-INF/NOTICE'
-            eachFile { file -> file.path = "META-INF/licenses/${module}/${file.name}" }
+    from('LICENSE')
+    from('THIRD_PARTY_NOTICES.md')
+    configurations.runtimeClasspath.each { dependency ->
+        from(dependency.isDirectory() ? fileTree(dependency) : zipTree(dependency)) {
+            exclude imageReaderService, 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+            filesMatching(['META-INF/LICENSE*', 'META-INF/NOTICE*', 'META-INF/licenses/**']) {
+                path = "META-INF/licenses/${dependency.name - '.jar'}/${path - 'META-INF/'}"
+            }
             includeEmptyDirs = false
         }
     }

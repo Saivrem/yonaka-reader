@@ -34,8 +34,8 @@ PDFBox and FontBox are distributed under the [Apache License 2.0](https://www.ap
 
 ## JPEG 2000
 
-Scanned PDFs can contain JPEG 2000 images. Yonaka Reader decodes them with
-[JAI ImageIO JPEG 2000](https://github.com/jai-imageio/jai-imageio-jpeg2000)
-and [JAI ImageIO Core](https://github.com/jai-imageio/jai-imageio-core).
-Their licenses and notices are included in the application JAR under
-`META-INF/licenses/jai-imageio-jpeg2000/` and `META-INF/licenses/jai-imageio-core/`.
+[jpx-imageio 0.1.0](https://github.com/pcorless/jpx-imageio/tree/v0.1.0) decodes
+JPEG 2000 images embedded in PDFs. Copyright 2026 Patrick Corless, licensed under
+Apache License 2.0. The decoder includes code derived from OpenJPEG 2.5.4 under
+the BSD 2-Clause license. The application JAR contains the decoder’s LICENSE,
+NOTICE and OpenJPEG copyright and license under `META-INF/licenses/jpx-imageio-0.1.0/`.
