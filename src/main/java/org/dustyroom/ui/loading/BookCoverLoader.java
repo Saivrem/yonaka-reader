@@ -18,7 +18,8 @@ public class BookCoverLoader {
             if (pages.isEmpty()) {
                 return null;
             }
-            return ThumbnailRenderer.renderCover(source.load(pages.getFirst()).getImage());
+            return ThumbnailRenderer.renderCover(source.load(pages.getFirst(),
+                    ThumbnailRenderer.COVER_WIDTH, ThumbnailRenderer.COVER_HEIGHT).getImage());
         } catch (RuntimeException ignored) {
             // Missing and unreadable sources still have a card with a placeholder.
             return null;

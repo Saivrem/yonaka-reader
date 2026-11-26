@@ -1,6 +1,9 @@
 package org.dustyroom.be.library;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.iterators.ImageIterator;
+import org.dustyroom.be.iterators.ImageIteratorException;
+import org.dustyroom.be.iterators.ImageIteratorFactory;
 import org.dustyroom.be.models.library.LibraryImport;
 import org.dustyroom.be.models.library.LibraryScan;
 import org.dustyroom.be.models.library.LibrarySource;
@@ -68,6 +71,12 @@ public final class LibraryScanner {
                     String name = child.getFileName().toString();
                     if (FileUtils.isSupportedImage(name)) {
                         images = true;
+                    } else if (FileUtils.isSupportedPdf(name)) {
+                        try (ImageIterator pdf = ImageIteratorFactory.create(child.toFile())) {
+                            chapters.add(new LibrarySource(child.toString(), name, false));
+                        } catch (ImageIteratorException exception) {
+                            warnings.add(exception.getMessage());
+                        }
                     } else if (FileUtils.isSupportedArchive(name) && readableArchive(root, child, cancelled, warnings)) {
                         chapters.add(new LibrarySource(child.toString(), name, false));
                     }

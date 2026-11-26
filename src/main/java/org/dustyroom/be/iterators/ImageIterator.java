@@ -39,8 +39,16 @@ public interface ImageIterator extends AutoCloseable {
 
     Picture load(PageRef page);
 
+    default Picture load(PageRef page, int maxWidth, int maxHeight) {
+        return load(page);
+    }
+
     /** Captures a read that owns its resources and may run after the iterator changes volume or closes. */
     Supplier<Picture> detachedLoad(PageRef page);
+
+    default Supplier<Picture> detachedLoad(PageRef page, int maxWidth, int maxHeight) {
+        return detachedLoad(page);
+    }
 
     default AnimationClip animation(PageRef page) {
         return null;
@@ -66,6 +74,9 @@ public interface ImageIterator extends AutoCloseable {
     }
 
     default File adjacentVolume(Direction direction) {
+        if (FileUtils.isPdf.test(getVolumeRoot())) {
+            return findVolume(FileUtils.isPdf, direction, false);
+        }
         Predicate<File> volumes = FileUtils.isZipFile.test(getVolumeRoot()) ? FileUtils.isZipFile : FileUtils.containsImages;
         return findVolume(volumes, direction, false);
     }

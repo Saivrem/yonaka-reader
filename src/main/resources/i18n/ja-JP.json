@@ -23,7 +23,7 @@
     "ui.home": "ホーム",
     "ui.return_to_recently_read_books": "最近読んだ本に戻る",
     "ui.open": "開く…",
-    "ui.open_an_image_zip_cbz_archive_or_folder": "画像、ZIP/CBZ書庫、フォルダーを開く",
+    "ui.open_an_image_zip_cbz_archive_or_folder": "画像、PDF、ZIP/CBZ書庫、フォルダーを開く",
     "ui.quit": "終了",
     "ui.exit": "終了",
     "ui.close_yonaka_reader": "Yonaka Readerを終了する",
@@ -78,7 +78,7 @@
     "ui.reading_mode": "読む方向",
     "ui.theme": "テーマ",
     "ui.no_recently_read_books": "最近読んだ本はありません",
-    "home.dropHint": "画像、ZIP/CBZ書庫、フォルダーをここにドロップして読み始めましょう。",
+    "home.dropHint": "画像、PDF、ZIP/CBZ書庫、フォルダーをここにドロップして読み始めましょう。",
     "ui.open_a_book": "本を開く",
     "ui.open_library": "ライブラリを開く",
     "ui.library": "ライブラリ",
@@ -183,7 +183,7 @@
     "ui.import_preview": "取り込みプレビュー",
     "library.selectionRequired": "章を1つ以上選び、選択した各本のタイトルを入力してください。",
     "library.operationFailed": "ライブラリの操作に失敗しました。既存のデータは保持されています。",
-    "drop.oneSource": "画像、ZIP/CBZ書庫、フォルダーは1つずつドロップしてください。",
+    "drop.oneSource": "画像、PDF、ZIP/CBZ書庫、フォルダーは1つずつドロップしてください。",
     "drop.failed": "ドロップしたファイルを読み込めません。「開く」から選択してください。",
     "ui.unable_to_access_the_last_open_directory": "最後に開いたフォルダーにアクセスできません。",
     "ui.supported_files": "対応ファイル",
@@ -231,7 +231,7 @@
     "errors.saveSettings": "設定を保存できません：%1$s",
     "errors.pageRange": "ページ番号は1から%1$sまでで指定してください",
     "startup.database": "%1$s\n\n読書データベースを開けません。読むことはできますが、設定と進行状況は保存されません。\n\n新しいバージョンで作成されたデータは、そのバージョンで開いてください。\n%2$s",
-    "reset.confirm": "現在の読書データをすべて消去しますか？\n\n設定、ライブラリの登録、読了マーク、読書履歴、\n保存したページ位置と読む方向が削除されます。\n画像、フォルダー、ZIP/CBZ書庫は削除されません。\n\nYonaka Readerを終了します。次回は既定の設定で起動します。",
+    "reset.confirm": "現在の読書データをすべて消去しますか？\n\n設定、ライブラリの登録、読了マーク、読書履歴、\n保存したページ位置と読む方向が削除されます。\n画像、PDF、フォルダー、ZIP/CBZ書庫は削除されません。\n\nYonaka Readerを終了します。次回は既定の設定で起動します。",
     "profile.failed": "プロファイルの切り替えに失敗しました。再起動すると前のプロファイルが開きます。\n%1$s",
     "library.remove": "「%1$s」をライブラリから削除しますか？\nファイル、履歴、進行状況、読了マークは保持されます。",
     "library.noBooks": "フォルダーと直下のサブフォルダーに対応する本がありません。\n%1$s",
@@ -313,6 +313,11 @@
     "swing.FileChooser.cancelButtonToolTipText": "ダイアログを閉じる",
     "brand.name": "Yonaka Reader",
     "brand.slogan": "もう少し読んでいましょう",
-    "home.formats": "JPG · PNG · GIF · ZIP · CBZ"
+    "pdf.password": "%1$s を開くにはパスワードが必要です。パスワード保護を解除したコピーを開いてください。",
+    "pdf.open": "PDFを開けませんでした: %1$s",
+    "pdf.empty": "PDFにページがありません: %1$s",
+    "pdf.page": "%2$s の%1$dページを読み込めませんでした",
+    "pdf.closed": "PDFは閉じられています",
+    "home.formats": "JPG · PNG · GIF · ZIP · CBZ · PDF"
   }
 }

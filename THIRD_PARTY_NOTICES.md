@@ -26,3 +26,16 @@ SQLite is embedded; a separate database server or SQLite installation is not req
 JSON language catalogs are read using [Gson](https://github.com/google/gson),
 Copyright Google Inc., under the
 [Apache License 2.0](https://github.com/google/gson/blob/main/LICENSE).
+
+## Apache PDFBox
+
+[Apache PDFBox](https://pdfbox.apache.org/) renders PDF pages and previews.
+PDFBox and FontBox are distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+## JPEG 2000
+
+Scanned PDFs can contain JPEG 2000 images. Yonaka Reader decodes them with
+[JAI ImageIO JPEG 2000](https://github.com/jai-imageio/jai-imageio-jpeg2000)
+and [JAI ImageIO Core](https://github.com/jai-imageio/jai-imageio-core).
+Their licenses and notices are included in the application JAR under
+`META-INF/licenses/jai-imageio-jpeg2000/` and `META-INF/licenses/jai-imageio-core/`.

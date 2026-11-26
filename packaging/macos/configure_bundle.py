@@ -13,7 +13,7 @@ info['CFBundleShortVersionString'] = sys.argv[2]
 expected = {p.stem for p in (Path(__file__).parent / 'associations').glob('*.properties')}
 standard_types = {'jpg': 'public.jpeg', 'jpeg': 'public.jpeg', 'png': 'public.png',
                   'gif': 'com.compuserve.gif', 'zip': 'public.zip-archive',
-                  'cbz': 'org.dustyroom.comicbook-archive'}
+                  'pdf': 'com.adobe.pdf', 'cbz': 'org.dustyroom.comicbook-archive'}
 # JDK 17 exports custom UTIs and marks the app as the default editor. These are
 # existing system formats: use their system UTIs and a non-default Viewer role.
 exported = info.pop('UTExportedTypeDeclarations', [])

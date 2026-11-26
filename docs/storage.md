@@ -4,7 +4,7 @@
 
 ## Drag and drop and saved state
 
-Drop one image, ZIP/CBZ archive, or image folder anywhere in the application content.
+Drop one image, PDF, ZIP/CBZ archive, or image folder anywhere in the application content.
 The Open dialog also accepts folders. Dropping multiple objects is rejected with an
 explanation; unsupported or corrupt sources leave the current book visible.
 
@@ -14,7 +14,7 @@ and failed opens do not change the saved directory; application reset clears it.
 
 A local SQLite database stores theme, scale and last-directory preferences, plus the last displayed
 page, page count, reading direction and spread mode for each book. A book is identified
-by the absolute normalized path of its folder or ZIP/CBZ archive. Reopening it resumes
+by the absolute normalized path of its folder, PDF or ZIP/CBZ archive. Reopening it resumes
 reading; explicitly opening an image always selects that image. Page names are used
 before numeric positions, so inserting earlier pages does not shift the bookmark.
 If the saved page was removed, its old position is clamped to the remaining pages.
@@ -31,14 +31,14 @@ Custom translation files live in the active data folder under `translations/`. W
 For portable storage, override the directory before `-jar`:
 
 ```bash
-java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.22.3.jar
+java -Dyonaka.dataDir=./reader-data -jar build/libs/yonaka-reader-0.23.0.jar
 ```
 
 ### Reset and compatibility
 
 Use **Help → Reset comic database…** to clear settings, library membership, completion marks and reading history. The
 confirmation defaults to Cancel. After a successful reset the app closes; the next
-launch uses defaults. Image files, folders and ZIP/CBZ archives are never deleted.
+launch uses defaults. Image files, PDFs, folders and ZIP/CBZ archives are never deleted.
 Reset is transactional: if clearing any table fails, all retain their data.
 Queued saves are drained before reset, and late loading callbacks cannot repopulate it.
 This is an application reset, not secure erasure of SQLite pages. No automatic database copies are created.

@@ -389,7 +389,7 @@ public final class AsyncViewerSession implements AutoCloseable {
                 return;
             }
             BufferedImage cached = cache.get(expected.getKey());
-            Supplier<Picture> read = source.detachedLoad(expected);
+            Supplier<Picture> read = source.detachedLoad(expected, ThumbnailRenderer.PREVIEW_WIDTH, ThumbnailRenderer.PREVIEW_HEIGHT);
             thumbnailWorkers.execute(() -> {
                 BufferedImage image = renderThumbnail(cached, read, wanted, targetGeneration);
                 uiExecutor.execute(() -> result.accept(isActive(targetGeneration) ? image : null));

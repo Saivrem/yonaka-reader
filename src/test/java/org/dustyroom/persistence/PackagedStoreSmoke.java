@@ -7,6 +7,7 @@ import org.dustyroom.be.models.state.ViewerTheme;
 import org.dustyroom.be.persistence.ReaderStore;
 import org.dustyroom.be.persistence.SqliteReaderStore;
 
+import javax.imageio.ImageIO;
 import java.nio.file.Path;
 
 /**
@@ -14,6 +15,11 @@ import java.nio.file.Path;
  */
 public final class PackagedStoreSmoke {
     static void main(String[] args) {
+        for (String format : new String[]{"JPEG2000", "JBIG2"}) {
+            if (!ImageIO.getImageReadersByFormatName(format).hasNext()) {
+                throw new AssertionError("Packaged PDF image decoder missing: " + format);
+            }
+        }
         for (String id : new String[]{"en-US", "ru-RU", "ja-JP"}) {
             I18n.select(id);
             if (!id.equals(I18n.language().getId()) || I18n.text("ui.open_a_book").isBlank()) {
