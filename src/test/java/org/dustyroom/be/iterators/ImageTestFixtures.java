@@ -1,5 +1,9 @@
 package org.dustyroom.be.iterators;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -20,6 +24,16 @@ public final class ImageTestFixtures {
         Files.createDirectories(directory);
         Path target = directory.resolve(name);
         ImageIO.write(image(), extension(name), target.toFile());
+        return target;
+    }
+
+    public static Path writePdf(Path target, int count) throws IOException {
+        try (PDDocument document = new PDDocument()) {
+            for (int index = 0; index < count; index++) {
+                document.addPage(new PDPage(new PDRectangle(100, 150)));
+            }
+            document.save(target.toFile());
+        }
         return target;
     }
 

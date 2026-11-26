@@ -11,7 +11,7 @@ public class Constants {
     public static final List<String> ARCHIVE_FORMATS = List.of("zip", "cbz");
     public static final String[] SUPPORTED_FORMATS = Stream.concat(
             IMAGE_FORMATS.stream(),
-            ARCHIVE_FORMATS.stream()
+            Stream.concat(ARCHIVE_FORMATS.stream(), Stream.of("pdf"))
     ).toArray(String[]::new);
     public static final List<String> FILTERED_PATH_PARTS = List.of("__MACOSX", ".DS_Store");
 

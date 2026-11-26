@@ -23,7 +23,7 @@
     "ui.home": "Home",
     "ui.return_to_recently_read_books": "Return to recently read books",
     "ui.open": "Open…",
-    "ui.open_an_image_zip_cbz_archive_or_folder": "Open an image, ZIP/CBZ archive or folder",
+    "ui.open_an_image_zip_cbz_archive_or_folder": "Open an image, PDF, ZIP/CBZ archive or folder",
     "ui.quit": "Quit",
     "ui.exit": "Exit",
     "ui.close_yonaka_reader": "Close Yonaka Reader",
@@ -78,7 +78,7 @@
     "ui.reading_mode": "Reading Mode",
     "ui.theme": "Theme",
     "ui.no_recently_read_books": "No recently read books",
-    "home.dropHint": "Drop an image, ZIP/CBZ archive or folder here to start reading.",
+    "home.dropHint": "Drop an image, PDF, ZIP/CBZ archive or folder here to start reading.",
     "ui.open_a_book": "Open a book",
     "ui.open_library": "Open the library",
     "ui.library": "Library",
@@ -183,7 +183,7 @@
     "ui.import_preview": "Import preview",
     "library.selectionRequired": "Select at least one chapter and enter a title for each selected book.",
     "library.operationFailed": "Library operation failed; existing data was kept.",
-    "drop.oneSource": "Drop one image, ZIP/CBZ archive, or folder at a time.",
+    "drop.oneSource": "Drop one image, PDF, ZIP/CBZ archive, or folder at a time.",
     "drop.failed": "Unable to read the dropped files. Try opening the source with Open instead.",
     "ui.unable_to_access_the_last_open_directory": "Unable to access the last open directory.",
     "ui.supported_files": "Supported Files",
@@ -231,7 +231,7 @@
     "errors.saveSettings": "Settings could not be saved: %1$s",
     "errors.pageRange": "Page must be between 1 and %1$s",
     "startup.database": "%1$s\n\nCannot open the reader database. Reading is available, but settings and progress will not be saved.\n\nIf this data belongs to a newer version, open it with that version to keep using it.\n%2$s",
-    "reset.confirm": "Clear all data in the current comic database?\n\nThis removes settings, library entries, completion marks, reading history,\nsaved page positions and reading modes.\nYour image files, folders and ZIP/CBZ archives will not be deleted.\n\nYonaka Reader will close. The next launch will start with default settings.",
+    "reset.confirm": "Clear all data in the current comic database?\n\nThis removes settings, library entries, completion marks, reading history,\nsaved page positions and reading modes.\nYour image files, PDFs, folders and ZIP/CBZ archives will not be deleted.\n\nYonaka Reader will close. The next launch will start with default settings.",
     "profile.failed": "Profile switch failed. Restart the reader to reopen the previous profile.\n%1$s",
     "library.remove": "Remove “%1$s” from the library?\nFiles, recent history, reading progress and completion marks will be kept.",
     "library.noBooks": "No supported books found in the folder or its immediate subfolders.\n%1$s",
@@ -313,6 +313,11 @@
     "swing.FileChooser.cancelButtonToolTipText": "Close dialog",
     "brand.name": "Yonaka Reader",
     "brand.slogan": "もう少し読んでいましょう",
-    "home.formats": "JPG · PNG · GIF · ZIP · CBZ"
+    "pdf.password": "%1$s requires a password. Open an unlocked copy to read it.",
+    "pdf.open": "Could not open PDF: %1$s",
+    "pdf.empty": "PDF contains no pages: %1$s",
+    "pdf.page": "Could not read page %1$d in %2$s",
+    "pdf.closed": "PDF is closed",
+    "home.formats": "JPG · PNG · GIF · ZIP · CBZ · PDF"
   }
 }

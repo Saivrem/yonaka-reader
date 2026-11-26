@@ -12,12 +12,17 @@ public class ThumbnailRenderer {
     // Retain enough samples for Retina and fractional desktop scaling, independently of the current monitor.
     public static final int PIXEL_DENSITY = 3;
 
+    public static final int PREVIEW_WIDTH = LOGICAL_WIDTH * PIXEL_DENSITY;
+    public static final int PREVIEW_HEIGHT = LOGICAL_HEIGHT * PIXEL_DENSITY;
+    public static final int COVER_WIDTH = 960;
+    public static final int COVER_HEIGHT = 1152;
+
     public static BufferedImage render(BufferedImage image) {
-        return render(image, LOGICAL_WIDTH * PIXEL_DENSITY, LOGICAL_HEIGHT * PIXEL_DENSITY);
+        return render(image, PREVIEW_WIDTH, PREVIEW_HEIGHT);
     }
 
     public static BufferedImage renderCover(BufferedImage image) {
-        return render(image, 960, 1152);
+        return render(image, COVER_WIDTH, COVER_HEIGHT);
     }
 
     private static BufferedImage render(BufferedImage image, int maxWidth, int maxHeight) {

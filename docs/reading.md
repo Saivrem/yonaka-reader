@@ -13,6 +13,7 @@ Settings alongside the other controls.
 ## Supported content
 
 - Images: `jpg`, `jpeg`, `png`, and `gif`
+- PDF volumes with scanned or vector pages. For a password-protected volume, open an unlocked copy.
 - Archives: `zip` and `cbz`
 - Natural file ordering, for example `page2` before `page10`
 - Nested image paths inside ZIP/CBZ archives
@@ -145,9 +146,9 @@ Existing reading history is preserved by a transactional schema migration.
 ## Library
 
 Open **File → Home → Library** to build an explicit shelf, separate from Recently read.
-Use **Add folder…** to scan a library root. Each ZIP or CBZ directly in the root becomes a
+Use **Add folder…** to scan a library root. Each PDF, ZIP or CBZ directly in the root becomes a
 book named after the file. Loose images in the root share one book. Each immediate
-subfolder becomes a book containing its archive chapters in natural order and its loose
+subfolder becomes a book containing its PDF and archive chapters in natural order and its loose
 images as one chapter. Deeper directories and symbolic links are skipped.
 
 Review book titles and select chapters before importing. A subfolder containing

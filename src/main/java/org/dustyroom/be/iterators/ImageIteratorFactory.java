@@ -11,6 +11,9 @@ import static org.dustyroom.be.utils.FileUtils.*;
 public class ImageIteratorFactory {
 
     public static ImageIterator create(File source) {
+        if (isPdf.test(source)) {
+            return new PdfIterator(source);
+        }
         if (isZipFile.test(source)) {
             return new ZipIterator(source);
         }

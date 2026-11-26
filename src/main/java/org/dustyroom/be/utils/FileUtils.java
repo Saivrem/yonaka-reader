@@ -28,6 +28,12 @@ public class FileUtils {
     public final static Predicate<File> isZipFile =
             f -> f != null && f.isFile() && isSupportedArchive(f.getName());
 
+    public static boolean isSupportedPdf(String path) {
+        return isAllowedPath(path) && extensionOf(path).filter("pdf"::equals).isPresent();
+    }
+
+    public static final Predicate<File> isPdf = f -> f != null && f.isFile() && isSupportedPdf(f.getName());
+
     public static boolean isSupportedImage(String path) {
         return isAllowedPath(path) && extensionOf(path).filter(IMAGE_FORMATS::contains).isPresent();
     }

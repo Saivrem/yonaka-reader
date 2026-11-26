@@ -24,7 +24,7 @@ class DefaultViewerActionsTest {
 
         assertEquals("openFile", action.getValue(Action.ACTION_COMMAND_KEY));
         assertEquals("Open…", action.getValue(Action.NAME));
-        assertEquals("Open an image, ZIP/CBZ archive or folder", action.getValue(Action.SHORT_DESCRIPTION));
+        assertEquals("Open an image, PDF, ZIP/CBZ archive or folder", action.getValue(Action.SHORT_DESCRIPTION));
         Assertions.assertNull(action.getValue(Action.MNEMONIC_KEY));
         assertEquals(accelerator, action.getValue(Action.ACCELERATOR_KEY));
 

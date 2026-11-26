@@ -37,12 +37,13 @@ class FileDropHandlerTest {
         List<File> opened = new ArrayList<>();
         SwingUtilities.invokeAndWait(() -> {
             FileDropHandler handler = new FileDropHandler(opened::add, Assertions::fail);
-            for (String path : new String[]{"chapter/page.png", "日本語 book.zip", "volume.CBZ", "chapter folder"}) {
+            List<String> paths = List.of("chapter/page.png", "日本語 book.zip", "volume.CBZ", "volume.PDF", "chapter folder");
+            for (String path : paths) {
                 File file = new File(path);
                 assertTrue(handler.importData(support(List.of(file))));
                 assertEquals(file, opened.getLast());
             }
-            assertEquals(4, opened.size());
+            assertEquals(paths.size(), opened.size());
         });
     }
 

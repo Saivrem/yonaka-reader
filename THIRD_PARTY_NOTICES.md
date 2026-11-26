@@ -26,3 +26,8 @@ SQLite is embedded; a separate database server or SQLite installation is not req
 JSON language catalogs are read using [Gson](https://github.com/google/gson),
 Copyright Google Inc., under the
 [Apache License 2.0](https://github.com/google/gson/blob/main/LICENSE).
+
+## Apache PDFBox
+
+[Apache PDFBox](https://pdfbox.apache.org/) renders PDF pages and previews.
+PDFBox and FontBox are distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).

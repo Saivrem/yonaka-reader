@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.dustyroom.be.iterators.ImageTestFixtures.writeImage;
 import static org.dustyroom.be.iterators.ImageTestFixtures.writeZip;
+import static org.dustyroom.be.iterators.ImageTestFixtures.writePdf;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReadingPersistenceTest extends BasePersistenceTest {
@@ -55,6 +56,9 @@ class ReadingPersistenceTest extends BasePersistenceTest {
 
     private Path createBook(String name) throws IOException {
         Path source = directory.resolve(name);
+        if (FileUtils.isSupportedPdf(name)) {
+            return writePdf(source, 3);
+        }
         if (FileUtils.isSupportedArchive(name)) {
             return writeZip(source, "chapter/01.png", "chapter/02.png", "chapter/03.png");
         }
@@ -66,7 +70,7 @@ class ReadingPersistenceTest extends BasePersistenceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"pages", "book.zip", "book.CBZ"})
+    @ValueSource(strings = {"pages", "book.zip", "book.CBZ", "book.PDF"})
     void resumesReadingAfterReopen(String name) throws IOException {
         Path source = createBook(name);
         AtomicReference<ViewerFrame> shown = new AtomicReference<>();

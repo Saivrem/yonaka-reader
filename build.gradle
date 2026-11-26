@@ -12,7 +12,7 @@ tasks.withType(JavaExec).configureEach {
 }
 
 group = 'org.dustyroom'
-version = '0.22.3'
+version = '0.23.0'
 
 tasks.register('printVersion') {
     description = 'Print the release version for automation.'
@@ -32,6 +32,8 @@ repositories {
 dependencies {
     def lombokVersion = '1.18.48'
 
+    implementation 'org.apache.pdfbox:pdfbox:3.0.8'
+    runtimeOnly 'org.apache.pdfbox:jbig2-imageio:3.0.5'
     implementation 'com.formdev:flatlaf:3.8'
     implementation 'com.google.code.gson:gson:2.15.0'
     implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
