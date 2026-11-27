@@ -220,8 +220,12 @@ public final class AsyncViewerSession implements AutoCloseable {
             }
             persist(() -> {
                 store.removeRecent(ids);
-                if (!pages.isEmpty() && ids.contains(pages.getFirst().getKey().sourceId())) {
-                    removedActiveSource = pages.getFirst().getKey().sourceId();
+                if (pages.isEmpty()) {
+                    return;
+                }
+                String activeSource = sourceIdOf(pages);
+                if (ids.contains(activeSource)) {
+                    removedActiveSource = activeSource;
                 }
             });
             refreshRecentBooks();
@@ -587,7 +591,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             if (candidateIndex < 0 || candidateIndex >= candidatePages.size()) {
                 throw new IllegalStateException(I18n.text("ui.image_source_has_an_invalid_initial_page"));
             }
-            Optional<BookState> saved = savedBook(candidatePages.getFirst().getKey().sourceId());
+            Optional<BookState> saved = savedBook(sourceIdOf(candidatePages));
             // An explicitly selected image takes precedence over the saved position of its folder.
             if (saved.isPresent() && !FileUtils.isImage.test(file)) {
                 candidateIndex = restoredIndex(saved.get(), candidatePages);
@@ -662,7 +666,7 @@ public final class AsyncViewerSession implements AutoCloseable {
             pages = switchedPages;
             pageIndex = selectedIndex < 0 ? source.initialPageIndex() : selectedIndex;
             shiftedPairing = false;
-            savedBook(pages.getFirst().getKey().sourceId()).ifPresent(state -> {
+            savedBook(sourceIdOf(pages)).ifPresent(state -> {
                 pageIndex = restoredIndex(state, pages);
                 shiftedPairing = state.isShiftedPairing();
                 twoPageMode = state.isTwoPageMode();
@@ -877,22 +881,15 @@ public final class AsyncViewerSession implements AutoCloseable {
     }
 
     private int spreadAnchor(int index) {
-        if (index == 0 || spreadPlanner.startsPair(index, shiftedPairing)) {
-            return index;
-        }
-        return resolveSecondPage(index - 1) == null ? index : index - 1;
+        return spreadPlanner.anchor(pages, index, twoPageMode, shiftedPairing, this::shapeOf);
     }
 
-    private PageRef resolveSecondPage(int anchorIndex) {
-        if (!twoPageMode || pages.size() < 2 || anchorIndex + 1 >= pages.size()) {
-            return null;
-        }
-        if (shiftedPairing && !spreadPlanner.startsPair(anchorIndex, true)) {
-            return null;
-        }
-        PageRef current = pages.get(anchorIndex);
-        PageRef next = pages.get(anchorIndex + 1);
-        return spreadPlanner.shouldPair(shapeOf(current), () -> shapeOf(next)) ? next : null;
+    private PageRef resolveSecondPage(int index) {
+        return spreadPlanner.secondPage(pages, index, twoPageMode, shiftedPairing, this::shapeOf);
+    }
+
+    private static String sourceIdOf(List<PageRef> pages) {
+        return pages.getFirst().getKey().sourceId();
     }
 
     private PageShape shapeOf(PageRef page) {

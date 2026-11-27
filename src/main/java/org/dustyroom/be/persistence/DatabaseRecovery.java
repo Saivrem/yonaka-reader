@@ -24,27 +24,22 @@ final class DatabaseRecovery {
                 sql.execute(SqlitePragmas.BUSY_TIMEOUT);
                 sql.execute(RecoverySql.DISABLE_FOREIGN_KEYS);
             }
-            connection.setAutoCommit(false);
-            try (Statement sql = connection.createStatement()) {
-                List<String> drops = new ArrayList<>();
-                try (ResultSet rows = sql.executeQuery(RecoverySql.SELECT_OBJECTS)) {
-                    while (rows.next()) {
-                        String kind = rows.getString(1).equals("view") ? "VIEW" : "TABLE";
-                        String name = rows.getString(2).replace("\"", "\"\"");
-                        drops.add(RecoverySql.DROP_OBJECT.formatted(kind, name));
+            SqliteUtils.inTransaction(connection, () -> {
+                try (Statement sql = connection.createStatement()) {
+                    List<String> drops = new ArrayList<>();
+                    try (ResultSet rows = sql.executeQuery(RecoverySql.SELECT_OBJECTS)) {
+                        while (rows.next()) {
+                            String kind = rows.getString(1).equals("view") ? "VIEW" : "TABLE";
+                            String name = rows.getString(2).replace("\"", "\"\"");
+                            drops.add(RecoverySql.DROP_OBJECT.formatted(kind, name));
+                        }
                     }
+                    for (String drop : drops) {
+                        sql.execute(drop);
+                    }
+                    sql.execute(SqlitePragmas.schemaVersion(0));
                 }
-                for (String drop : drops) {
-                    sql.execute(drop);
-                }
-                sql.execute(SqlitePragmas.schemaVersion(0));
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            });
         } catch (SQLException exception) {
             throw new IllegalStateException(I18n.text("reset.unsafe"), exception);
         }

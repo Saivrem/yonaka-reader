@@ -1,6 +1,7 @@
 package org.dustyroom.be.iterators;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.io.ImageDecoder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -26,19 +27,18 @@ import static org.dustyroom.be.models.direction.Direction.PREV;
 import static org.dustyroom.be.utils.FileUtils.*;
 
 @Slf4j
-public class FileImageIterator implements ImageIterator {
+public class FileImageIterator extends VolumePageIterator {
     private List<File> fileList = List.of();
     private List<PageRef> pageRefs = List.of();
     @Getter
     private File volumeRoot;
     private File pendingFile;
-    private int currentIndex = -1;
     @Getter
     @Accessors(fluent = true)
     private int initialPageIndex = -1;
-    private boolean initialSelectionPending;
 
     public FileImageIterator(File file) {
+        super("image.foreignSelection");
         this.pendingFile = normalize(file);
         init();
     }
@@ -64,9 +64,8 @@ public class FileImageIterator implements ImageIterator {
             volumeRoot = root;
             fileList = files;
             pageRefs = pages;
-            currentIndex = candidateIndex;
+            resetCursor(candidateIndex);
             initialPageIndex = candidateIndex;
-            initialSelectionPending = true;
         } finally {
             pendingFile = null;
         }
@@ -75,37 +74,6 @@ public class FileImageIterator implements ImageIterator {
     @Override
     public void setFile(File file) {
         this.pendingFile = normalize(file);
-    }
-
-    @Override
-    public Picture next() {
-        if (initialSelectionPending) {
-            initialSelectionPending = false;
-        } else {
-            currentIndex = Math.floorMod(currentIndex + 1, fileList.size());
-        }
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture prev() {
-        initialSelectionPending = false;
-        currentIndex = Math.floorMod(currentIndex - 1, fileList.size());
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture first() {
-        initialSelectionPending = false;
-        currentIndex = 0;
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture last() {
-        initialSelectionPending = false;
-        currentIndex = fileList.size() - 1;
-        return load(pageRefs.get(currentIndex));
     }
 
     @Override
@@ -146,18 +114,6 @@ public class FileImageIterator implements ImageIterator {
     }
 
     @Override
-    public Picture nextVol() {
-        PageRef page = switchToNextVolume();
-        return consumeVolumeSelection(page);
-    }
-
-    @Override
-    public Picture prevVol() {
-        PageRef page = switchToPreviousVolume();
-        return consumeVolumeSelection(page);
-    }
-
-    @Override
     public List<PageRef> pages() {
         return pageRefs;
     }
@@ -179,20 +135,8 @@ public class FileImageIterator implements ImageIterator {
         );
     }
 
-    private Picture consumeVolumeSelection(PageRef page) {
-        if (page == null) {
-            return null;
-        }
-        int selectedIndex = pageRefs.indexOf(page);
-        if (selectedIndex < 0) {
-            throw new ImageIteratorException(I18n.text("image.foreignSelection"), volumeRoot);
-        }
-        currentIndex = selectedIndex;
-        initialSelectionPending = false;
-        return load(page);
-    }
-
     private File currentFile() {
+        int currentIndex = currentIndex();
         if (currentIndex >= 0 && currentIndex < fileList.size()) {
             return fileList.get(currentIndex);
         }

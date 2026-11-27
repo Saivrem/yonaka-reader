@@ -68,18 +68,11 @@ final class SqliteLibraryStore implements LibraryStore {
             }
         }
         try {
-            connection.setAutoCommit(false);
-            try {
+            SqliteUtils.inTransaction(connection, () -> {
                 for (LibraryImport selection : selections) {
                     importWork(selection);
                 }
-                connection.commit();
-            } catch (SQLException | RuntimeException exception) {
-                connection.rollback();
-                throw exception;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            });
         } catch (SQLException exception) {
             throw failure(exception);
         }

@@ -22,51 +22,53 @@ public final class BufferedAnimation implements AutoCloseable {
     private boolean buffering;
 
     public BufferedAnimation(AnimationClip source, Consumer<Exception> errorHandler) {
-        worker = new Thread(() -> {
-            try {
-                int pass = 0;
-                while (!closed) {
-                    int count = 0, loops;
-                    try (AnimationDecoder decoder = source.getOpener().open()) {
-                        while (!closed) {
-                            // Reserve room before decoding, so a full buffer never triggers more I/O.
-                            capacity.acquire();
-                            if (closed) {
-                                return;
-                            }
-                            AnimationFrame frame = decoder.next();
-                            if (frame == null) {
-                                capacity.release();
-                                break;
-                            }
-                            if (closed) {
-                                return;
-                            }
-                            frames.put(frame);
-                            count++;
-                        }
-                        loops = decoder.loops();
-                    }
-                    pass++;
-                    if (count <= 1 || (loops > 0 && pass >= loops)) {
-                        break;
-                    }
-                }
-            } catch (InterruptedException cancelled) {
-                Thread.currentThread().interrupt();
-            } catch (Exception error) {
-                if (!closed) {
-                    errorHandler.accept(error);
-                }
-            } finally {
-                complete = true;
-                if (closed) {
-                    frames.clear();
-                }
-            }
-        }, "yonaka-gif-decoder");
+        worker = new Thread(() -> decodeFrames(source, errorHandler), "yonaka-gif-decoder");
         worker.setDaemon(true);
         worker.start();
+    }
+
+    private void decodeFrames(AnimationClip source, Consumer<Exception> errorHandler) {
+        try {
+            int pass = 0;
+            while (!closed) {
+                int count = 0, loops;
+                try (AnimationDecoder decoder = source.getOpener().open()) {
+                    while (!closed) {
+                        // Reserve room before decoding, so a full buffer never triggers more I/O.
+                        capacity.acquire();
+                        if (closed) {
+                            return;
+                        }
+                        AnimationFrame frame = decoder.next();
+                        if (frame == null) {
+                            capacity.release();
+                            break;
+                        }
+                        if (closed) {
+                            return;
+                        }
+                        frames.put(frame);
+                        count++;
+                    }
+                    loops = decoder.loops();
+                }
+                pass++;
+                if (count <= 1 || (loops > 0 && pass >= loops)) {
+                    break;
+                }
+            }
+        } catch (InterruptedException cancelled) {
+            Thread.currentThread().interrupt();
+        } catch (Exception error) {
+            if (!closed) {
+                errorHandler.accept(error);
+            }
+        } finally {
+            complete = true;
+            if (closed) {
+                frames.clear();
+            }
+        }
     }
 
     /**

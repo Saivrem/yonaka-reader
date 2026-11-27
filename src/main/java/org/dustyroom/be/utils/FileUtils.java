@@ -29,17 +29,21 @@ public class FileUtils {
             f -> f != null && f.isFile() && isSupportedArchive(f.getName());
 
     public static boolean isSupportedPdf(String path) {
-        return isAllowedPath(path) && extensionOf(path).filter("pdf"::equals).isPresent();
+        return matchesExtension(path, "pdf"::equals);
     }
 
     public static final Predicate<File> isPdf = f -> f != null && f.isFile() && isSupportedPdf(f.getName());
 
     public static boolean isSupportedImage(String path) {
-        return isAllowedPath(path) && extensionOf(path).filter(IMAGE_FORMATS::contains).isPresent();
+        return matchesExtension(path, IMAGE_FORMATS::contains);
     }
 
     public static boolean isSupportedArchive(String path) {
-        return isAllowedPath(path) && extensionOf(path).filter(ARCHIVE_FORMATS::contains).isPresent();
+        return matchesExtension(path, ARCHIVE_FORMATS::contains);
+    }
+
+    private static boolean matchesExtension(String path, Predicate<String> matches) {
+        return isAllowedPath(path) && extensionOf(path).filter(matches).isPresent();
     }
 
     public static Optional<String> extensionOf(String path) {

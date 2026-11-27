@@ -194,21 +194,25 @@ public final class SettingsDialog extends JDialog {
             return;
         }
         setBusy(true);
-        CompletableFuture.supplyAsync(() -> ProfileManager.containsProfile(selected)).whenComplete((existing, failure) -> SwingUtilities.invokeLater(() -> {
-            setBusy(false);
-            if (failure != null) {
-                error(I18n.text("ui.cannot_inspect_the_selected_folder"));
-                return;
-            }
-            String question = existing
-                    ? I18n.text("profile.open")
-                    : I18n.text("profile.moveQuestion");
-            String message = I18n.text("profile.confirm", question);
-            if (JOptionPane.showConfirmDialog(this, message, I18n.text("ui.change_data_folder"), JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
-                host.switchDataDirectory(selected, existing, this::dispose);
-            }
-        }));
+        CompletableFuture.supplyAsync(() -> ProfileManager.containsProfile(selected))
+                .whenCompleteAsync((existing, failure) -> confirmProfile(selected, existing, failure),
+                        SwingUtilities::invokeLater);
+    }
+
+    private void confirmProfile(Path selected, Boolean existing, Throwable failure) {
+        setBusy(false);
+        if (failure != null) {
+            error(I18n.text("ui.cannot_inspect_the_selected_folder"));
+            return;
+        }
+        String question = existing
+                ? I18n.text("profile.open")
+                : I18n.text("profile.moveQuestion");
+        String message = I18n.text("profile.confirm", question);
+        if (JOptionPane.showConfirmDialog(this, message, I18n.text("ui.change_data_folder"), JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
+            host.switchDataDirectory(selected, existing, this::dispose);
+        }
     }
 
     private void load(ReaderSettings settings) {

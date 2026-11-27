@@ -157,7 +157,7 @@ public final class ThumbnailPanel extends JPanel {
 
     public void setExpanded(boolean expanded) {
         if (!expanded) {
-            pending.values().forEach(wanted -> wanted.set(false));
+            cancelPendingRequests();
             setGridMode(false);
         }
         if (this.expanded == expanded) {
@@ -178,12 +178,16 @@ public final class ThumbnailPanel extends JPanel {
         }
     }
 
+    private void cancelPendingRequests() {
+        pending.values().forEach(wanted -> wanted.set(false));
+    }
+
     public void showPages(List<PageRef> newPages) {
         if (pages == newPages) {
             return;
         }
         setGridMode(false);
-        pending.values().forEach(wanted -> wanted.set(false));
+        cancelPendingRequests();
         pages = newPages;
         gridButton.setEnabled(!newPages.isEmpty());
         cache.clear();

@@ -1,6 +1,7 @@
 package org.dustyroom.be.settings;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.io.StagedFile;
 import org.dustyroom.be.utils.SqliteUtils;
 import org.dustyroom.be.persistence.schema.SqlitePragmas;
 import lombok.experimental.UtilityClass;
@@ -140,16 +141,11 @@ public class ProfileManager {
 
     static void writePointer(Path standardDirectory, Path directory) throws IOException {
         Files.createDirectories(standardDirectory);
-        Path temporary = Files.createTempFile(standardDirectory, "profile-", ".tmp");
         try {
-            Files.writeString(temporary, directory.toString(), StandardCharsets.UTF_8);
-            try {
-                Files.move(temporary, standardDirectory.resolve("profile.path"), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException exception) {
-                throw new IOException(I18n.text("profile.atomicUpdateFailed"), exception);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
+            StagedFile.write(standardDirectory.resolve("profile.path"), output -> output.write(directory.toString()),
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException exception) {
+            throw new IOException(I18n.text("profile.atomicUpdateFailed"), exception);
         }
     }
 }

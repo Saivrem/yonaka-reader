@@ -14,6 +14,36 @@ public class SqliteUtils {
         return DriverManager.getConnection("jdbc:sqlite:" + database);
     }
 
+    @FunctionalInterface
+    public interface Transaction {
+        void run() throws SQLException;
+    }
+
+    public static void inTransaction(Connection connection, Transaction operation) throws SQLException {
+        if (!connection.getAutoCommit()) {
+            throw new SQLException("Connection already has an active transaction");
+        }
+        connection.setAutoCommit(false);
+        try {
+            operation.run();
+            connection.commit();
+        } catch (SQLException | RuntimeException | Error failure) {
+            try {
+                connection.rollback();
+                connection.setAutoCommit(true);
+            } catch (SQLException cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+                try {
+                    connection.close();
+                } catch (SQLException closeFailure) {
+                    failure.addSuppressed(closeFailure);
+                }
+            }
+            throw failure;
+        }
+        connection.setAutoCommit(true);
+    }
+
     public static PreparedStatement prepare(Connection connection, String query, Object... values) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query);
         try {

@@ -1,14 +1,14 @@
-package org.dustyroom.be.iterators;
+package org.dustyroom.be.io;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipFile;
 
-final class ZipEntryInputStream extends FilterInputStream {
+public final class ZipEntryInputStream extends FilterInputStream {
     private final ZipFile zip;
 
-    ZipEntryInputStream(InputStream input, ZipFile zip) {
+    public ZipEntryInputStream(InputStream input, ZipFile zip) {
         super(input);
         this.zip = zip;
     }

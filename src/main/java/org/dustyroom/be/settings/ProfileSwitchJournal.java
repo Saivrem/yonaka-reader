@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
+import org.dustyroom.be.io.StagedFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,15 +29,9 @@ class ProfileSwitchJournal {
         Properties properties = new Properties();
         properties.setProperty("source", source.toAbsolutePath().normalize().toString());
         properties.setProperty("target", target.toAbsolutePath().normalize().toString());
-        Path temporary = Files.createTempFile(standardDirectory, "profile-switch-", ".tmp");
-        try {
-            try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
-                properties.store(writer, "Pending user-requested profile move; not a database backup");
-            }
-            Files.move(temporary, file(standardDirectory), StandardCopyOption.ATOMIC_MOVE);
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
+        StagedFile.write(file(standardDirectory),
+                output -> properties.store(output, "Pending user-requested profile move; not a database backup"),
+                StandardCopyOption.ATOMIC_MOVE);
     }
 
     static void recover(Path standardDirectory) throws IOException {

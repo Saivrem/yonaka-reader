@@ -4,6 +4,8 @@ import org.dustyroom.be.models.i18n.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -64,6 +66,18 @@ class TranslationFilesTest {
         assertEquals(renamed, TranslationFiles.read(exported));
         assertEquals(-1L, Files.mismatch(exported, profile.resolve("translations").resolve(name + ".json")));
         assertEquals(imported, TranslationFiles.read(profile.resolve("translations/en-US.json")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{\"id\":7,\"name\":\"Test\",\"messages\":{}}",
+            "{\"id\":\"test\",\"name\":true,\"messages\":{}}",
+            "{\"id\":\"test\",\"name\":\"Test\",\"messages\":[[\"key\",\"value\"]]}",
+            "{\"id\":\"test\",\"name\":\"Test\",\"messages\":{\"key\":null}}"
+    })
+    void rejectsMalformedCatalogFields(String json) throws IOException {
+        Path file = Files.writeString(profile.resolve("import.json"), json);
+        assertThrows(IOException.class, () -> TranslationFiles.read(file));
     }
 
     @Test

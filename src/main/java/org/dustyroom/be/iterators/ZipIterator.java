@@ -1,6 +1,8 @@
 package org.dustyroom.be.iterators;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.io.ImageDecoder;
+import org.dustyroom.be.io.ZipEntryInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.dustyroom.be.animation.gif.GifDecoder;
 import org.dustyroom.be.models.animation.AnimationClip;
@@ -31,17 +33,16 @@ import static org.dustyroom.be.utils.FileUtils.normalizedPath;
 import static org.dustyroom.be.utils.NaturalOrderComparator.INSTANCE;
 
 @Slf4j
-public class ZipIterator implements ImageIterator {
+public class ZipIterator extends VolumePageIterator {
 
     private List<PageRef> pageRefs = List.of();
     private File zipFilePath;
     private File pendingZipFilePath;
     private ZipFile zipFile;
-    private int currentIndex = -1;
-    private boolean initialSelectionPending;
     private boolean closed;
 
     public ZipIterator(File zipFilePath) {
+        super("zip.foreignSelection");
         this.pendingZipFilePath = normalize(zipFilePath);
         init();
     }
@@ -80,8 +81,7 @@ public class ZipIterator implements ImageIterator {
             zipFile = openedZip;
             zipFilePath = candidatePath;
             pageRefs = pages;
-            currentIndex = 0;
-            initialSelectionPending = true;
+            resetCursor(0);
             openedZip = null;
             closeQuietly(previousZip);
         } catch (IOException e) {
@@ -105,43 +105,8 @@ public class ZipIterator implements ImageIterator {
     }
 
     @Override
-    public Picture next() {
-        ensureOpen();
-        if (initialSelectionPending) {
-            initialSelectionPending = false;
-        } else {
-            currentIndex = Math.floorMod(currentIndex + 1, pageRefs.size());
-        }
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture prev() {
-        ensureOpen();
-        initialSelectionPending = false;
-        currentIndex = Math.floorMod(currentIndex - 1, pageRefs.size());
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture first() {
-        ensureOpen();
-        initialSelectionPending = false;
-        currentIndex = 0;
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
-    public Picture last() {
-        ensureOpen();
-        initialSelectionPending = false;
-        currentIndex = pageRefs.size() - 1;
-        return load(pageRefs.get(currentIndex));
-    }
-
-    @Override
     public AnimationClip animation(PageRef page) {
-        ensureOpen();
+        checkNavigationAvailable();
         if (!page.getKey().sourceId().equals(normalizedPath(zipFilePath))) {
             throw new IllegalArgumentException(I18n.text("errors.wrong_source"));
         }
@@ -187,7 +152,7 @@ public class ZipIterator implements ImageIterator {
     }
 
     private void validatePage(PageRef page) {
-        ensureOpen();
+        checkNavigationAvailable();
         String currentSourceId = normalizedPath(zipFilePath);
         if (!page.getKey().sourceId().equals(currentSourceId)) {
             throw new ImageIteratorException(I18n.text("zip.foreignPage"), zipFilePath);
@@ -218,18 +183,6 @@ public class ZipIterator implements ImageIterator {
                     e
             );
         }
-    }
-
-    @Override
-    public Picture nextVol() {
-        PageRef page = switchToNextVolume();
-        return consumeVolumeSelection(page);
-    }
-
-    @Override
-    public Picture prevVol() {
-        PageRef page = switchToPreviousVolume();
-        return consumeVolumeSelection(page);
     }
 
     @Override
@@ -264,11 +217,11 @@ public class ZipIterator implements ImageIterator {
         zipFile = null;
         pendingZipFilePath = null;
         pageRefs = List.of();
-        currentIndex = -1;
-        initialSelectionPending = false;
+        resetCursor(-1);
     }
 
-    private void ensureOpen() {
+    @Override
+    void checkNavigationAvailable() {
         if (closed || zipFile == null) {
             throw new ImageIteratorException(I18n.text("errors.zip_archive_is_closed"), zipFilePath);
         }
@@ -281,7 +234,7 @@ public class ZipIterator implements ImageIterator {
     }
 
     private void ensureCurrentVolumeAvailable() {
-        ensureOpen();
+        checkNavigationAvailable();
         if (!isZipFile.test(zipFilePath)) {
             throw new ImageIteratorException(I18n.text("errors.current_zip_source_is_no_longer_available"), zipFilePath);
         }
@@ -303,18 +256,5 @@ public class ZipIterator implements ImageIterator {
                 new PageKey(source.getPath(), entry.getName()),
                 new PictureMetadata(entry.getName(), source.getName(), source.getParentFile())
         );
-    }
-
-    private Picture consumeVolumeSelection(PageRef page) {
-        if (page == null) {
-            return null;
-        }
-        int selectedIndex = pageRefs.indexOf(page);
-        if (selectedIndex < 0) {
-            throw new ImageIteratorException(I18n.text("zip.foreignSelection"), zipFilePath);
-        }
-        currentIndex = selectedIndex;
-        initialSelectionPending = false;
-        return load(page);
     }
 }

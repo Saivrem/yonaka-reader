@@ -1,5 +1,6 @@
-package org.dustyroom.be.iterators;
+package org.dustyroom.be.io;
 
+import org.dustyroom.be.iterators.ImageTestFixtures;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
