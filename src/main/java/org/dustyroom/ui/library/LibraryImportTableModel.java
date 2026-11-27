@@ -6,34 +6,45 @@ import org.dustyroom.be.models.library.LibrarySource;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.BitSet;
+import java.util.Collection;
 import java.util.List;
 
 final class LibraryImportTableModel extends AbstractTableModel {
-    private final List<LibraryImport> works;
-    private final List<LibraryImport> owners = new ArrayList<>();
-    private final List<LibrarySource> sources = new ArrayList<>();
-    private final BitSet included = new BitSet();
+    private static final class Row {
+        final LibraryImport work;
+        final LibrarySource source;
+        boolean included;
+
+        Row(LibraryImport work, LibrarySource source, boolean included) {
+            this.work = work;
+            this.source = source;
+            this.included = included;
+        }
+    }
+
+    private final List<List<Row>> groups = new ArrayList<>();
+    private final List<Row> rows;
 
     LibraryImportTableModel(List<LibraryImport> works) {
-        this.works = works;
         for (LibraryImport work : works) {
             List<LibrarySource> chapters = work.getSources();
             boolean mixed = chapters.size() > 1 && chapters
                     .stream()
                     .anyMatch(LibrarySource::isDirectory);
 
-            for (LibrarySource source : chapters) {
-                owners.add(work);
-                included.set(sources.size(), !mixed);
-                sources.add(source);
-            }
+            List<Row> group = chapters.stream()
+                    .map(source -> new Row(work, source, !mixed))
+                    .toList();
+            groups.add(group);
         }
+        rows = groups.stream()
+                .flatMap(Collection::stream)
+                .toList();
     }
 
     @Override
     public int getRowCount() {
-        return sources.size();
+        return rows.size();
     }
 
     @Override
@@ -57,10 +68,11 @@ final class LibraryImportTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
+        Row entry = rows.get(row);
         return switch (column) {
-            case 0 -> included.get(row);
-            case 1 -> owners.get(row).getTitle();
-            default -> sources.get(row).toString();
+            case 0 -> entry.included;
+            case 1 -> entry.work.getTitle();
+            default -> entry.source.toString();
         };
     }
 
@@ -72,26 +84,23 @@ final class LibraryImportTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         if (column == 0) {
-            included.set(row, Boolean.TRUE.equals(value));
+            rows.get(row).included = Boolean.TRUE.equals(value);
             fireTableCellUpdated(row, column);
         } else if (column == 1) {
-            owners.get(row).setTitle(value.toString().strip());
+            rows.get(row).work.setTitle(value.toString().strip());
             fireTableRowsUpdated(0, getRowCount() - 1);
         }
     }
 
     List<LibraryImport> selection() {
         List<LibraryImport> selected = new ArrayList<>();
-        int row = 0;
-        for (LibraryImport work : works) {
-            List<LibrarySource> chapters = new ArrayList<>();
-            for (LibrarySource source : work.getSources()) {
-                if (included.get(row)) {
-                    chapters.add(source);
-                }
-                row++;
-            }
+        for (List<Row> group : groups) {
+            List<LibrarySource> chapters = group.stream()
+                    .filter(row -> row.included)
+                    .map(row -> row.source)
+                    .toList();
             if (!chapters.isEmpty()) {
+                LibraryImport work = group.getFirst().work;
                 selected.add(new LibraryImport(work.getRoot(), work.getTitle(), chapters));
             }
         }

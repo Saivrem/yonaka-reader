@@ -47,6 +47,22 @@ class SqliteReaderStoreTest extends BasePersistenceTest {
     }
 
     @Test
+    void rollsBackShortcutDeletionWhenEncodingSettingsFails() {
+        ReaderSettings saved = ReaderSettings.defaults().toBuilder()
+                .shortcuts(Map.of("shiftPairing", "meta pressed J"))
+                .build();
+        try (ReaderStore store = openStore()) {
+            store.saveSettings(saved);
+            ReaderSettings invalid = ReaderSettings.defaults().setVolumeBoundary(null);
+            assertThrows(NullPointerException.class, () -> store.saveSettings(invalid));
+            assertEquals(saved, store.settings());
+        }
+        try (ReaderStore store = openStore()) {
+            assertEquals(saved, store.settings());
+        }
+    }
+
+    @Test
     void persistsClearedAndReassignedShortcutsUntilDefaultsAreRestored() {
         Map<String, String> shortcuts = Map.of("nextImage", "", "shiftPairing", "meta pressed J");
         try (ReaderStore store = openStore()) {

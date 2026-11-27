@@ -90,21 +90,16 @@ public final class SqliteReaderStore implements ReaderStore {
     @Override
     public void saveSettings(ReaderSettings settings) {
         try {
-            connection.setAutoCommit(false);
-            try (Statement cleanup = connection.createStatement();
-                 PreparedStatement sql = connection.prepareStatement(ReaderSql.SAVE_SETTING)) {
-                cleanup.executeUpdate(ReaderSql.CLEAR_SHORTCUTS);
-                for (Map.Entry<String, String> entry : SettingsCodec.encode(settings).entrySet()) {
-                    SqliteUtils.addBatch(sql, entry.getKey(), entry.getValue());
+            SqliteUtils.inTransaction(connection, () -> {
+                try (Statement cleanup = connection.createStatement();
+                     PreparedStatement sql = connection.prepareStatement(ReaderSql.SAVE_SETTING)) {
+                    cleanup.executeUpdate(ReaderSql.CLEAR_SHORTCUTS);
+                    for (Map.Entry<String, String> entry : SettingsCodec.encode(settings).entrySet()) {
+                        SqliteUtils.addBatch(sql, entry.getKey(), entry.getValue());
+                    }
+                    sql.executeBatch();
                 }
-                sql.executeBatch();
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            });
         } catch (SQLException exception) {
             throw failure(exception);
         }
@@ -166,19 +161,14 @@ public final class SqliteReaderStore implements ReaderStore {
     @Override
     public void removeRecent(List<String> sourceIds) {
         try {
-            connection.setAutoCommit(false);
-            try (PreparedStatement sql = connection.prepareStatement(ReaderSql.DELETE_BOOK)) {
-                for (String id : sourceIds) {
-                    SqliteUtils.addBatch(sql, id);
+            SqliteUtils.inTransaction(connection, () -> {
+                try (PreparedStatement sql = connection.prepareStatement(ReaderSql.DELETE_BOOK)) {
+                    for (String id : sourceIds) {
+                        SqliteUtils.addBatch(sql, id);
+                    }
+                    sql.executeBatch();
                 }
-                sql.executeBatch();
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            });
         } catch (SQLException exception) {
             throw failure(exception);
         }
@@ -196,19 +186,14 @@ public final class SqliteReaderStore implements ReaderStore {
     @Override
     public void reset() {
         try {
-            connection.setAutoCommit(false);
-            try (Statement sql = connection.createStatement()) {
-                sql.executeUpdate(ReaderSql.CLEAR_CHAPTERS);
-                sql.executeUpdate(ReaderSql.CLEAR_WORKS);
-                sql.executeUpdate(ReaderSql.CLEAR_SETTINGS);
-                sql.executeUpdate(ReaderSql.CLEAR_BOOKS);
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            } finally {
-                connection.setAutoCommit(true);
-            }
+            SqliteUtils.inTransaction(connection, () -> {
+                try (Statement sql = connection.createStatement()) {
+                    sql.executeUpdate(ReaderSql.CLEAR_CHAPTERS);
+                    sql.executeUpdate(ReaderSql.CLEAR_WORKS);
+                    sql.executeUpdate(ReaderSql.CLEAR_SETTINGS);
+                    sql.executeUpdate(ReaderSql.CLEAR_BOOKS);
+                }
+            });
         } catch (SQLException exception) {
             throw failure(exception);
         }
