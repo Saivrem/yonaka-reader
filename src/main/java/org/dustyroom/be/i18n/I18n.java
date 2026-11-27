@@ -1,9 +1,7 @@
 package org.dustyroom.be.i18n;
 
 import org.dustyroom.be.models.i18n.Language;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.dustyroom.be.io.TranslationJson;
 import lombok.experimental.UtilityClass;
 
 import java.io.BufferedReader;
@@ -121,26 +119,7 @@ public class I18n {
     }
 
     public static Language parse(Reader input) {
-        JsonObject document = JsonParser.parseReader(input).getAsJsonObject();
-        String id = requiredString(document, "id");
-        String name = requiredString(document, "name");
-        Map<String, String> messages = new LinkedHashMap<>();
-        for (Map.Entry<String, JsonElement> entry : document.getAsJsonObject("messages").entrySet()) {
-            if (!entry.getValue().isJsonPrimitive() || !entry.getValue().getAsJsonPrimitive().isString()) {
-                throw new IllegalArgumentException("Translation must be a string: " + entry.getKey());
-            }
-            messages.put(entry.getKey(), entry.getValue().getAsString());
-        }
-        return new Language(id, name, messages);
-    }
-
-    private static String requiredString(JsonObject document, String key) {
-        JsonElement value = document.get(key);
-        if (value == null || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()
-                || value.getAsString().isBlank()) {
-            throw new IllegalArgumentException("Expected a nonblank string for " + key);
-        }
-        return value.getAsString();
+        return TranslationJson.read(input);
     }
 
     private static BufferedReader reader(String file) throws IOException {

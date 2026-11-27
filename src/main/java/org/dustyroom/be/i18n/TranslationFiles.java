@@ -1,7 +1,7 @@
 package org.dustyroom.be.i18n;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.dustyroom.be.io.StagedFile;
+import org.dustyroom.be.io.TranslationJson;
 import lombok.extern.slf4j.Slf4j;
 import org.dustyroom.be.models.i18n.Language;
 
@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 @Slf4j
 public final class TranslationFiles {
-    private static final Gson JSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     private final Path directory;
 
     public TranslationFiles(Path profile) {
@@ -61,7 +60,7 @@ public final class TranslationFiles {
         String filename = file.getFileName().toString();
         String id = checkedId(filename.substring(0, filename.length() - 5));
         try (Reader input = Files.newBufferedReader(file)) {
-            Language parsed = I18n.parse(input);
+            Language parsed = TranslationJson.read(input);
             return new Language(id, parsed.getName(), parsed.getMessages());
         } catch (RuntimeException exception) {
             throw new IOException(I18n.text("translations.invalidJson"), exception);
@@ -91,16 +90,11 @@ public final class TranslationFiles {
     }
 
     public static void write(Path target, Language language, boolean replace) throws IOException {
-        Path temporary = Files.createTempFile(target.toAbsolutePath().getParent(), ".translation-", ".tmp");
-        try {
-            Files.writeString(temporary, JSON.toJson(language) + "\n");
-            if (replace) {
-                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Files.move(temporary, target);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
+        StagedFile.Content content = output -> TranslationJson.write(output, language);
+        if (replace) {
+            StagedFile.write(target, content, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            StagedFile.write(target, content);
         }
     }
 }
