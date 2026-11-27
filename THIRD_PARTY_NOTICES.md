@@ -34,8 +34,22 @@ PDFBox and FontBox are distributed under the [Apache License 2.0](https://www.ap
 
 ## JPEG 2000
 
-Scanned PDFs can contain JPEG 2000 images. Yonaka Reader decodes them with
-[JAI ImageIO JPEG 2000](https://github.com/jai-imageio/jai-imageio-jpeg2000)
-and [JAI ImageIO Core](https://github.com/jai-imageio/jai-imageio-core).
-Their licenses and notices are included in the application JAR under
-`META-INF/licenses/jai-imageio-jpeg2000/` and `META-INF/licenses/jai-imageio-core/`.
+[jpx-imageio 0.1.0](https://github.com/pcorless/jpx-imageio/tree/v0.1.0) decodes
+JPEG 2000 images embedded in PDFs. Copyright 2026 Patrick Corless, licensed under
+Apache License 2.0. The decoder includes code derived from OpenJPEG 2.5.4 under
+the BSD 2-Clause license. The application JAR contains the decoder’s LICENSE,
+NOTICE and OpenJPEG copyright and license under `META-INF/licenses/jpx-imageio-0.1.0/`.
+
+## Other bundled components
+
+Logback Classic and Core 1.6.6, copyright QOS.ch, are distributed here under
+the GNU Lesser General Public License 2.1. The JAR includes the upstream
+notice and license in `META-INF/licenses/logback/`. The
+[corresponding source](https://github.com/qos-ch/logback/tree/v_1.6.6)
+and the application's Gradle build are available to rebuild the combined JAR.
+
+SLF4J API is distributed under the MIT license. Apache Commons Lang, Apache
+Commons Logging, the Apache JBIG2 ImageIO decoder and Google's Error Prone
+annotations are distributed under the Apache License 2.0. The JAR includes
+the Apache license in `META-INF/licenses/flatlaf-3.8/LICENSE` and the
+component notices supplied by their publishers.
