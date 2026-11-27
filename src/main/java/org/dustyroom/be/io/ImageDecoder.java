@@ -1,4 +1,4 @@
-package org.dustyroom.be.iterators;
+package org.dustyroom.be.io;
 
 import org.dustyroom.be.animation.gif.GifDecoder;
 
@@ -17,7 +17,7 @@ import java.util.Iterator;
  * Decodes images while handling JPEGs whose JFIF and Adobe color markers
  * cause the JDK reader to expose only a raw YCbCr raster.
  */
-final class ImageDecoder {
+public final class ImageDecoder {
     private static final String JPEG_FORMAT = "JPEG";
     private static final int JPEG_START_OF_IMAGE = 0xffd8;
     private static final int JPEG_START_OF_SCAN = 0xda;
@@ -28,14 +28,17 @@ final class ImageDecoder {
     // Keep small archive entries seekable in memory while leaving large streams to ImageIO.
     private static final long MEMORY_STREAM_LIMIT = 4L * 1024 * 1024;
 
-    static ImageInputStream openStream(InputStream input, long size) throws IOException {
+    private ImageDecoder() {
+    }
+
+    public static ImageInputStream openStream(InputStream input, long size) throws IOException {
         if (size >= 0 && size <= MEMORY_STREAM_LIMIT) {
             return new MemoryCacheImageInputStream(input);
         }
         return ImageIO.createImageInputStream(input);
     }
 
-    static BufferedImage read(ImageInputStream imageInput) throws IOException {
+    public static BufferedImage read(ImageInputStream imageInput) throws IOException {
         if (imageInput == null) {
             return null;
         }

@@ -1,6 +1,8 @@
 package org.dustyroom.be.iterators;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.io.ImageDecoder;
+import org.dustyroom.be.io.ZipEntryInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.dustyroom.be.animation.gif.GifDecoder;
 import org.dustyroom.be.models.animation.AnimationClip;

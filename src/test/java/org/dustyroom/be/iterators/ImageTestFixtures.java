@@ -37,14 +37,14 @@ public final class ImageTestFixtures {
         return target;
     }
 
-    static byte[] pngBytes() throws IOException {
+    public static byte[] pngBytes() throws IOException {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             ImageIO.write(image(), "png", output);
             return output.toByteArray();
         }
     }
 
-    static byte[] jpegWithConflictingColorMarkers() throws IOException {
+    public static byte[] jpegWithConflictingColorMarkers() throws IOException {
         byte[] jpeg;
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             ImageIO.write(image(), "jpeg", output);

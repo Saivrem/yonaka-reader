@@ -1,6 +1,7 @@
 package org.dustyroom.be.iterators;
 
 import org.dustyroom.be.i18n.I18n;
+import org.dustyroom.be.io.ImageDecoder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
