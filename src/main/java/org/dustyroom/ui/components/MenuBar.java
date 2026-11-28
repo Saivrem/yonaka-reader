@@ -1,6 +1,7 @@
 package org.dustyroom.ui.components;
 
 import org.dustyroom.ui.i18n.UiText;
+import org.dustyroom.ui.utils.PlatformUi;
 import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.state.BookState;
 import org.dustyroom.be.models.state.ThemeMode;
@@ -54,6 +55,10 @@ public class MenuBar extends JMenuBar {
         addRadioActions(viewMenu, actions.fitHeight(), actions.fitWidth(), actions.fitScreen());
         viewMenu.addSeparator();
         addActions(viewMenu, actions.zoomIn(), actions.zoomOut());
+        if (!PlatformUi.usesScreenMenuBar()) {
+            viewMenu.addSeparator();
+            viewMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
+        }
 
         addActions(navigationMenu,
                 actions.nextImage(), actions.prevImage(), actions.firstImage(), actions.lastImage(),
@@ -64,7 +69,6 @@ public class MenuBar extends JMenuBar {
 
         addActions(optionsMenu, actions.settings());
         optionsMenu.addSeparator();
-        optionsMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
 
         optionsMenu.add(readingModeMenu);
         optionsMenu.add(themeMenu(selectTheme));
