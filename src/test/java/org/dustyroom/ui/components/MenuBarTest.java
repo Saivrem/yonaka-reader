@@ -14,6 +14,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MenuBarTest {
@@ -30,6 +34,7 @@ class MenuBarTest {
     }
 
     @Test
+    @DisabledOnOs(OS.MAC)
     void showsFullscreenWithItsConfiguredShortcutInViewMenu() {
         NoOpViewerActions actions = new NoOpViewerActions();
         MenuBar menuBar = new MenuBar(actions, ThemeMode.SYSTEM, _ -> true);
@@ -41,6 +46,15 @@ class MenuBarTest {
         KeyStroke shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0);
         actions.toggleFullscreen().putValue(Action.ACCELERATOR_KEY, shortcut);
         assertEquals(shortcut, fullscreen.getAccelerator());
+    }
+
+    @Test
+    @EnabledOnOs(OS.MAC)
+    void leavesFullscreenMenuItemToMacOS() {
+        NoOpViewerActions actions = new NoOpViewerActions();
+        MenuBar menuBar = new MenuBar(actions, ThemeMode.SYSTEM, _ -> true);
+
+        assertFalse(allMenuLabels(menuBar).anyMatch("Fullscreen"::equals));
     }
 
     @Test

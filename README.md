@@ -51,7 +51,7 @@ The bottom toolbar has three groups. Within each group, the buttons appear in th
 | <img src="docs/images/controls/next-volume.png" width="24" height="24" alt=""> Next volume |  | <img src="docs/images/controls/read-left-to-right.png" width="24" height="24" alt=""> Read left to right |
 |  |  | <img src="docs/images/controls/spread.png" width="24" height="24" alt=""> Toggle two-page spreads |
 
-Open a book with `Cmd+O` on macOS or `Ctrl+O` on Windows and Linux. Choose **View → Full Screen** to toggle fullscreen. The default shortcut is `Ctrl+Cmd+F` on macOS and `F11` on Windows and Linux. On macOS, the green window button and the system fullscreen shortcut control the same native mode.
+Open a book with `Cmd+O` on macOS or `Ctrl+O` on Windows and Linux. On macOS, use the system fullscreen command in **View**, the green window button, or the reader shortcut (default `Ctrl+Cmd+F`). On Windows and Linux, choose **View → Full Screen** or press `F11`.
 While reading, use `←` / `→` or `Page Up` / `Page Down` to turn pages and `W` / `H` / `S` to fit width, height or the whole page.
 Use the wheel or trackpad to pan a magnified page. Toolbar zoom keeps the center in view, and Ctrl/Command+wheel zooms around the pointer.
 Text fields keep their typing and editing keys. See [Keyboard shortcuts](docs/reading.md#keyboard-shortcuts) for the full list or change them in **Settings → Shortcuts**.
