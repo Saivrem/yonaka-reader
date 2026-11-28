@@ -1,5 +1,7 @@
 package org.dustyroom.ui;
 
+import com.formdev.flatlaf.ui.FlatNativeMacLibrary;
+import org.dustyroom.ui.listeners.ComponentResizeListener;
 import org.dustyroom.ui.i18n.UiText;
 import org.dustyroom.be.i18n.I18n;
 import org.dustyroom.be.models.animation.AnimatedPage;
@@ -71,6 +73,7 @@ public class ViewerController implements SettingsHost, ViewerView {
     private boolean groupRecentByFolder;
     private String lastDirectory;
     private boolean choosingFile;
+    private final boolean nativeFullscreen = PlatformUi.usesScreenMenuBar() && FlatNativeMacLibrary.isLoaded();
     private boolean fullscreen;
     private boolean resetting;
     private boolean profileSwitchPending;
@@ -84,6 +87,10 @@ public class ViewerController implements SettingsHost, ViewerView {
         this.thumbnailsVisible = settings.isThumbnailsVisible();
         this.groupRecentByFolder = settings.isGroupRecentByFolder();
         this.graphicsDevice = graphicsDevice;
+        if (nativeFullscreen) {
+            frame.addComponentListener(new ComponentResizeListener(() ->
+                    updateFullscreen(FlatNativeMacLibrary.isWindowFullScreen(frame))));
+        }
         this.imageComponent = imageComponent;
         this.scrollPane = scrollPane;
         this.session = new AsyncViewerSession(this, store);
@@ -234,7 +241,7 @@ public class ViewerController implements SettingsHost, ViewerView {
     }
 
     private void showFileChooser(File root) {
-        if (fullscreen) {
+        if (fullscreen && !nativeFullscreen) {
             graphicsDevice.setFullScreenWindow(null);
         }
 
@@ -256,7 +263,7 @@ public class ViewerController implements SettingsHost, ViewerView {
             imageComponent.setAnimationPaused(false);
         }
 
-        if (fullscreen) {
+        if (fullscreen && !nativeFullscreen) {
             graphicsDevice.setFullScreenWindow(frame);
         }
         frame.requestFocus();
@@ -462,39 +469,32 @@ public class ViewerController implements SettingsHost, ViewerView {
     }
 
     public void toggleFullscreen() {
-        if (thumbnailPanel != null) {
-            thumbnailPanel.setGridMode(false);
-        }
-        if (fullscreen) {
-            frame.setVisible(false);
-            frame.dispose();
-            frame.setUndecorated(false);
-            graphicsDevice.setFullScreenWindow(null);
-            if (navigationPanel != null) {
-                navigationPanel.setVisible(true);
-            }
-            if (menuBar != null) {
-                menuBar.setVisible(true);
-            }
-            frame.setVisible(true);
-        } else {
-            frame.setVisible(false);
-            frame.dispose();
-            frame.setUndecorated(true);
-            graphicsDevice.setFullScreenWindow(frame);
-            if (navigationPanel != null) {
-                navigationPanel.setVisible(false);
-            }
-            if (menuBar != null) {
-                menuBar.setVisible(false);
-            }
-            frame.setVisible(true);
+        if (nativeFullscreen) {
+            FlatNativeMacLibrary.toggleWindowFullScreen(frame);
+            return;
         }
 
-        fullscreen = !fullscreen;
-        thumbnailPanel.setFullscreen(fullscreen);
-        refreshControls();
+        boolean enter = !fullscreen;
+        frame.setVisible(false);
+        frame.dispose();
+        frame.setUndecorated(enter);
+        graphicsDevice.setFullScreenWindow(enter ? frame : null);
+        menuBar.setVisible(!enter);
+        updateFullscreen(enter);
+        frame.setVisible(true);
         frame.requestFocusInWindow();
+    }
+
+    private void updateFullscreen(boolean active) {
+        if (fullscreen == active) {
+            return;
+        }
+
+        fullscreen = active;
+        thumbnailPanel.setGridMode(false);
+        navigationPanel.setVisible(!active);
+        thumbnailPanel.setFullscreen(active);
+        refreshControls();
     }
 
     public void configureViewerSurfaces() {

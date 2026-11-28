@@ -30,6 +30,20 @@ class MenuBarTest {
     }
 
     @Test
+    void showsFullscreenWithItsConfiguredShortcutInViewMenu() {
+        NoOpViewerActions actions = new NoOpViewerActions();
+        MenuBar menuBar = new MenuBar(actions, ThemeMode.SYSTEM, _ -> true);
+        JMenu view = menuBar.getMenu(1);
+        JMenuItem fullscreen = view.getItem(view.getItemCount() - 1);
+
+        assertInstanceOf(JCheckBoxMenuItem.class, fullscreen);
+        assertSame(actions.toggleFullscreen(), fullscreen.getAction());
+        KeyStroke shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0);
+        actions.toggleFullscreen().putValue(Action.ACCELERATOR_KEY, shortcut);
+        assertEquals(shortcut, fullscreen.getAccelerator());
+    }
+
+    @Test
     void offersSystemAndBothApplicationThemes() {
         NoOpViewerActions actions = new NoOpViewerActions();
         MenuBar menuBar = new MenuBar(actions, ThemeMode.SYSTEM, _ -> true);
@@ -38,7 +52,7 @@ class MenuBarTest {
         assertFalse(allMenuLabels(menuBar).anyMatch("Color scheme"::equals));
         assertFalse(allMenuLabels(menuBar).anyMatch(label -> label.endsWith(" theme")));
 
-        JMenu themeMenu = (JMenu) menuBar.getMenu(3).getItem(4);
+        JMenu themeMenu = (JMenu) menuBar.getMenu(3).getItem(3);
         assertEquals("Theme", themeMenu.getText());
         assertEquals(3, themeMenu.getItemCount());
         assertTrue(themeMenu.getItem(0).isSelected());
@@ -61,7 +75,7 @@ class MenuBarTest {
             requested.set(theme);
             return accept.get();
         });
-        JMenu themes = (JMenu) menuBar.getMenu(3).getItem(4);
+        JMenu themes = (JMenu) menuBar.getMenu(3).getItem(3);
         JMenuItem light = themes.getItem(1);
         JMenuItem dark = themes.getItem(2);
 
@@ -86,6 +100,12 @@ class MenuBarTest {
 
     private static final class NoOpViewerActions implements ViewerActions {
         private final Action action = new AbstractAction("Test Action") {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+            }
+        };
+
+        private final Action fullscreen = new AbstractAction("Fullscreen") {
             @Override
             public void actionPerformed(ActionEvent event) {
             }
@@ -182,7 +202,7 @@ class MenuBarTest {
 
         @Override
         public Action toggleFullscreen() {
-            return action;
+            return fullscreen;
         }
 
         @Override

@@ -54,6 +54,8 @@ public class MenuBar extends JMenuBar {
         addRadioActions(viewMenu, actions.fitHeight(), actions.fitWidth(), actions.fitScreen());
         viewMenu.addSeparator();
         addActions(viewMenu, actions.zoomIn(), actions.zoomOut());
+        viewMenu.addSeparator();
+        viewMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
 
         addActions(navigationMenu,
                 actions.nextImage(), actions.prevImage(), actions.firstImage(), actions.lastImage(),
@@ -64,7 +66,6 @@ public class MenuBar extends JMenuBar {
 
         addActions(optionsMenu, actions.settings());
         optionsMenu.addSeparator();
-        optionsMenu.add(item(new JCheckBoxMenuItem(actions.toggleFullscreen())));
 
         optionsMenu.add(readingModeMenu);
         optionsMenu.add(themeMenu(selectTheme));
